@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{pool::PoolConnection, prelude::FromRow, Postgres};
 
+use crate::models::paginate::Paginate;
+
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct PossibleOption {
     id: i32,
@@ -15,11 +17,14 @@ pub struct Question {
     possible_options: Vec<PossibleOption>,
 }
 
-impl Question {
-    pub async fn get_by_quiz_id(
-        id: i32,
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QuestionQuery {}
+
+impl Paginate<QuestionQuery> for Question {
+    async fn page(
+        query: &QuestionQuery,
         connection: &PoolConnection<Postgres>,
-    ) -> Result<Vec<Question>, sqlx::Error> {
+    ) -> Result<super::paginate::Page<Self>, sqlx::Error> {
         todo!()
     }
 }
