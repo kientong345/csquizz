@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "migrate"] }
 tokio = { version = "1.0.0", features = ["full"] }
+axum = { version = "0.8.4", features = ["macros"] }
 serde = { version = "1.0.225", features = ["derive"] }
 serde_json = "1.0.145"
 dotenvy = "0.15"

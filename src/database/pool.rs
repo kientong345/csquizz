@@ -2,6 +2,7 @@ use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Pool, Postgres, Transa
 
 use crate::database::config;
 
+#[derive(Clone)]
 pub struct QuizBankPool {
     connection_pool: Pool<Postgres>,
 }

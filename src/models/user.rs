@@ -12,7 +12,10 @@ pub struct User {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct UserQuery {}
+pub struct UserQuery {
+    page: i32,
+    size: i32,
+}
 
 impl Paginate<UserQuery> for User {
     async fn page(

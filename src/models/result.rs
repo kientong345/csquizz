@@ -15,7 +15,11 @@ pub struct QuizResult {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct QuizResultQuery {}
+pub struct QuizResultQuery {
+    user_id: i32,
+    page: i32,
+    size: i32,
+}
 
 impl Paginate<QuizResultQuery> for QuizResult {
     async fn page(
@@ -30,7 +34,7 @@ impl Paginate<QuizResultQuery> for QuizResult {
 pub struct UserAnswer {
     question: Question,
     explanation: Option<String>,
-    chosen_option_id: i32,
+    chosen_option_ids: Vec<i32>,
     is_correct: bool,
 }
 

@@ -16,7 +16,14 @@ pub struct Quiz {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct QuizQuery {}
+pub struct QuizQuery {
+    title_pattern: Option<String>,
+    category: Option<String>,
+    difficulty: Option<String>,
+    completed_by: Option<i32>,
+    page: i32,
+    size: i32,
+}
 
 impl Paginate<QuizQuery> for Quiz {
     async fn page(

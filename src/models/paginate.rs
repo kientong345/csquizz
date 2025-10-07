@@ -6,8 +6,8 @@ pub struct Page<T> {
     pub items: Vec<T>,
     pub total_items: i64,
     pub total_page: i32,
-    pub page_num: i32,
-    pub page_size: i32,
+    pub page: i32,
+    pub size: i32,
 }
 
 #[allow(async_fn_in_trait)]
