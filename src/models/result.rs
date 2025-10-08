@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{pool::PoolConnection, prelude::FromRow, Postgres};
+use sqlx::{pool::PoolConnection, prelude::FromRow, PgConnection, Postgres};
 
 use crate::models::{paginate::Paginate, question::Question};
 
@@ -24,7 +24,7 @@ pub struct QuizResultQuery {
 impl Paginate<QuizResultQuery> for QuizResult {
     async fn page(
         query: &QuizResultQuery,
-        connection: &PoolConnection<Postgres>,
+        connection: &mut PgConnection,
     ) -> Result<super::paginate::Page<Self>, sqlx::Error> {
         todo!()
     }

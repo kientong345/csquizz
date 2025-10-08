@@ -27,3 +27,27 @@ pub async fn submit_quiz(
 ) -> Result<Json<Value>, StatusCode> {
     todo!()
 }
+
+pub async fn create_quiz(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+    todo!()
+}
+
+pub async fn update_quiz_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+    todo!()
+}
+
+pub async fn delete_quiz(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+    todo!()
+}
+
+pub async fn add_question(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+    todo!()
+}
+
+pub async fn update_question(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+    todo!()
+}
+
+pub async fn delete_question(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+    todo!()
+}

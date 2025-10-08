@@ -1,3 +1,4 @@
+pub mod category;
 pub mod paginate;
 pub mod question;
 pub mod quiz;

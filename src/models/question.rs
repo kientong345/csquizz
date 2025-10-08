@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{pool::PoolConnection, prelude::FromRow, Postgres};
+use sqlx::{pool::PoolConnection, prelude::FromRow, PgConnection, Postgres};
 
 use crate::models::paginate::Paginate;
 
@@ -27,7 +27,7 @@ pub struct QuestionQuery {
 impl Paginate<QuestionQuery> for Question {
     async fn page(
         query: &QuestionQuery,
-        connection: &PoolConnection<Postgres>,
+        connection: &mut PgConnection,
     ) -> Result<super::paginate::Page<Self>, sqlx::Error> {
         todo!()
     }

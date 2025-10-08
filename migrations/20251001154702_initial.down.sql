@@ -9,4 +9,6 @@ DROP TABLE questions;
 
 DROP TABLE quizzes;
 
+DROP TABLE categories;
+
 DROP TABLE users;

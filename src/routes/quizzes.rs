@@ -11,7 +11,7 @@ use crate::{
 pub fn create_route(pool: QuizBankPool) -> Router {
     Router::new()
         .route("/api/quizzes", get(get_quizzes))
-        .route("/api/quizzes/:id", get(get_quiz))
-        .route("/api/quizzes/:id/submit", post(submit_quiz))
+        .route("/api/quizzes/{:id}", get(get_quiz))
+        .route("/api/quizzes/{:id}/submit", post(submit_quiz))
         .with_state(pool)
 }

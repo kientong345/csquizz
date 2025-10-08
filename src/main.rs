@@ -13,6 +13,8 @@ mod services;
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
     let port = config::Configuration::get().port;
     let address = SocketAddr::from(([127, 0, 0, 1], port));
 

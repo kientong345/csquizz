@@ -10,11 +10,18 @@ CREATE TABLE users (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE categories (
+    id              SERIAL PRIMARY KEY,
+    name            VARCHAR(50) NOT NULL,  -- Data Structures, Algorithms, OS...
+    image_url       VARCHAR(255),
+    description     TEXT
+);
+
 CREATE TABLE quizzes (
     id              SERIAL PRIMARY KEY,
     title           VARCHAR(100) NOT NULL,
     description     TEXT,
-    category        VARCHAR(50) NOT NULL,  -- Data Structures, Algorithms, OS...
+    category        INT REFERENCES categories(id) ON DELETE CASCADE,
     difficulty      VARCHAR(20),  -- easy, medium, hard
     created_by      INT REFERENCES users(id) ON DELETE SET NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -25,7 +32,7 @@ CREATE TABLE questions (
     quiz_id         INT REFERENCES quizzes(id) ON DELETE CASCADE,
 	question_type	TEXT NOT NULL, -- multiple choices, single choice, ...
     question_text   TEXT NOT NULL,
-    explanation     TEXT,
+    explanation     TEXT
 );
 
 CREATE TABLE options (
