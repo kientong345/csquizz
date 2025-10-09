@@ -1,14 +1,36 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{pool::PoolConnection, prelude::FromRow, PgConnection, Postgres};
+use sqlx::PgConnection;
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Page<T> {
     pub items: Vec<T>,
     pub total_items: i64,
     pub total_pages: i64,
 }
 
+impl<T> Page<T> {
+    pub fn create_from(items: Vec<T>, total_items: i64, page_size: i64) -> Self {
+        let total_pages = if page_size > 0 {
+            (total_items as f64 / page_size as f64).ceil() as i64
+        } else {
+            0
+        };
+
+        Self {
+            items,
+            total_items,
+            total_pages,
+        }
+    }
+}
+
 #[allow(async_fn_in_trait)]
 pub trait Paginate<Q>: Serialize + Sized {
     async fn page(query: &Q, connection: &mut PgConnection) -> Result<Page<Self>, sqlx::Error>;
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PageQuery {
+    pub page: i64,
+    pub size: i64,
 }

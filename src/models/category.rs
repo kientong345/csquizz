@@ -1,14 +1,14 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{pool::PoolConnection, prelude::FromRow, PgConnection, Postgres};
+use sqlx::{prelude::FromRow, PgConnection};
 
 use crate::models::paginate::{Page, Paginate};
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizCategory {
-    id: i32,
-    name: String,
-    image_url: Option<String>,
-    description: Option<String>,
+    pub id: i32,
+    pub name: String,
+    pub image_url: Option<String>,
+    pub description: Option<String>,
 }
 
 impl QuizCategory {
@@ -18,6 +18,7 @@ impl QuizCategory {
             .await?)
     }
 
+    #[allow(unused)]
     pub async fn count_by_name(
         name: &str,
         connection: &mut PgConnection,
@@ -33,8 +34,8 @@ impl QuizCategory {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct QuizCategoryQuery {
-    page: i64,
-    size: i64,
+    pub page: i64,
+    pub size: i64,
 }
 
 impl Paginate<QuizCategoryQuery> for QuizCategory {
@@ -43,7 +44,6 @@ impl Paginate<QuizCategoryQuery> for QuizCategory {
         connection: &mut PgConnection,
     ) -> Result<super::paginate::Page<Self>, sqlx::Error> {
         let total_items = QuizCategory::count(connection).await?;
-
         let offset = (query.page.saturating_sub(1)) * query.size;
 
         let items = sqlx::query_as!(
@@ -55,16 +55,6 @@ impl Paginate<QuizCategoryQuery> for QuizCategory {
         .fetch_all(connection)
         .await?;
 
-        let total_pages = if query.size > 0 {
-            (total_items as f64 / query.size as f64).ceil() as i64
-        } else {
-            0
-        };
-
-        Ok(Page {
-            items,
-            total_items,
-            total_pages,
-        })
+        Ok(Page::create_from(items, total_items, query.size))
     }
 }

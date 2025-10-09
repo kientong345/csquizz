@@ -1,24 +1,24 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{pool::PoolConnection, prelude::FromRow, PgConnection, Postgres};
+use sqlx::{prelude::FromRow, PgConnection};
 
 use crate::models::{paginate::Paginate, question::Question};
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizResult {
-    id: i32,
-    quiz_title: String,
-    score: f64,
-    total_questions: i32,
-    correct_answers: i32,
-    submitted_at: DateTime<Utc>,
+    pub id: i32,
+    pub quiz_title: String,
+    pub score: f64,
+    pub total_questions: i32,
+    pub correct_answers: i32,
+    pub submitted_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct QuizResultQuery {
-    user_id: i32,
-    page: i32,
-    size: i32,
+    pub user_id: i32,
+    pub page: i32,
+    pub size: i32,
 }
 
 impl Paginate<QuizResultQuery> for QuizResult {
@@ -32,22 +32,23 @@ impl Paginate<QuizResultQuery> for QuizResult {
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct UserAnswer {
-    question: Question,
-    explanation: Option<String>,
-    chosen_option_ids: Vec<i32>,
-    is_correct: bool,
+    pub question: Question,
+    pub explanation: Option<String>,
+    pub chosen_option_ids: Vec<i32>,
+    pub text_answer: Option<String>,
+    pub is_correct: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizResultDetail {
-    result: QuizResult,
-    answers: Vec<UserAnswer>,
+    pub result: QuizResult,
+    pub answers: Vec<UserAnswer>,
 }
 
 impl QuizResultDetail {
     pub async fn get_by_id(
         id: i32,
-        connection: &PoolConnection<Postgres>,
+        connection: &mut PgConnection,
     ) -> Result<QuizResultDetail, sqlx::Error> {
         todo!()
     }

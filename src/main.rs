@@ -7,6 +7,7 @@ use crate::database::pool::QuizBankPool;
 mod app;
 mod config;
 mod database;
+mod error;
 mod models;
 mod routes;
 mod services;

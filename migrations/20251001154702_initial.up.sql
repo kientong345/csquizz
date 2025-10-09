@@ -30,7 +30,7 @@ CREATE TABLE quizzes (
 CREATE TABLE questions (
     id              SERIAL PRIMARY KEY,
     quiz_id         INT REFERENCES quizzes(id) ON DELETE CASCADE,
-	question_type	TEXT NOT NULL, -- multiple choices, single choice, ...
+	question_type	TEXT NOT NULL, -- multiple-choice, single-choice, text-entry ...
     question_text   TEXT NOT NULL,
     explanation     TEXT
 );

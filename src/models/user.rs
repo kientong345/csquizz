@@ -1,20 +1,20 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{pool::PoolConnection, prelude::FromRow, PgConnection, Postgres};
+use sqlx::{prelude::FromRow, PgConnection};
 
 use crate::models::paginate::Paginate;
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct User {
-    id: i32,
-    username: String,
-    avatar_url: Option<String>,
+    pub id: i32,
+    pub username: String,
+    pub avatar_url: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserQuery {
-    page: i32,
-    size: i32,
+    pub page: i32,
+    pub size: i32,
 }
 
 impl Paginate<UserQuery> for User {
@@ -28,12 +28,12 @@ impl Paginate<UserQuery> for User {
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct UserDetail {
-    user: User,
-    google_id: Option<String>,
-    email: String,
-    password_hash: Option<String>,
-    role: String,
-    create_at: DateTime<Utc>,
+    pub user: User,
+    pub google_id: Option<String>,
+    pub email: String,
+    pub password_hash: Option<String>,
+    pub role: String,
+    pub create_at: DateTime<Utc>,
 }
 
 impl UserDetail {
