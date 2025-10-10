@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+ 
+model User {
+  id              Int         @id @default(autoincrement())
+  google_id       String?     @unique
+  username        String      @unique
+  email           String      @unique
+  password_hash   String?
+  avatar_url      String?
+  role            Role        @default(user)
+  created_at      DateTime    @default(now())
+ 
+  quizzes         Quiz[]      @relation("QuizCreatedBy")
+  results         Result[]
+}
+ 
+model Category {
+  id              Int         @id @default(autoincrement())
+  name            String      @unique
+  image_url       String?
+ 
+  quizzes         Quiz[]      @relation("QuizRelateTo")
+}
+ 
+model Quiz {
+  id              Int         @id @default(autoincrement())
+  title           String
+  description     String?
+  category        Int
+  difficulty      Difficulty?
+  created_by      Int?
+  created_at      DateTime    @default(now())
+ 
+  questions       Question[]
+  relateTo        Category    @relation("QuizRelateTo", fields: [category], references: [id])
+  createdBy       User?       @relation("QuizCreatedBy", fields: [created_by], references: [id])
+  results         Result[]
+}
+ 
+model Question {
+  id              Int         @id @default(autoincrement())
+  quiz_id         Int
+  question_type   QuestionType
+  question_text   String
+  image_url       String?
+  correct_entry   String?
+  explanation     String?
+ 
+  quiz            Quiz        @relation(fields: [quiz_id], references: [id])
+  options         Option[]
+  user_answers    UserAnswer[]
+}
+ 
+model Option {
+  id              Int         @id @default(autoincrement())
+  question_id     Int
+  option_text     String
+  is_correct      Boolean     @default(false)
+ 
+  question        Question    @relation(fields: [question_id], references: [id])
+  user_answers    UserAnswer[]
+}
+ 
+model Result {
+  id              Int         @id @default(autoincrement())
+  user_id         Int
+  quiz_id         Int
+  score           Int
+  total_questions Int
+  correct_answers Int
+  submitted_at    DateTime    @default(now())
+ 
+  user            User        @relation(fields: [user_id], references: [id])
+  quiz            Quiz        @relation(fields: [quiz_id], references: [id])
+  user_answers    UserAnswer[]
+}
+ 
+model UserAnswer {
+  id              Int         @id @default(autoincrement())
+  result_id       Int
+  question_id     Int
+  selected_option Int?
+  entried_text    String?
+  is_correct      Boolean?
+ 
+  result          Result      @relation(fields: [result_id], references: [id])
+  question        Question    @relation(fields: [question_id], references: [id])
+  option          Option?     @relation(fields: [selected_option], references: [id])
+}
+ 
+enum Role {
+  user
+  admin
+}
+ 
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+ 
+enum QuestionType {
+  single_choice
+  multiple_choice
+  text_entry
+}

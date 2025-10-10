@@ -11,10 +11,10 @@ pub struct AnswerOption {
     pub text: String,
 }
 
-#[derive(FromRow)]
+#[derive(Debug, FromRow)]
 struct FetchedAnswerOption {
     id: i32,
-    text: String,
+    option_text: String,
     question_id: i32,
 }
 
@@ -28,7 +28,7 @@ impl AnswerOption {
         }
 
         let fetched_options = sqlx::query_as::<_, FetchedAnswerOption>(
-            "SELECT id, text, question_id FROM answer_options WHERE question_id = ANY($1)",
+            "SELECT id, option_text, question_id FROM options WHERE question_id = ANY($1)",
         )
         .bind(question_ids)
         .fetch_all(connection)
@@ -41,7 +41,7 @@ impl AnswerOption {
                 .or_default()
                 .push(AnswerOption {
                     id: fetched.id,
-                    text: fetched.text,
+                    text: fetched.option_text,
                 });
         }
         Ok(options_map)
@@ -78,6 +78,7 @@ pub struct QuestionQuery {
     pub size: i64,
 }
 
+#[derive(Debug)]
 struct FetchedQuestion {
     id: i32,
     form: String,

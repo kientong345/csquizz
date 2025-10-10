@@ -49,7 +49,7 @@ INSERT INTO options (question_id, option_text, is_correct) VALUES
 (2, 'All of the above', FALSE);
 
 -- Question 3 (Text Entry)
-INSERT INTO questions (id, quiz_id, question_type, question_text, correct_text_answer, explanation) VALUES
+INSERT INTO questions (id, quiz_id, question_type, question_text, correct_entry, explanation) VALUES
 (3, 1, 'text-entry', 'In C++, which header must be included to use std::vector?', '<vector>', 'The <vector> header contains the definition for the std::vector class template.');
 
 -- Quiz 2: Introduction to Sorting
