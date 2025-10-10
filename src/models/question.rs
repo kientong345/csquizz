@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, PgConnection};
+use sqlx::{prelude::{FromRow, Type}, PgConnection};
 
 use crate::models::paginate::{Page, Paginate};
 
@@ -48,10 +48,18 @@ impl AnswerOption {
     }
 }
 
+#[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq)]
+#[sqlx(type_name = "question_form", rename_all = "kebab-case")]
+pub enum QuestionForm {
+    MultipleChoice,
+    SingleChoice,
+    TextEntry,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Question {
     pub id: i32,
-    pub form: String,
+    pub form: QuestionForm,
     pub text: String,
     pub image_url: Option<String>,
     pub options: Vec<AnswerOption>,
@@ -81,7 +89,7 @@ pub struct QuestionQuery {
 #[derive(Debug)]
 struct FetchedQuestion {
     id: i32,
-    form: String,
+    form: QuestionForm,
     text: String,
     image_url: Option<String>,
 }
@@ -94,7 +102,7 @@ impl FetchedQuestion {
         let offset = (query.page.saturating_sub(1)) * query.size;
         Ok(sqlx::query_as!(
             FetchedQuestion,
-            r#"SELECT id, question_type AS form, question_text AS text, image_url FROM questions LIMIT $1 OFFSET $2"#,
+            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url FROM questions LIMIT $1 OFFSET $2"#,
             query.size,
             offset
         )
@@ -121,7 +129,7 @@ impl Paginate<QuestionQuery> for Question {
 
         let question_ids_with_options: Vec<i32> = fetched_questions
             .iter()
-            .filter(|q| q.form != "text-entry")
+            .filter(|q| q.form != QuestionForm::TextEntry)
             .map(|q| q.id)
             .collect();
 

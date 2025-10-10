@@ -1,7 +1,18 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, PgConnection, QueryBuilder};
+use sqlx::{
+    prelude::{FromRow, Type},
+    PgConnection, QueryBuilder,
+};
 
 use crate::models::paginate::{Page, Paginate};
+
+#[derive(Debug, Type, Deserialize, Serialize)]
+#[sqlx(type_name = "quiz_difficulty", rename_all = "kebab-case")]
+pub enum QuizDifficulty {
+    Easy,
+    Medium,
+    Hard,
+}
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizInfo {
@@ -9,7 +20,7 @@ pub struct QuizInfo {
     pub title: String,
     pub description: Option<String>,
     pub category: String,
-    pub difficulty: Option<String>,
+    pub difficulty: Option<QuizDifficulty>,
     pub created_by: Option<String>,
 }
 
@@ -20,7 +31,7 @@ impl QuizInfo {
     ) -> Result<QuizInfo, sqlx::Error> {
         Ok(sqlx::query_as!(
             QuizInfo,
-            r#"SELECT q.id, q.title, q.description, c.name AS category, q.difficulty, u.username AS created_by
+            r#"SELECT q.id, q.title, q.description, c.name AS category, q.difficulty AS "difficulty: QuizDifficulty", u.username AS created_by
             FROM quizzes AS q JOIN categories AS c ON q.category = c.id JOIN users AS u ON q.created_by = u.id
             WHERE q.id = $1"#, id
         ).fetch_one(connection).await?)

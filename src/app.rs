@@ -9,5 +9,6 @@ pub async fn create_app(pool: QuizBankPool) -> Router {
         .merge(routes::quizzes::create_route(pool.clone()))
         .merge(routes::user::create_route(pool.clone()))
         .merge(routes::categories::create_route(pool.clone()))
-        .merge(routes::admin::create_route(pool))
+        .merge(routes::admin::create_route(pool.clone()))
+        .merge(routes::auth::create_route(pool))
 }

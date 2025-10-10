@@ -70,7 +70,7 @@ pub async fn get_question_page(
 
     match Question::page(&query, &mut *connection).await {
         Ok(page) => Ok(Json(json!(page))),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {println!("{e}");  Err(StatusCode::INTERNAL_SERVER_ERROR)},
     }
 }
 

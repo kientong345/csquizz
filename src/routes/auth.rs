@@ -1,7 +1,17 @@
-use axum::Router;
+use axum::{
+    routing::{get, post},
+    Router,
+};
 
-use crate::database::pool::QuizBankPool;
+use crate::{
+    database::pool::QuizBankPool,
+    services::auth::{get_my_info, handle_login, handle_register},
+};
 
 pub fn create_route(pool: QuizBankPool) -> Router {
-    todo!()
+    Router::new()
+        .route("/api/auth/register", post(handle_register))
+        .route("/api/auth/login", post(handle_login))
+        .route("/api/auth/me", get(get_my_info))
+        .with_state(pool)
 }
