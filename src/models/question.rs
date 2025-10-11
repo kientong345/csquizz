@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::{FromRow, Type}, PgConnection};
+use sqlx::{
+    prelude::{FromRow, Type},
+    PgConnection,
+};
 
 use crate::models::paginate::{Page, Paginate};
 

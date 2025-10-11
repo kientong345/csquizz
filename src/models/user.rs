@@ -1,6 +1,8 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::{FromRow, Type}, PgConnection};
+use sqlx::{
+    prelude::{FromRow, Type},
+    PgConnection,
+};
 
 use crate::models::paginate::Paginate;
 
@@ -40,7 +42,6 @@ pub struct UserDetail {
     pub email: String,
     pub password_hash: Option<String>,
     pub role: UserRole,
-    pub create_at: DateTime<Utc>,
 }
 
 #[derive(Debug, FromRow)]
@@ -52,7 +53,23 @@ struct FetchedUser {
     password_hash: Option<String>,
     avatar_url: Option<String>,
     role: UserRole,
-    // created_at: DateTime<Utc>,
+}
+
+impl Into<UserDetail> for FetchedUser {
+    fn into(self) -> UserDetail {
+        let user = User {
+            id: self.id,
+            username: self.username,
+            avatar_url: self.avatar_url,
+        };
+        UserDetail {
+            user,
+            google_id: self.google_id,
+            email: self.email,
+            password_hash: self.password_hash,
+            role: self.role,
+        }
+    }
 }
 
 impl UserDetail {
@@ -60,13 +77,13 @@ impl UserDetail {
         id: i32,
         connection: &mut PgConnection,
     ) -> Result<UserDetail, sqlx::Error> {
-        // sqlx::query_as!(
-        //     FetchedUser,
-        //     r#"SELECT id, google_id, username, email, password_hash, avatar_url, role
-        //     FROM users WHERE id = $1"#,
-        //     id
-        // ).fetch_one(connection).await?;
+        let fetched_user = sqlx::query_as!(
+            FetchedUser,
+            r#"SELECT id, google_id, username, email, password_hash, avatar_url, role AS "role: UserRole"
+            FROM users WHERE id = $1"#,
+            id
+        ).fetch_one(connection).await?;
 
-        todo!()
+        Ok(fetched_user.into())
     }
 }
