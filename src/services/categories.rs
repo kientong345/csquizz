@@ -9,7 +9,7 @@ use crate::{
     database::pool::QuizBankPool,
     models::{
         category::{QuizCategory, QuizCategoryQuery},
-        paginate::Paginate,
+        pagination::Paginate,
     },
 };
 

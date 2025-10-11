@@ -1,16 +1,7 @@
 use std::net::SocketAddr;
 
+use quiz_bank::{app, config, database::pool::QuizBankPool};
 use tokio::net::TcpListener;
-
-use crate::database::pool::QuizBankPool;
-
-mod app;
-mod config;
-mod database;
-mod error;
-mod models;
-mod routes;
-mod services;
 
 #[tokio::main]
 async fn main() {

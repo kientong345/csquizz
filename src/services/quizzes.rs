@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 use crate::{
     database::pool::QuizBankPool,
     models::{
-        paginate::{PageQuery, Paginate},
+        pagination::{PageQuery, Paginate},
         question::{Question, QuestionQuery},
         quiz::{QuizInfo, QuizQuery},
     },

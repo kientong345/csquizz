@@ -1,8 +1,10 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, PgConnection};
+use sqlx::prelude::FromRow;
 
-use crate::models::{paginate::Paginate, question::Question};
+use crate::models::question::Question;
+
+pub mod get;
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizResult {
@@ -21,15 +23,6 @@ pub struct QuizResultQuery {
     pub size: i32,
 }
 
-impl Paginate<QuizResultQuery> for QuizResult {
-    async fn page(
-        query: &QuizResultQuery,
-        connection: &mut PgConnection,
-    ) -> Result<super::paginate::Page<Self>, sqlx::Error> {
-        todo!()
-    }
-}
-
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct UserAnswer {
     pub question: Question,
@@ -43,13 +36,4 @@ pub struct UserAnswer {
 pub struct QuizResultDetail {
     pub result: QuizResult,
     pub answers: Vec<UserAnswer>,
-}
-
-impl QuizResultDetail {
-    pub async fn get_by_id(
-        id: i32,
-        connection: &mut PgConnection,
-    ) -> Result<QuizResultDetail, sqlx::Error> {
-        todo!()
-    }
 }

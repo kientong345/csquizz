@@ -1,18 +1,11 @@
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-use sqlx::{
-    prelude::{FromRow, Type},
-    PgConnection,
+use sqlx::{prelude::FromRow, PgConnection};
+
+use crate::models::{
+    pagination::{Page, Paginate},
+    question::{AnswerOption, Question, QuestionForm, QuestionQuery},
 };
-
-use crate::models::paginate::{Page, Paginate};
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct AnswerOption {
-    pub id: i32,
-    pub text: String,
-}
 
 #[derive(Debug, FromRow)]
 struct FetchedAnswerOption {
@@ -49,44 +42,6 @@ impl AnswerOption {
         }
         Ok(options_map)
     }
-}
-
-#[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq)]
-#[sqlx(type_name = "question_form", rename_all = "kebab-case")]
-pub enum QuestionForm {
-    MultipleChoice,
-    SingleChoice,
-    TextEntry,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Question {
-    pub id: i32,
-    pub form: QuestionForm,
-    pub text: String,
-    pub image_url: Option<String>,
-    pub options: Vec<AnswerOption>,
-}
-
-impl Question {
-    pub async fn count_by_quiz_id(
-        quiz_id: i32,
-        connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
-        Ok(
-            sqlx::query_scalar("SELECT COUNT(*) FROM questions WHERE quiz_id = $1")
-                .bind(quiz_id)
-                .fetch_one(&mut *connection)
-                .await?,
-        )
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct QuestionQuery {
-    pub quiz_id: i32,
-    pub page: i64,
-    pub size: i64,
 }
 
 #[derive(Debug)]
@@ -127,7 +82,7 @@ impl Paginate<QuestionQuery> for Question {
     async fn page(
         query: &QuestionQuery,
         connection: &mut PgConnection,
-    ) -> Result<super::paginate::Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, sqlx::Error> {
         let fetched_questions = FetchedQuestion::get_by_query(query, connection).await?;
 
         let question_ids_with_options: Vec<i32> = fetched_questions
