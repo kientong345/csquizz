@@ -16,6 +16,20 @@ impl User {
         .fetch_one(connection)
         .await?)
     }
+
+    pub async fn get_by_email(
+        email: &str,
+        connection: &mut PgConnection,
+    ) -> Result<User, sqlx::Error> {
+        Ok(sqlx::query_as!(
+            User,
+            r#"SELECT id, username, avatar_url, email, role AS "role: UserRole"
+            FROM users WHERE email = $1"#,
+            email
+        )
+        .fetch_one(connection)
+        .await?)
+    }
 }
 
 impl Paginate<UserQuery> for UserMinimal {

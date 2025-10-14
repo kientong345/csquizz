@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use quiz_bank::{app, config, database::pool::QuizBankPool};
+use csquizz::{app, config, database::pool::QuizBankPool};
 use tokio::net::TcpListener;
 
 #[tokio::main]
