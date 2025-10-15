@@ -70,15 +70,15 @@ pub fn generate_token_pair(user: &User, secret: &[u8]) -> (String, String) {
     let now = chrono::Utc::now();
 
     let access_claims = AccessClaims {
-        sub: user.id.to_string(),
-        role: user.role.to_string(),
+        sub: user.pub_info.id.to_string(),
+        role: user.pub_info.role.to_string(),
         exp: (now + chrono::Duration::minutes(ACCESS_TOKEN_EXPIRE)).timestamp(),
     };
 
     let access_token = generate_jwt(&access_claims, secret);
 
     let refresh_claims = RefreshClaims {
-        sub: user.id.to_string(),
+        sub: user.pub_info.id.to_string(),
         exp: (now + chrono::Duration::minutes(REFRESH_TOKEN_EXPIRE)).timestamp(),
     };
 
@@ -121,9 +121,9 @@ impl AuthenticatedUser {
     pub async fn register(
         registration: Registration,
         connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, sqlx::Error> {
+    ) -> Result<AuthenticatedUser, AuthError> {
         if User::is_email_exist(&registration.email, connection).await? {
-            return Err(sqlx::Error::BeginFailed);
+            return Err(AuthError::EmailExisted);
         }
         let signup_method = SignupMethod::WithPassword(registration);
         let user = User::create(signup_method, connection).await?;
@@ -133,7 +133,7 @@ impl AuthenticatedUser {
     pub async fn login(
         login_form: LoginForm,
         connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, sqlx::Error> {
+    ) -> Result<AuthenticatedUser, AuthError> {
         let user = User::validate_login(&login_form, connection).await?;
         Ok(AuthenticatedUser(user))
     }
@@ -141,7 +141,7 @@ impl AuthenticatedUser {
     pub async fn login_by_google(
         oauth: OAuthPayload,
         connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, sqlx::Error> {
+    ) -> Result<AuthenticatedUser, AuthError> {
         let user = if !User::is_email_exist(&oauth.email, connection).await? {
             let signup_method = SignupMethod::OAuth(oauth);
             User::create(signup_method, connection).await?
@@ -150,5 +150,17 @@ impl AuthenticatedUser {
         };
 
         Ok(AuthenticatedUser(user))
+    }
+}
+
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
+pub enum AuthError {
+    EmailExisted,
+    SqlxError(String),
+}
+
+impl From<sqlx::Error> for AuthError {
+    fn from(value: sqlx::Error) -> Self {
+        AuthError::SqlxError(value.to_string())
     }
 }

@@ -34,7 +34,7 @@ impl Question {
         Ok(
             sqlx::query_scalar("SELECT COUNT(*) FROM questions WHERE quiz_id = $1")
                 .bind(quiz_id)
-                .fetch_one(&mut *connection)
+                .fetch_one(connection)
                 .await?,
         )
     }

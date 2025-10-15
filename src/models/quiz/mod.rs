@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
     prelude::{FromRow, Type},
-    QueryBuilder,
+    PgConnection, QueryBuilder,
 };
 
 pub mod get;
@@ -24,11 +24,26 @@ pub struct QuizInfo {
     pub created_by: Option<String>,
 }
 
+impl QuizInfo {
+    pub async fn count_by_creator_id(
+        user_id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<i64, sqlx::Error> {
+        Ok(
+            sqlx::query_scalar("SELECT COUNT(*) FROM quizzes WHERE created_by = $1")
+                .bind(user_id)
+                .fetch_one(connection)
+                .await?,
+        )
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct QuizQuery {
     pub category_id: Option<i32>,
     pub title_pattern: Option<String>,
     pub difficulty: Option<String>,
+    pub created_by: Option<i32>,
     pub completed_by: Option<i32>,
     pub page: i64,
     pub size: i64,
@@ -52,6 +67,10 @@ impl QuizQuery {
             builder
                 .push(" AND q.difficulty = ")
                 .push_bind(difficulty.clone());
+        }
+
+        if let Some(user_id) = self.created_by {
+            builder.push(" AND q.created_by = ").push_bind(user_id);
         }
 
         if let Some(user_id) = self.completed_by {

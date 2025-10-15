@@ -1,6 +1,5 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::prelude::FromRow;
+use sqlx::{prelude::FromRow, PgConnection};
 
 use crate::models::question::Question;
 
@@ -13,14 +12,28 @@ pub struct QuizResult {
     pub score: f64,
     pub total_questions: i32,
     pub correct_answers: i32,
-    pub submitted_at: DateTime<Utc>,
+    // pub submitted_at: DateTime<Utc>,
+}
+
+impl QuizResult {
+    pub async fn count_by_user_id(
+        user_id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<i64, sqlx::Error> {
+        Ok(
+            sqlx::query_scalar("SELECT COUNT(*) FROM results WHERE user_id = $1")
+                .bind(user_id)
+                .fetch_one(connection)
+                .await?,
+        )
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct QuizResultQuery {
     pub user_id: i32,
-    pub page: i32,
-    pub size: i32,
+    pub page: i64,
+    pub size: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
