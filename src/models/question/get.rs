@@ -50,6 +50,7 @@ struct FetchedQuestion {
     form: QuestionForm,
     text: String,
     image_url: Option<String>,
+    explanation: Option<String>,
 }
 
 impl FetchedQuestion {
@@ -60,7 +61,7 @@ impl FetchedQuestion {
         let offset = (query.page.saturating_sub(1)) * query.size;
         Ok(sqlx::query_as!(
             FetchedQuestion,
-            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url FROM questions LIMIT $1 OFFSET $2"#,
+            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, explanation FROM questions LIMIT $1 OFFSET $2"#,
             query.size,
             offset
         )
@@ -73,6 +74,7 @@ impl FetchedQuestion {
             form: self.form,
             text: self.text,
             image_url: self.image_url,
+            explanation: self.explanation,
             options,
         }
     }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, PgConnection};
 
-use crate::models::question::Question;
+use crate::models::question::QuestionForm;
 
 pub mod get;
 
@@ -27,6 +27,19 @@ impl QuizResult {
                 .await?,
         )
     }
+
+    pub async fn get_quiz_id_from(
+        result_id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<i32, sqlx::Error> {
+        Ok(
+            sqlx::query!(r#"SELECT quiz_id FROM results WHERE id = $1"#, result_id)
+                .fetch_one(connection)
+                .await?
+                .quiz_id
+                .unwrap_or(-1),
+        )
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -38,15 +51,34 @@ pub struct QuizResultQuery {
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct UserAnswer {
-    pub question: Question,
+    pub question_form: QuestionForm,
+    pub question_text: String,
+    pub question_image_url: Option<String>,
+    pub options_text: Vec<String>,
     pub explanation: Option<String>,
-    pub chosen_option_ids: Vec<i32>,
-    pub text_answer: Option<String>,
-    pub is_correct: bool,
+
+    pub chosen_options_index: Vec<i32>,
+    pub entried_text: Option<String>,
+    pub is_correct: Option<bool>,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
-pub struct QuizResultDetail {
-    pub result: QuizResult,
-    pub answers: Vec<UserAnswer>,
+impl UserAnswer {
+    pub async fn count_by_result_id(
+        result_id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<i64, sqlx::Error> {
+        Ok(
+            sqlx::query_scalar("SELECT COUNT(*) FROM user_answers WHERE result_id = $1")
+                .bind(result_id)
+                .fetch_one(connection)
+                .await?,
+        )
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserAnswerQuery {
+    pub result_id: i32,
+    pub page: i64,
+    pub size: i64,
 }

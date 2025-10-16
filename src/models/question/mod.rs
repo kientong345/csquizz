@@ -9,6 +9,12 @@ pub struct AnswerOption {
     pub text: String,
 }
 
+impl ToString for AnswerOption {
+    fn to_string(&self) -> String {
+        String::from(&self.text)
+    }
+}
+
 #[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq)]
 #[sqlx(type_name = "question_form", rename_all = "kebab-case")]
 pub enum QuestionForm {
@@ -23,6 +29,7 @@ pub struct Question {
     pub form: QuestionForm,
     pub text: String,
     pub image_url: Option<String>,
+    pub explanation: Option<String>,
     pub options: Vec<AnswerOption>,
 }
 
