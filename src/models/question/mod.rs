@@ -15,7 +15,7 @@ impl ToString for AnswerOption {
     }
 }
 
-#[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq, Clone, Copy)]
 #[sqlx(type_name = "question_form", rename_all = "kebab-case")]
 pub enum QuestionForm {
     MultipleChoice,
@@ -23,7 +23,7 @@ pub enum QuestionForm {
     TextEntry,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Question {
     pub id: i32,
     pub form: QuestionForm,

@@ -3,7 +3,7 @@ use sqlx::PgConnection;
 use crate::models::{
     pagination::{Page, Paginate},
     quiz::QuizInfo,
-    result::QuizResult,
+    result::QuizResultSummary,
     user::{FetchedUser, OrderType, User, UserMinimal, UserQuery, UserRole},
 };
 
@@ -20,7 +20,7 @@ impl User {
 
         let quiz_created_count = QuizInfo::count_by_creator_id(fetched_user.id, connection).await?;
         let quiz_completed_count =
-            QuizResult::count_by_user_id(fetched_user.id, connection).await?;
+            QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
         Ok(User::create_from(
             fetched_user,
@@ -44,7 +44,7 @@ impl User {
 
         let quiz_created_count = QuizInfo::count_by_creator_id(fetched_user.id, connection).await?;
         let quiz_completed_count =
-            QuizResult::count_by_user_id(fetched_user.id, connection).await?;
+            QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
         Ok(User::create_from(
             fetched_user,

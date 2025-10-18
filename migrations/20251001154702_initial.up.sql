@@ -57,5 +57,5 @@ CREATE TABLE user_answers (
     result_id       INT REFERENCES results(id) ON DELETE CASCADE,
     question_id     INT REFERENCES questions(id) ON DELETE CASCADE,
     selected_option INT REFERENCES options(id) ON DELETE SET NULL,
-    is_correct      BOOLEAN
+    is_correct      BOOLEAN NOT NULL
 );

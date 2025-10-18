@@ -5,20 +5,22 @@ use sqlx::{prelude::FromRow, PgConnection};
 use crate::models::{
     pagination::{Page, Paginate},
     question::{Question, QuestionQuery},
-    result::{QuizResult, QuizResultQuery, UserAnswer, UserAnswerQuery},
-    vec_stringify,
+    result::{
+        FetchedAnswer, QuestionAnswerResult, QuestionAnswerResultQuery, QuizResultSummary,
+        QuizResultSummaryQuery,
+    },
 };
 
-impl Paginate<QuizResultQuery> for QuizResult {
+impl Paginate<QuizResultSummaryQuery> for QuizResultSummary {
     async fn page(
-        query: &QuizResultQuery,
+        query: &QuizResultSummaryQuery,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, sqlx::Error> {
-        let total_items = QuizResult::count_by_user_id(query.user_id, connection).await?;
+        let total_items = QuizResultSummary::count_by_user_id(query.user_id, connection).await?;
         let offset = (query.page.saturating_sub(1)) * query.size;
 
         let items = sqlx::query_as!(
-            QuizResult,
+            QuizResultSummary,
             r#"SELECT r.id, q.title AS quiz_title, r.score, r.total_questions, r.correct_answers
             FROM results AS r JOIN quizzes AS q ON r.quiz_id = q.id WHERE r.user_id = $1 LIMIT $2 OFFSET $3"#,
             query.user_id,
@@ -32,13 +34,13 @@ impl Paginate<QuizResultQuery> for QuizResult {
     }
 }
 
-impl QuizResult {
+impl QuizResultSummary {
     pub async fn get_by_id(
         id: i32,
         connection: &mut PgConnection,
-    ) -> Result<QuizResult, sqlx::Error> {
+    ) -> Result<QuizResultSummary, sqlx::Error> {
         Ok(sqlx::query_as!(
-            QuizResult,
+            QuizResultSummary,
             r#"SELECT r.id, q.title AS quiz_title, r.score, r.total_questions, r.correct_answers
             FROM results AS r JOIN quizzes AS q ON r.quiz_id = q.id WHERE r.id = $1"#,
             id
@@ -48,61 +50,72 @@ impl QuizResult {
     }
 }
 
-#[derive(Default, Debug, FromRow)]
-struct FetchedAnswer {
-    chosen_options_index: Vec<i32>,
-    entried_text: Option<String>,
-    is_correct: Option<bool>,
-}
-
 impl FetchedAnswer {
-    async fn get_by_question_ids(
+    async fn get_by_result_id(
         result_id: i32,
-        question_ids: &[i32],
         connection: &mut PgConnection,
-    ) -> Result<HashMap<i32, FetchedAnswer>, sqlx::Error> {
-        todo!()
+    ) -> Result<HashMap<i32, Vec<FetchedAnswer>>, sqlx::Error> {
+        // HashMap<question_id, Vec<FetchedAnswer>
+        #[derive(FromRow)]
+        struct AnswerWithQuestionId {
+            question_id: Option<i32>,
+            selected_option: Option<i32>,
+            entried_text: Option<String>,
+            is_correct: bool,
+        }
+
+        let rows = sqlx::query_as!(
+            AnswerWithQuestionId,
+            r#"SELECT question_id, selected_option, entried_text, is_correct
+            FROM user_answers WHERE result_id = $1"#,
+            result_id
+        )
+        .fetch_all(connection)
+        .await?;
+
+        let mut answers_map: HashMap<i32, Vec<FetchedAnswer>> = HashMap::new();
+
+        for row in rows {
+            let answer = FetchedAnswer {
+                chosen_option_id: row.selected_option,
+                entried_text: row.entried_text,
+                is_correct: row.is_correct,
+            };
+            answers_map
+                .entry(row.question_id.unwrap())
+                .or_default()
+                .push(answer);
+        }
+
+        Ok(answers_map)
     }
 }
 
-impl Paginate<UserAnswerQuery> for UserAnswer {
+impl Paginate<QuestionAnswerResultQuery> for QuestionAnswerResult {
     async fn page(
-        query: &UserAnswerQuery,
+        query: &QuestionAnswerResultQuery,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, sqlx::Error> {
-        let quiz_id = QuizResult::get_quiz_id_from(query.result_id, connection).await?;
-
         let question_query = QuestionQuery {
-            quiz_id,
+            quiz_id: QuizResultSummary::get_quiz_id_from(query.result_id, connection).await?,
             page: query.page,
             size: query.size,
         };
 
         let questions_vec = Question::page(&question_query, connection).await?.items;
 
-        let question_ids: Vec<i32> = questions_vec.iter().map(|q| q.id).collect();
+        let mut answers_map = FetchedAnswer::get_by_result_id(query.result_id, connection).await?;
 
-        let mut answers_map =
-            FetchedAnswer::get_by_question_ids(query.result_id, &question_ids, connection).await?;
-
-        let items: Vec<UserAnswer> = questions_vec
+        let items: Vec<QuestionAnswerResult> = questions_vec
             .into_iter()
             .map(|q| {
-                let answer = answers_map.remove(&q.id).unwrap_or_default();
-                UserAnswer {
-                    question_form: q.form,
-                    question_text: q.text,
-                    question_image_url: q.image_url,
-                    options_text: vec_stringify(q.options),
-                    explanation: q.explanation,
-                    chosen_options_index: answer.chosen_options_index,
-                    entried_text: answer.entried_text,
-                    is_correct: answer.is_correct,
-                }
+                let answers = answers_map.remove(&q.id).unwrap_or_default();
+                QuestionAnswerResult::create_from(q, answers).unwrap()
             })
             .collect();
 
-        let total_items = UserAnswer::count_by_result_id(query.result_id, connection).await?;
+        let total_items =
+            QuestionAnswerResult::count_by_result_id(query.result_id, connection).await?;
 
         Ok(Page::create_from(items, total_items, query.size))
     }
