@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, PgConnection};
 
-pub mod get;
+pub mod paginate;
+pub mod post;
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizCategory {
@@ -9,12 +10,6 @@ pub struct QuizCategory {
     pub name: String,
     pub image_url: Option<String>,
     pub description: Option<String>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct QuizCategoryQuery {
-    pub page: i64,
-    pub size: i64,
 }
 
 impl QuizCategory {

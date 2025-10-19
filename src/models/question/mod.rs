@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::{prelude::Type, PgConnection};
 
 pub mod get;
+pub mod paginate;
+pub mod post;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AnswerOption {
@@ -47,9 +49,24 @@ impl Question {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct QuestionQuery {
-    pub quiz_id: i32,
-    pub page: i64,
-    pub size: i64,
+#[derive(Debug)]
+struct FetchedQuestion {
+    id: i32,
+    form: QuestionForm,
+    text: String,
+    image_url: Option<String>,
+    explanation: Option<String>,
+}
+
+impl FetchedQuestion {
+    fn into_full_options(self, options: Vec<AnswerOption>) -> Question {
+        Question {
+            id: self.id,
+            form: self.form,
+            text: self.text,
+            image_url: self.image_url,
+            explanation: self.explanation,
+            options,
+        }
+    }
 }

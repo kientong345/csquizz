@@ -5,7 +5,7 @@ use axum::{
 };
 use serde_json::Value;
 
-use crate::{database::pool::QuizBankPool, models::result::QuestionAnswerResultQuery};
+use crate::{database::pool::QuizBankPool, models::result::paginate::QuestionAnswerResultQuery};
 
 pub async fn get_results(
     State(pool): State<QuizBankPool>,

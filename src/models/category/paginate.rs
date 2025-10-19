@@ -1,9 +1,16 @@
+use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
 use crate::models::{
-    category::{QuizCategory, QuizCategoryQuery},
+    category::QuizCategory,
     pagination::{Page, Paginate},
 };
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QuizCategoryQuery {
+    pub page: i64,
+    pub size: i64,
+}
 
 impl Paginate<QuizCategoryQuery> for QuizCategory {
     async fn page(

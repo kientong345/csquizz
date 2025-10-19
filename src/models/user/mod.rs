@@ -7,6 +7,7 @@ use sqlx::{
 use crate::models::auth::LoginForm;
 
 pub mod get;
+pub mod paginate;
 pub mod patch;
 pub mod post;
 
@@ -24,13 +25,6 @@ pub struct UserMinimal {
     pub role: UserRole,
     pub quiz_created_count: i64,
     pub quiz_completed_count: i64,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct UserQuery {
-    pub order_by: OrderType,
-    pub page: i64,
-    pub size: i64,
 }
 
 #[derive(Debug, Type, Deserialize, Serialize)]

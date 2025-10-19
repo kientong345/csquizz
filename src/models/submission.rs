@@ -1,13 +1,36 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Answer {
-    pub question_id: i32,
-    pub option_ids: Vec<i32>,
+use crate::models::{question::post::PostQuestion, quiz::post::PostQuizInfo};
+
+#[derive(Debug, Deserialize)]
+pub enum AnswerType {
+    ChoicesAnswer(Vec<i32>), // Vec<option_id>
+    TextAnswer(String),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+pub struct SubmittedAnswer {
+    pub question_id: i32,
+    pub answer: AnswerType,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Submission {
     pub user_id: i32,
-    pub answers: Vec<Answer>,
+    pub answers: Vec<SubmittedAnswer>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SubmissionResult {}
+
+impl Submission {
+    pub fn evaluate(&self) -> SubmissionResult {
+        todo!()
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PostQuiz {
+    pub info: PostQuizInfo,
+    pub questions: Vec<PostQuestion>,
 }

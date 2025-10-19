@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, PgConnection};
 
-use crate::models::{
-    question::{Question, QuestionForm},
-    vec_stringify,
+use crate::{
+    models::question::{Question, QuestionForm},
+    utils::vec_stringify,
 };
 
 pub mod get;
+pub mod paginate;
+pub mod post;
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizResultSummary {
@@ -58,13 +60,6 @@ impl QuizResultSummary {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct QuizResultSummaryQuery {
-    pub user_id: i32,
-    pub page: i64,
-    pub size: i64,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
 pub struct QuestionContent {
     pub question_form: QuestionForm,
     pub question_text: String,
@@ -86,22 +81,19 @@ impl From<Question> for QuestionContent {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct AnswerResult {
-    pub chosen_option_ids: Vec<(i32, bool)>, // Vec<(option_id, is_correct)>
-    pub entried_text: Option<(String, bool)>, // Option<(text, is_correct)>
+pub enum AnswerResultType {
+    ChoicesResult(Vec<(i32, bool)>), // Vec<(option_id, is_correct)>
+    TextResult(String, bool),        // Option<(text, is_correct)>
+    InvalidResult,
 }
 
-impl From<Vec<FetchedAnswer>> for AnswerResult {
+impl From<Vec<FetchedAnswer>> for AnswerResultType {
     fn from(fetched_answers: Vec<FetchedAnswer>) -> Self {
         let mut chosen_option_ids = Vec::new();
         let mut entried_text = None;
         for answer in fetched_answers {
             if !answer.is_valid() {
-                // return an invalid answer
-                return AnswerResult {
-                    chosen_option_ids: Vec::new(),
-                    entried_text: None,
-                };
+                return AnswerResultType::InvalidResult;
             }
             if let Some(option_id) = answer.chosen_option_id {
                 chosen_option_ids.push((option_id, answer.is_correct));
@@ -111,17 +103,18 @@ impl From<Vec<FetchedAnswer>> for AnswerResult {
                 entried_text = Some((text, answer.is_correct));
             }
         }
-        AnswerResult {
-            chosen_option_ids,
-            entried_text,
-        }
-    }
-}
 
-impl AnswerResult {
-    pub fn is_valid(&self) -> bool {
-        (self.chosen_option_ids.is_empty() && self.entried_text.is_some())
-            || (!self.chosen_option_ids.is_empty() && self.entried_text.is_none())
+        if (chosen_option_ids.is_empty() && entried_text.is_some())
+            || (!chosen_option_ids.is_empty() && entried_text.is_none())
+        {
+            return AnswerResultType::InvalidResult;
+        }
+
+        if let Some((text, is_correct)) = entried_text {
+            AnswerResultType::TextResult(text, is_correct)
+        } else {
+            AnswerResultType::ChoicesResult(chosen_option_ids)
+        }
     }
 }
 
@@ -129,7 +122,7 @@ impl AnswerResult {
 pub struct QuestionAnswerResult {
     pub question_id: i32,
     pub question: QuestionContent,
-    pub answer: AnswerResult,
+    pub answer: AnswerResultType,
 }
 
 impl QuestionAnswerResult {
@@ -151,21 +144,23 @@ impl QuestionAnswerResult {
     ) -> Result<QuestionAnswerResult, &'static str> {
         let question_id = fetched_question.id;
         let question = QuestionContent::from(fetched_question.clone());
-        let answer = AnswerResult::from(fetched_answers);
+        let answer = AnswerResultType::from(fetched_answers);
 
-        if !answer.is_valid() {
-            return Err("invalid answer");
-        }
-
-        for (option_id, _) in &answer.chosen_option_ids {
-            if fetched_question
-                .options
-                .iter()
-                .find(|x| &x.id == option_id)
-                .is_none()
-            {
-                return Err("invalid option");
+        match &answer {
+            AnswerResultType::InvalidResult => return Err("invalid answer"),
+            AnswerResultType::ChoicesResult(choices_result) => {
+                for (option_id, _) in choices_result {
+                    if fetched_question
+                        .options
+                        .iter()
+                        .find(|x| &x.id == option_id)
+                        .is_none()
+                    {
+                        return Err("invalid option");
+                    }
+                }
             }
+            _ => (),
         }
 
         Ok(QuestionAnswerResult {
@@ -176,15 +171,9 @@ impl QuestionAnswerResult {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct QuestionAnswerResultQuery {
-    pub result_id: i32,
-    pub page: i64,
-    pub size: i64,
-}
-
 #[derive(Default, Debug, FromRow)]
 struct FetchedAnswer {
+    question_id: Option<i32>,
     chosen_option_id: Option<i32>,
     entried_text: Option<String>,
     is_correct: bool,

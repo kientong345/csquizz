@@ -9,8 +9,10 @@ use crate::{
     database::pool::QuizBankPool,
     models::{
         pagination::{PageQuery, Paginate},
-        question::{Question, QuestionQuery},
-        quiz::{QuizInfo, QuizQuery},
+        question::{paginate::QuestionQuery, Question},
+        quiz::{paginate::QuizQuery, QuizInfo},
+        result::QuizResultSummary,
+        submission::{PostQuiz, Submission},
     },
 };
 
@@ -80,12 +82,47 @@ pub async fn get_question_page(
 pub async fn submit_quiz(
     State(pool): State<QuizBankPool>,
     Path(id): Path<String>,
+    Json(submission): Json<Submission>,
 ) -> Result<Json<Value>, StatusCode> {
-    todo!()
+    if id.parse().unwrap_or(-1) != submission.user_id {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    let submission_result = submission.evaluate();
+    let mut connection = match pool.get_connection().await {
+        Ok(connection) => connection,
+        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+    };
+    match QuizResultSummary::create(submission_result, &mut *connection).await {
+        Ok(result) => Ok(Json(json!(result.id))),
+        Err(_) => Err(StatusCode::NOT_ACCEPTABLE),
+    }
 }
 
-pub async fn create_quiz(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
-    todo!()
+pub async fn create_quiz(
+    State(pool): State<QuizBankPool>,
+    Json(data): Json<PostQuiz>,
+) -> StatusCode {
+    let mut connection = match pool.start_transaction().await {
+        Ok(connection) => connection,
+        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR,
+    };
+
+    let new_quiz = match QuizInfo::create(data.info, &mut connection).await {
+        Ok(quiz) => quiz,
+        Err(_) => return StatusCode::BAD_REQUEST,
+    };
+
+    if Question::create(new_quiz.id, data.questions, &mut connection)
+        .await
+        .is_err()
+    {
+        return StatusCode::BAD_REQUEST;
+    }
+
+    match connection.commit().await {
+        Ok(_) => StatusCode::CREATED,
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
+    }
 }
 
 pub async fn update_quiz_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
