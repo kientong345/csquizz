@@ -5,17 +5,17 @@ TRUNCATE TABLE users, categories, quizzes, questions, options, results, user_ans
 -- USERS
 -- =================================================================
 -- Note: Passwords are encrypted. 'admin' password is 'admin123', 'testuser' password is 'user123'
-INSERT INTO users (username, email, password_hash, role) VALUES
-('admin', 'admin@quizbank.com', '$2b$12$p/tWlC5S42y2N6Kz2JzL1.RPwZJc2jV/bJv5efe3h3dG4n2a.g/S2', 'admin'),
-('testuser', 'user@quizbank.com', '$2b$12$8.iEAO2h2N.JgHk4QvODUuWcIkdJcrfC5x2wz0Ea.A5uL2S.I/2/G', 'user');
+INSERT INTO users (display_name, email, password_hash, role) VALUES
+('bocchi_the_dev', 'bocchi345@gmail.com', '$2b$12$p/tWlC5S42y2N6Kz2JzL1.RPwZJc2jV/bJv5efe3h3dG4n2a.g/S2', 'admin'),
+('super_user', 'su123@gmail.com', '$2b$12$8.iEAO2h2N.JgHk4QvODUuWcIkdJcrfC5x2wz0Ea.A5uL2S.I/2/G', 'user');
 
 -- =================================================================
 -- CATEGORIES
 -- =================================================================
-INSERT INTO categories (id, name, description) VALUES
-(1, 'Data Structures', 'Questions about fundamental data structures like arrays, linked lists, trees, etc.'),
-(2, 'Algorithms', 'Questions about sorting, searching, and other common algorithms.'),
-(3, 'Networking', 'Questions about network protocols, layers, and concepts.');
+INSERT INTO categories (name, description) VALUES
+('Data Structures', 'Questions about fundamental data structures like arrays, linked lists, trees, etc.'),
+('Algorithms', 'Questions about sorting, searching, and other common algorithms.'),
+('Networking', 'Questions about network protocols, layers, and concepts.');
 
 -- =================================================================
 -- QUIZZES

@@ -28,3 +28,25 @@ impl QuizCategory {
         .await?)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use sqlx::{pool::PoolConnection, Postgres};
+
+    use crate::models::category::{post::PostQuizCategory, QuizCategory};
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_create_new_category(mut conn: PoolConnection<Postgres>) {
+        let data = PostQuizCategory {
+            name: String::from("Operating System"),
+            image_url: Some(String::from("https://www.telecomreviewafrica.com/wp-content/uploads/2019/12/Operating_systemsThe_heart_of_smartphones_intro.jpg")),
+            description: Some(String::from("An operating system (OS) is system software that manages computer hardware and software resources, and provides common services for computer programs.")),
+        };
+
+        let category = QuizCategory::create(data, &mut conn).await.unwrap();
+
+        assert_eq!(&category.name, "Operating System");
+        assert_eq!(category.image_url, Some(String::from("https://www.telecomreviewafrica.com/wp-content/uploads/2019/12/Operating_systemsThe_heart_of_smartphones_intro.jpg")));
+        assert_eq!(category.description, Some(String::from("An operating system (OS) is system software that manages computer hardware and software resources, and provides common services for computer programs.")));
+    }
+}

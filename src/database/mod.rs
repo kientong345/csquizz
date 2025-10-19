@@ -1,2 +1,19 @@
+use sqlx::{Executor, PgConnection};
+
 mod config;
 pub mod pool;
+
+const LOAD_SAMPLE_SQL: &str = include_str!("../../sample/sample.up.sql");
+const UNLOAD_SAMPLE_SQL: &str = include_str!("../../sample/sample.down.sql");
+
+pub async fn load_sample(conn: &mut PgConnection) {
+    if let Err(e) = conn.execute(LOAD_SAMPLE_SQL).await {
+        panic!("ERROR: {e}");
+    }
+}
+
+pub async fn unload_sample(conn: &mut PgConnection) {
+    if let Err(e) = conn.execute(UNLOAD_SAMPLE_SQL).await {
+        panic!("ERROR: {e}");
+    }
+}
