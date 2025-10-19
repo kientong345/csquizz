@@ -2,7 +2,7 @@
 CREATE TABLE users (
     id              SERIAL PRIMARY KEY,
     google_id       VARCHAR(255) UNIQUE,
-    username        VARCHAR(50) NOT NULL,
+    display_name    VARCHAR(50) NOT NULL,
     email           VARCHAR(100) UNIQUE NOT NULL,
     password_hash   TEXT,
     avatar_url      VARCHAR(255),

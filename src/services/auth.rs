@@ -101,6 +101,14 @@ pub async fn handle_login(
     ))
 }
 
+pub async fn handle_refresh(State(pool): State<QuizBankPool>) -> StatusCode {
+    todo!()
+}
+
+pub async fn handle_logout(State(pool): State<QuizBankPool>) -> StatusCode {
+    todo!()
+}
+
 pub async fn get_my_info(
     State(pool): State<QuizBankPool>,
     headers: HeaderMap,

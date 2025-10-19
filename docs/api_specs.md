@@ -18,18 +18,24 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
 -   **Request Body:** `application/json`
     ```json
     {
-        "username": "string", // Bắt buộc
+        "display_name": "string", // Bắt buộc
         "email": "string",    // Bắt buộc, duy nhất, định dạng email
         "password": "string"  // Bắt buộc, tối thiểu 8 ký tự
     }
     ```
 -   **Success Response:** `201 Created`
+    ```
+    Set-Cookie: refresh_token=...; HttpOnly; Secure; Path=/api/auth
+    ```
     ```json
     {
-        "id": "number",
-        "username": "string",
-        "email": "string",
-        "role": "string"
+        "access_token": "string", // JWT Access Token (ngắn hạn)
+        "user": {
+            "id": "number",
+            "display_name": "string",
+            "email": "string",
+            "role": "string"
+        }
     }
     ```
 -   **Error Responses:**
@@ -48,19 +54,20 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
     }
     ```
 -   **Success Response:** `200 OK`
-    -   **Body:**
-        ```json
-        {
-            "access_token": "string", // JWT Access Token (ngắn hạn)
-            "user": {
-                "id": "number",
-                "username": "string",
-                "role": "string"
-            }
+    ```
+    Set-Cookie: refresh_token=...; HttpOnly; Secure; Path=/api/auth
+    ```
+    ```json
+    {
+        "access_token": "string", // JWT Access Token (ngắn hạn)
+        "user": {
+            "id": "number",
+            "display_name": "string",
+            "email": "string",
+            "role": "string"
         }
-        ```
-    -   **Headers:**
-        -   `Set-Cookie`: `refresh_token=...; HttpOnly; Secure; Path=/api/auth`
+    }
+    ```
 
 -   **Error Responses:**
     -   `401 Unauthorized`: Sai `email` hoặc `password`.
@@ -100,7 +107,7 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
     ```json
     {
         "id": "number",
-        "username": "string",
+        "display_name": "string",
         "email": "string",
         "role": "string",
         "created_at": "string"

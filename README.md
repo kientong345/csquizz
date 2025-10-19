@@ -1,8 +1,8 @@
-# Quiz-Bank: Nền tảng Test Online về Computer Science
+# csquiz: Nền tảng Test Online về Computer Science
 
 ## 1. Tổng quan & Ý tưởng cốt lõi (Project Overview & Core Concept)
 
-**Quiz-Bank** là một trang web cung cấp các bài test trực tuyến về Khoa học Máy tính (Computer Science).
+**csquiz** là một trang web cung cấp các bài test trực tuyến về Khoa học Máy tính (Computer Science).
 
 -   **Mục tiêu:** Giúp sinh viên, người học, và bất kỳ ai quan tâm đến lĩnh vực Khoa học máy tính có thể luyện tập kiến thức, kiểm tra trình độ và theo dõi sự tiến bộ của bản thân.
 -   **Ý tưởng cốt lõi:**

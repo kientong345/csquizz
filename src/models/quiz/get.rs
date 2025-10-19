@@ -9,7 +9,7 @@ impl QuizInfo {
     ) -> Result<QuizInfo, sqlx::Error> {
         Ok(sqlx::query_as!(
             QuizInfo,
-            r#"SELECT q.id, q.title, q.description, c.name AS category, q.difficulty AS "difficulty: QuizDifficulty", u.username AS created_by
+            r#"SELECT q.id, q.title, q.description, c.name AS category, q.difficulty AS "difficulty: QuizDifficulty", u.display_name AS created_by
             FROM quizzes AS q JOIN categories AS c ON q.category = c.id JOIN users AS u ON q.created_by = u.id
             WHERE q.id = $1"#, id
         ).fetch_one(connection).await?)

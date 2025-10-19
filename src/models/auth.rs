@@ -5,7 +5,7 @@ use crate::models::user::User;
 
 #[derive(Debug, Deserialize)]
 pub struct Registration {
-    pub username: String,
+    pub display_name: String,
     pub password: String,
     pub email: String,
 }
@@ -31,7 +31,7 @@ impl LoginForm {
 #[derive(Debug, Deserialize)]
 pub struct OAuthPayload {
     pub google_id: String,
-    pub username: String,
+    pub display_name: String,
     pub email: String,
 }
 

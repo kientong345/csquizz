@@ -20,7 +20,7 @@ pub enum OrderType {
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct UserMinimal {
     pub id: i32,
-    pub username: String,
+    pub display_name: String,
     pub avatar_url: Option<String>,
     pub role: UserRole,
     pub quiz_created_count: i64,
@@ -60,7 +60,7 @@ impl User {
         User {
             pub_info: UserMinimal {
                 id: fetched_user.id,
-                username: fetched_user.username,
+                display_name: fetched_user.display_name,
                 avatar_url: fetched_user.avatar_url,
                 role: fetched_user.role,
                 quiz_created_count,
@@ -107,7 +107,7 @@ impl User {
 
 struct FetchedUser {
     id: i32,
-    username: String,
+    display_name: String,
     avatar_url: Option<String>,
     role: UserRole,
     email: String,

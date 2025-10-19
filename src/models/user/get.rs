@@ -10,7 +10,7 @@ impl User {
     pub async fn get_by_id(id: i32, connection: &mut PgConnection) -> Result<User, sqlx::Error> {
         let fetched_user = sqlx::query_as!(
             FetchedUser,
-            r#"SELECT id , username, avatar_url, email, role AS "role: UserRole", password_hash, google_id
+            r#"SELECT id , display_name, avatar_url, email, role AS "role: UserRole", password_hash, google_id
             FROM users WHERE id = $1"#,
             id
         )
@@ -34,7 +34,7 @@ impl User {
     ) -> Result<User, sqlx::Error> {
         let fetched_user = sqlx::query_as!(
             FetchedUser,
-            r#"SELECT id , username, avatar_url, email, role AS "role: UserRole", password_hash, google_id
+            r#"SELECT id , display_name, avatar_url, email, role AS "role: UserRole", password_hash, google_id
             FROM users WHERE email = $1"#,
             email
         )
