@@ -1,9 +1,17 @@
-use axum::{routing::get, Router};
+use axum::{middleware, routing::get, Router};
 
-use crate::{database::pool::QuizBankPool, services::results::get_results};
+use crate::{
+    database::pool::QuizBankPool,
+    middleware::auth::auth_middleware,
+    services::users::{get_my_info, get_my_result, get_user_info, get_user_results},
+};
 
 pub fn create_route(pool: QuizBankPool) -> Router {
     Router::new()
-        .route("/api/user/results", get(get_results))
+        .route("/api/users/me", get(get_my_info))
+        .route("/api/users/me/results", get(get_my_result))
+        .layer(middleware::from_fn(auth_middleware))
+        .route("/api/users/{:id}", get(get_user_info))
+        .route("/api/users/{:id}/results", get(get_user_results))
         .with_state(pool)
 }

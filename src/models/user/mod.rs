@@ -27,7 +27,7 @@ pub struct UserMinimal {
     pub quiz_completed_count: i64,
 }
 
-#[derive(Debug, Type, Deserialize, Serialize)]
+#[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq)]
 #[sqlx(type_name = "user_role", rename_all = "kebab-case")]
 pub enum UserRole {
     User,

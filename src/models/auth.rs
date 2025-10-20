@@ -12,7 +12,7 @@ pub struct Registration {
 
 impl Registration {
     pub fn is_valid(&self) -> bool {
-        todo!()
+        true
     }
 }
 
@@ -24,7 +24,7 @@ pub struct LoginForm {
 
 impl LoginForm {
     pub fn is_valid(&self) -> bool {
-        todo!()
+        true
     }
 }
 

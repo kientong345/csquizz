@@ -57,7 +57,7 @@ mod tests {
 
         assert_eq!(category_page.total_items, 3);
         assert_eq!(category_page.total_pages, 1);
-        assert_eq!(&category_page.items[0].name, "Data Structures");
+        assert_eq!(category_page.items[0].name, "Data Structures".to_string());
         assert_eq!(category_page.items[1].image_url, None);
         assert_eq!(
             category_page.items[2].description,

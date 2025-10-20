@@ -1,6 +1,6 @@
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Pool, Postgres, Transaction};
 
-use crate::database::config;
+use crate::config;
 
 #[derive(Clone)]
 pub struct QuizBankPool {

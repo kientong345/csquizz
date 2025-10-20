@@ -1,6 +1,5 @@
 use sqlx::{Executor, PgConnection};
 
-mod config;
 pub mod pool;
 
 const LOAD_SAMPLE_SQL: &str = include_str!("../../sample/sample.up.sql");
