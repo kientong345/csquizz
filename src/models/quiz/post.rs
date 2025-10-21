@@ -1,7 +1,10 @@
 use serde::Deserialize;
 use sqlx::PgConnection;
 
-use crate::models::quiz::{QuizDifficulty, QuizInfo};
+use crate::models::{
+    error::ModelError,
+    quiz::{QuizDifficulty, QuizInfo},
+};
 
 #[derive(Debug, Deserialize)]
 pub struct PostQuizInfo {
@@ -16,7 +19,7 @@ impl QuizInfo {
     pub async fn create(
         data: PostQuizInfo,
         connection: &mut PgConnection,
-    ) -> Result<QuizInfo, sqlx::Error> {
+    ) -> Result<QuizInfo, ModelError> {
         let difficulty = if let Some(diff_type) = data.difficulty {
             match diff_type {
                 QuizDifficulty::Easy => Some(String::from("easy")),

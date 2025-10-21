@@ -1,12 +1,12 @@
 use sqlx::PgConnection;
 
-use crate::models::quiz::{QuizDifficulty, QuizInfo};
+use crate::models::{
+    error::ModelError,
+    quiz::{QuizDifficulty, QuizInfo},
+};
 
 impl QuizInfo {
-    pub async fn get_by_id(
-        id: i32,
-        connection: &mut PgConnection,
-    ) -> Result<QuizInfo, sqlx::Error> {
+    pub async fn get_by_id(id: i32, connection: &mut PgConnection) -> Result<QuizInfo, ModelError> {
         Ok(sqlx::query_as!(
             QuizInfo,
             r#"SELECT q.id, q.title, q.description, c.name AS category, q.difficulty AS "difficulty: QuizDifficulty", u.display_name AS created_by

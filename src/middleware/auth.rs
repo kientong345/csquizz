@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::{config, models::auth::validate_access_token};
+use crate::{config, models::auth::AccessClaims};
 
 pub async fn auth_middleware(mut req: Request<Body>, next: Next) -> Response {
     let auth_header = match req.headers().get("Authorization") {
@@ -20,12 +20,12 @@ pub async fn auth_middleware(mut req: Request<Body>, next: Next) -> Response {
         .strip_prefix("Bearer ")
         .unwrap();
 
-    let user_id = match validate_access_token(access_token, &config::secret_key()) {
-        Ok(user_id) => user_id,
+    let access_claims = match AccessClaims::decode(access_token, &config::secret_key()) {
+        Ok(access_claims) => access_claims,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };
 
-    req.extensions_mut().insert(user_id);
+    req.extensions_mut().insert(access_claims);
 
     next.run(req).await
 }

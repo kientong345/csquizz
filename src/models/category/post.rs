@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use sqlx::PgConnection;
 
-use crate::models::category::QuizCategory;
+use crate::models::{category::QuizCategory, error::ModelError};
 
 #[derive(Debug, Deserialize)]
 pub struct PostQuizCategory {
@@ -14,7 +14,7 @@ impl QuizCategory {
     pub async fn create(
         data: PostQuizCategory,
         connection: &mut PgConnection,
-    ) -> Result<QuizCategory, sqlx::Error> {
+    ) -> Result<QuizCategory, ModelError> {
         Ok(sqlx::query_as!(
             QuizCategory,
             r#"INSERT INTO categories (name, image_url, description)

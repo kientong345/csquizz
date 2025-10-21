@@ -1,7 +1,7 @@
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sqlx::PgConnection;
 
-use crate::models::user::User;
+use crate::models::{error::ModelError, user::UserFullDetail};
 
 #[derive(Debug, Deserialize)]
 pub struct Registration {
@@ -42,16 +42,28 @@ pub enum SignupMethod {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct AccessClaims {
-    sub: String,
-    role: String,
-    exp: i64,
+pub struct AccessClaims {
+    pub sub: String,
+    pub role: String,
+    pub exp: i64,
+}
+
+impl AccessClaims {
+    pub fn decode(jwt: &str, secret: &[u8]) -> Result<Self, ModelError> {
+        Ok(decode_jwt::<AccessClaims>(jwt, secret)?)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct RefreshClaims {
-    sub: String,
-    exp: i64,
+pub struct RefreshClaims {
+    pub sub: String,
+    pub exp: i64,
+}
+
+impl RefreshClaims {
+    pub fn decode(jwt: &str, secret: &[u8]) -> Result<Self, ModelError> {
+        Ok(decode_jwt::<RefreshClaims>(jwt, secret)?)
+    }
 }
 
 const ACCESS_TOKEN_EXPIRE: i64 = 15;
@@ -66,7 +78,7 @@ fn generate_jwt<C: Serialize>(claims: &C, secret: &[u8]) -> String {
     .unwrap_or(String::from(""))
 }
 
-pub fn generate_token_pair(user: &User, secret: &[u8]) -> (String, String) {
+pub fn generate_token_pair(user: &UserFullDetail, secret: &[u8]) -> (String, String) {
     let now = chrono::Utc::now();
 
     let access_claims = AccessClaims {
@@ -87,10 +99,7 @@ pub fn generate_token_pair(user: &User, secret: &[u8]) -> (String, String) {
     (access_token, refresh_token)
 }
 
-fn decode_jwt<C: Clone + DeserializeOwned>(
-    jwt: &str,
-    secret: &[u8],
-) -> Result<C, jsonwebtoken::errors::Error> {
+fn decode_jwt<C: Clone + DeserializeOwned>(jwt: &str, secret: &[u8]) -> Result<C, ModelError> {
     Ok(jsonwebtoken::decode::<C>(
         jwt,
         &jsonwebtoken::DecodingKey::from_secret(&secret),
@@ -99,20 +108,10 @@ fn decode_jwt<C: Clone + DeserializeOwned>(
     .claims)
 }
 
-pub fn validate_access_token(
-    access_token: &str,
-    secret: &[u8],
-) -> Result<i32, jsonwebtoken::errors::Error> {
-    Ok(decode_jwt::<AccessClaims>(access_token, secret)?
-        .sub
-        .parse()
-        .unwrap_or(-1))
-}
+pub struct AuthenticatedUser(UserFullDetail);
 
-pub struct AuthenticatedUser(User);
-
-impl Into<User> for AuthenticatedUser {
-    fn into(self) -> User {
+impl Into<UserFullDetail> for AuthenticatedUser {
+    fn into(self) -> UserFullDetail {
         self.0
     }
 }
@@ -121,46 +120,36 @@ impl AuthenticatedUser {
     pub async fn register(
         registration: Registration,
         connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, AuthError> {
-        if User::is_email_exist(&registration.email, connection).await? {
-            return Err(AuthError::EmailExisted);
+    ) -> Result<AuthenticatedUser, ModelError> {
+        if UserFullDetail::is_email_exist(&registration.email, connection).await? {
+            return Err(ModelError::EmailTaken {
+                email: registration.email,
+            });
         }
         let signup_method = SignupMethod::WithPassword(registration);
-        let user = User::create(signup_method, connection).await?;
+        let user = UserFullDetail::create(signup_method, connection).await?;
         Ok(AuthenticatedUser(user))
     }
 
     pub async fn login(
         login_form: LoginForm,
         connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, AuthError> {
-        let user = User::validate_login(&login_form, connection).await?;
+    ) -> Result<AuthenticatedUser, ModelError> {
+        let user = UserFullDetail::validate_login(&login_form, connection).await?;
         Ok(AuthenticatedUser(user))
     }
 
     pub async fn login_by_google(
         oauth: OAuthPayload,
         connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, AuthError> {
-        let user = if !User::is_email_exist(&oauth.email, connection).await? {
+    ) -> Result<AuthenticatedUser, ModelError> {
+        let user = if !UserFullDetail::is_email_exist(&oauth.email, connection).await? {
             let signup_method = SignupMethod::OAuth(oauth);
-            User::create(signup_method, connection).await?
+            UserFullDetail::create(signup_method, connection).await?
         } else {
-            User::get_by_email(&oauth.email, connection).await?
+            UserFullDetail::get_by_email(&oauth.email, connection).await?
         };
 
         Ok(AuthenticatedUser(user))
-    }
-}
-
-#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
-pub enum AuthError {
-    EmailExisted,
-    SqlxError(String),
-}
-
-impl From<sqlx::Error> for AuthError {
-    fn from(value: sqlx::Error) -> Self {
-        AuthError::SqlxError(value.to_string())
     }
 }

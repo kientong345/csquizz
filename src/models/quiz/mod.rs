@@ -4,6 +4,8 @@ use sqlx::{
     PgConnection,
 };
 
+use crate::models::error::ModelError;
+
 pub mod get;
 pub mod paginate;
 pub mod post;
@@ -30,7 +32,7 @@ impl QuizInfo {
     pub async fn count_by_creator_id(
         user_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
+    ) -> Result<i64, ModelError> {
         Ok(
             sqlx::query_scalar("SELECT COUNT(*) FROM quizzes WHERE created_by = $1")
                 .bind(user_id)

@@ -4,8 +4,8 @@ use axum::{
 };
 
 use crate::{
+    controller::quizzes::{get_question_page, get_quiz_info, get_quizzes, submit_quiz},
     database::pool::QuizBankPool,
-    services::quizzes::{get_question_page, get_quiz_info, get_quizzes, submit_quiz},
 };
 
 pub fn create_route(pool: QuizBankPool) -> Router {

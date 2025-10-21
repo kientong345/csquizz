@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod category;
+pub mod error;
 pub mod pagination;
 pub mod question;
 pub mod quiz;

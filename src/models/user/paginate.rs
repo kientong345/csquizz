@@ -2,8 +2,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
 use crate::models::{
+    error::ModelError,
     pagination::{Page, Paginate},
-    user::{OrderType, User, UserMinimal},
+    user::{OrderType, UserFullDetail, UserPubInfo},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -13,11 +14,11 @@ pub struct UserQuery {
     pub size: i64,
 }
 
-impl Paginate<UserQuery> for UserMinimal {
+impl Paginate<UserQuery> for UserPubInfo {
     async fn page(
         query: &UserQuery,
         connection: &mut PgConnection,
-    ) -> Result<Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, ModelError> {
         let mut query_str = String::from(
             r#"SELECT
                 u.id, u.username, u.avatar_url, u.role AS "role: UserRole",
@@ -41,11 +42,11 @@ impl Paginate<UserQuery> for UserMinimal {
             }
         }
 
-        let total_items = User::count(connection).await?;
+        let total_items = UserFullDetail::count(connection).await?;
         let offset = (query.page.saturating_sub(1)) * query.size;
         query_str.push_str(" LIMIT $1 OFFSET $2");
 
-        let items: Vec<UserMinimal> = sqlx::query_as(&query_str)
+        let items: Vec<UserPubInfo> = sqlx::query_as(&query_str)
             .bind(query.size)
             .bind(offset)
             .fetch_all(connection)

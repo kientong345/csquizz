@@ -6,20 +6,14 @@ use axum::{
 use serde_json::{json, Value};
 
 use crate::{
-    database::pool::QuizBankPool,
-    models::{
+    controller::error::ControllerError, database::pool::QuizBankPool, models::{
         result::paginate::QuestionAnswerResultQuery,
-        user::{User, UserMinimal},
-    },
+        user::{UserFullDetail, UserPubInfo},
+    }
 };
 
-pub async fn get_my_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
-    let mut connection = match pool.get_connection().await {
-        Ok(connection) => connection,
-        Err(_) => {
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
+pub async fn get_my_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, ControllerError> {
+    let mut connection = pool.get_connection().await?;
 
     // let auth_header = headers
     //     .get("Authorization")
@@ -39,10 +33,9 @@ pub async fn get_my_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>
 
     let user_id = -1;
 
-    match User::get_by_id(user_id, &mut *connection).await {
-        Ok(user) => Ok(Json(json!(user))),
-        Err(_) => return Err(StatusCode::UNAUTHORIZED),
-    }
+    let user = UserFullDetail::get_by_id(user_id, &mut *connection).await?;
+
+    Ok(Json(json!(user)))
 }
 
 pub async fn get_my_result(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
@@ -52,19 +45,12 @@ pub async fn get_my_result(State(pool): State<QuizBankPool>) -> Result<Json<Valu
 pub async fn get_user_info(
     State(pool): State<QuizBankPool>,
     Path(id): Path<String>,
-) -> Result<Json<Value>, StatusCode> {
-    let mut connection = match pool.get_connection().await {
-        Ok(connection) => connection,
-        Err(_) => {
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
+) -> Result<Json<Value>, ControllerError> {
+    let mut connection = pool.get_connection().await?;
 
     let id: i32 = id.parse().unwrap_or(-1);
-    match UserMinimal::get_by_id(id, &mut *connection).await {
-        Ok(user) => Ok(Json(json!(user))),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-    }
+    let user = UserPubInfo::get_by_id(id, &mut *connection).await?;
+    Ok(Json(json!(user)))
 }
 
 pub async fn get_user_results(

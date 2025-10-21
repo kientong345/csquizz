@@ -1,6 +1,6 @@
 use axum::{routing::get, Router};
 
-use crate::{database::pool::QuizBankPool, services::categories::get_categories};
+use crate::{controller::categories::get_categories, database::pool::QuizBankPool};
 
 pub fn create_route(pool: QuizBankPool) -> Router {
     Router::new()

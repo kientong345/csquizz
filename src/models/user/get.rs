@@ -1,16 +1,17 @@
 use sqlx::PgConnection;
 
 use crate::models::{
+    error::ModelError,
     quiz::QuizInfo,
     result::QuizResultSummary,
-    user::{FetchedUser, User, UserMinimal, UserRole},
+    user::{FetchedUser, UserFullDetail, UserPubInfo, UserRole},
 };
 
-impl UserMinimal {
+impl UserPubInfo {
     pub async fn get_by_id(
         id: i32,
         connection: &mut PgConnection,
-    ) -> Result<UserMinimal, sqlx::Error> {
+    ) -> Result<UserPubInfo, ModelError> {
         let fetched_user = sqlx::query_as!(
             FetchedUser,
             r#"SELECT id , display_name, avatar_url, email, role AS "role: UserRole", password_hash, google_id
@@ -24,7 +25,7 @@ impl UserMinimal {
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
-        Ok(UserMinimal {
+        Ok(UserPubInfo {
             id: fetched_user.id,
             display_name: fetched_user.display_name,
             avatar_url: fetched_user.avatar_url,
@@ -35,8 +36,11 @@ impl UserMinimal {
     }
 }
 
-impl User {
-    pub async fn get_by_id(id: i32, connection: &mut PgConnection) -> Result<User, sqlx::Error> {
+impl UserFullDetail {
+    pub async fn get_by_id(
+        id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<UserFullDetail, ModelError> {
         let fetched_user = sqlx::query_as!(
             FetchedUser,
             r#"SELECT id , display_name, avatar_url, email, role AS "role: UserRole", password_hash, google_id
@@ -50,7 +54,7 @@ impl User {
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
-        Ok(User::create_from(
+        Ok(UserFullDetail::create_from(
             fetched_user,
             quiz_created_count,
             quiz_completed_count,
@@ -60,7 +64,7 @@ impl User {
     pub async fn get_by_email(
         email: &str,
         connection: &mut PgConnection,
-    ) -> Result<User, sqlx::Error> {
+    ) -> Result<UserFullDetail, ModelError> {
         let fetched_user = sqlx::query_as!(
             FetchedUser,
             r#"SELECT id , display_name, avatar_url, email, role AS "role: UserRole", password_hash, google_id
@@ -74,7 +78,7 @@ impl User {
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
-        Ok(User::create_from(
+        Ok(UserFullDetail::create_from(
             fetched_user,
             quiz_created_count,
             quiz_completed_count,
@@ -88,15 +92,15 @@ mod tests {
 
     use crate::{
         database::load_sample,
-        models::user::{User, UserMinimal, UserRole},
+        models::user::{UserFullDetail, UserPubInfo, UserRole},
     };
 
     #[sqlx::test(migrations = "./migrations")]
     async fn test_get_minimal_users(mut conn: PoolConnection<Postgres>) {
         load_sample(&mut conn).await;
 
-        let user1 = UserMinimal::get_by_id(1, &mut conn).await.unwrap();
-        let user2 = UserMinimal::get_by_id(2, &mut conn).await.unwrap();
+        let user1 = UserPubInfo::get_by_id(1, &mut conn).await.unwrap();
+        let user2 = UserPubInfo::get_by_id(2, &mut conn).await.unwrap();
 
         assert_eq!(user1.display_name, "bocchi_the_dev".to_string());
         assert_eq!(user1.quiz_completed_count, 0);
@@ -108,8 +112,8 @@ mod tests {
     async fn test_get_users(mut conn: PoolConnection<Postgres>) {
         load_sample(&mut conn).await;
 
-        let user1 = User::get_by_id(1, &mut conn).await.unwrap();
-        let user2 = User::get_by_id(2, &mut conn).await.unwrap();
+        let user1 = UserFullDetail::get_by_id(1, &mut conn).await.unwrap();
+        let user2 = UserFullDetail::get_by_id(2, &mut conn).await.unwrap();
 
         assert_eq!(user1.google_id, None);
         assert_eq!(user1.email, "bocchi345@gmail.com".to_string());

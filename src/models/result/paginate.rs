@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
 use crate::models::{
+    error::ModelError,
     pagination::{Page, Paginate},
     question::{paginate::QuestionQuery, Question},
     result::{FetchedAnswer, QuestionAnswerResult, QuizResultSummary},
@@ -27,7 +28,7 @@ impl Paginate<QuizResultSummaryQuery> for QuizResultSummary {
     async fn page(
         query: &QuizResultSummaryQuery,
         connection: &mut PgConnection,
-    ) -> Result<Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, ModelError> {
         let total_items = QuizResultSummary::count_by_user_id(query.user_id, connection).await?;
         let offset = (query.page.saturating_sub(1)) * query.size;
 
@@ -50,7 +51,7 @@ impl FetchedAnswer {
     async fn get_by_result_id(
         result_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<HashMap<i32, Vec<FetchedAnswer>>, sqlx::Error> {
+    ) -> Result<HashMap<i32, Vec<FetchedAnswer>>, ModelError> {
         // HashMap<question_id, Vec<FetchedAnswer>
         let fetched_answers = sqlx::query_as!(
             FetchedAnswer,
@@ -78,7 +79,7 @@ impl Paginate<QuestionAnswerResultQuery> for QuestionAnswerResult {
     async fn page(
         query: &QuestionAnswerResultQuery,
         connection: &mut PgConnection,
-    ) -> Result<Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, ModelError> {
         let question_query = QuestionQuery {
             quiz_id: QuizResultSummary::get_quiz_id_from(query.result_id, connection).await?,
             page: query.page,

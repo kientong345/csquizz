@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
+use crate::models::error::ModelError;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Page<T> {
     pub items: Vec<T>,
@@ -26,7 +28,7 @@ impl<T> Page<T> {
 
 #[allow(async_fn_in_trait)]
 pub trait Paginate<Q>: Serialize + Sized {
-    async fn page(query: &Q, connection: &mut PgConnection) -> Result<Page<Self>, sqlx::Error>;
+    async fn page(query: &Q, connection: &mut PgConnection) -> Result<Page<Self>, ModelError>;
 }
 
 #[derive(Debug, Deserialize, Serialize)]

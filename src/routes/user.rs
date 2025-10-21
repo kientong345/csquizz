@@ -1,9 +1,9 @@
 use axum::{middleware, routing::get, Router};
 
 use crate::{
+    controller::users::{get_my_info, get_my_result, get_user_info, get_user_results},
     database::pool::QuizBankPool,
     middleware::auth::auth_middleware,
-    services::users::{get_my_info, get_my_result, get_user_info, get_user_results},
 };
 
 pub fn create_route(pool: QuizBankPool) -> Router {

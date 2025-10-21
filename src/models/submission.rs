@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::models::{question::post::PostQuestion, quiz::post::PostQuizInfo};
+use crate::models::{question::post::PostQuestion, quiz::post::PostQuizInfo, result::QuizResult};
 
 #[derive(Debug, Deserialize)]
 pub enum AnswerType {
@@ -20,11 +20,8 @@ pub struct Submission {
     pub answers: Vec<SubmittedAnswer>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct SubmissionResult {}
-
 impl Submission {
-    pub fn evaluate(&self) -> SubmissionResult {
+    pub fn evaluate(self) -> QuizResult {
         todo!()
     }
 }

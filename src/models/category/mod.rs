@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, PgConnection};
 
+use crate::models::error::ModelError;
+
 pub mod paginate;
 pub mod post;
 
@@ -13,7 +15,7 @@ pub struct QuizCategory {
 }
 
 impl QuizCategory {
-    pub async fn count(connection: &mut PgConnection) -> Result<i64, sqlx::Error> {
+    pub async fn count(connection: &mut PgConnection) -> Result<i64, ModelError> {
         Ok(sqlx::query_scalar("SELECT COUNT(*) FROM categories")
             .fetch_one(&mut *connection)
             .await?)
@@ -23,7 +25,7 @@ impl QuizCategory {
     pub async fn count_by_name(
         name: &str,
         connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
+    ) -> Result<i64, ModelError> {
         Ok(
             sqlx::query_scalar("SELECT COUNT(*) FROM categories WHERE name = $1")
                 .bind(name)

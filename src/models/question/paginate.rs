@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
 use crate::models::{
+    error::ModelError,
     pagination::{Page, Paginate},
     question::{AnswerOption, FetchedQuestion, Question, QuestionForm},
 };
@@ -17,7 +18,7 @@ impl FetchedQuestion {
     async fn get_by_query(
         query: &QuestionQuery,
         connection: &mut PgConnection,
-    ) -> Result<Vec<FetchedQuestion>, sqlx::Error> {
+    ) -> Result<Vec<FetchedQuestion>, ModelError> {
         let offset = (query.page.saturating_sub(1)) * query.size;
         Ok(sqlx::query_as!(
             FetchedQuestion,
@@ -33,7 +34,7 @@ impl Paginate<QuestionQuery> for Question {
     async fn page(
         query: &QuestionQuery,
         connection: &mut PgConnection,
-    ) -> Result<Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, ModelError> {
         let fetched_questions = FetchedQuestion::get_by_query(query, connection).await?;
 
         let question_ids_with_options: Vec<i32> = fetched_questions

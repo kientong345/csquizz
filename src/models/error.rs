@@ -1,0 +1,35 @@
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum ModelError {
+    #[error("database error: {0}")]
+    Sqlx(#[from] sqlx::Error),
+
+    #[error("jwt error: {0}")]
+    Jwt(#[from] jsonwebtoken::errors::Error),
+
+    #[error("bcrypt error: {0}")]
+    Bcrypt(#[from] bcrypt::BcryptError),
+
+    #[error("email already taken: {email}")]
+    EmailTaken { email: String },
+
+    #[error("email does not exist: {email}")]
+    EmailNotExist { email: String },
+
+    #[error("wrong password for email: {email}")]
+    WrongPasswordForEmail { email: String },
+}
+
+impl ModelError {
+    pub fn get_code(&self) -> u16 {
+        match self {
+            ModelError::Sqlx(_) => 50001,
+            ModelError::Jwt(_) => 50002,
+            ModelError::Bcrypt(_) => 50003,
+            ModelError::EmailTaken { .. } => 40001,
+            ModelError::EmailNotExist { .. } => 40002,
+            ModelError::WrongPasswordForEmail { .. } => 40003,
+        }
+    }
+}

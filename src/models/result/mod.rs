@@ -2,7 +2,10 @@ use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, PgConnection};
 
 use crate::{
-    models::question::{Question, QuestionForm},
+    models::{
+        error::ModelError,
+        question::{Question, QuestionForm},
+    },
     utils::vec_stringify,
 };
 
@@ -24,7 +27,7 @@ impl QuizResultSummary {
     pub async fn count_by_user_id(
         user_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
+    ) -> Result<i64, ModelError> {
         Ok(
             sqlx::query_scalar("SELECT COUNT(*) FROM results WHERE user_id = $1")
                 .bind(user_id)
@@ -36,7 +39,7 @@ impl QuizResultSummary {
     pub async fn count_distinct_by_user_id(
         user_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
+    ) -> Result<i64, ModelError> {
         Ok(
             sqlx::query_scalar("SELECT COUNT(DISTINCT user_id) FROM results WHERE user_id = $1")
                 .bind(user_id)
@@ -48,7 +51,7 @@ impl QuizResultSummary {
     pub async fn get_quiz_id_from(
         result_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<i32, sqlx::Error> {
+    ) -> Result<i32, ModelError> {
         Ok(
             sqlx::query!(r#"SELECT quiz_id FROM results WHERE id = $1"#, result_id)
                 .fetch_one(connection)
@@ -129,7 +132,7 @@ impl QuestionAnswerResult {
     pub async fn count_by_result_id(
         result_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
+    ) -> Result<i64, ModelError> {
         Ok(
             sqlx::query_scalar("SELECT COUNT(*) FROM user_answers WHERE result_id = $1")
                 .bind(result_id)
@@ -169,6 +172,12 @@ impl QuestionAnswerResult {
             answer,
         })
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct QuizResult {
+    pub summary: QuizResultSummary,
+    pub result: Vec<QuestionAnswerResult>,
 }
 
 #[derive(Default, Debug, FromRow)]

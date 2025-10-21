@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, QueryBuilder};
 
 use crate::models::{
+    error::ModelError,
     pagination::{Page, Paginate},
     quiz::QuizInfo,
 };
@@ -61,7 +62,7 @@ impl Paginate<QuizQuery> for QuizInfo {
     async fn page(
         query: &QuizQuery,
         connection: &mut PgConnection,
-    ) -> Result<Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, ModelError> {
         let mut count_builder: QueryBuilder<sqlx::Postgres> = QueryBuilder::new(
             "SELECT count(q.id) FROM quizzes AS q JOIN categories AS c ON q.category = c.id",
         );

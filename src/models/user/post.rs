@@ -2,18 +2,18 @@ use sqlx::PgConnection;
 
 use crate::models::{
     auth::SignupMethod,
-    user::{FetchedUser, User, UserRole},
+    error::ModelError,
+    user::{FetchedUser, UserFullDetail, UserRole},
 };
 
-impl User {
+impl UserFullDetail {
     pub async fn create(
         signup_method: SignupMethod,
         connection: &mut PgConnection,
-    ) -> Result<User, sqlx::Error> {
+    ) -> Result<UserFullDetail, ModelError> {
         match signup_method {
             SignupMethod::WithPassword(registration) => {
-                let password_hash = bcrypt::hash(registration.password, bcrypt::DEFAULT_COST)
-                    .expect("hashing failed");
+                let password_hash = bcrypt::hash(registration.password, bcrypt::DEFAULT_COST)?;
 
                 let fetched_user = sqlx::query_as!(
                     FetchedUser,
@@ -26,7 +26,7 @@ impl User {
                 .fetch_one(connection)
                 .await?;
 
-                Ok(User::create_from(fetched_user, 0, 0))
+                Ok(UserFullDetail::create_from(fetched_user, 0, 0))
             }
             SignupMethod::OAuth(oauth_payload) => {
                 let fetched_user = sqlx::query_as!(
@@ -40,7 +40,7 @@ impl User {
                 .fetch_one(connection)
                 .await?;
 
-                Ok(User::create_from(fetched_user, 0, 0))
+                Ok(UserFullDetail::create_from(fetched_user, 0, 0))
             }
         }
     }

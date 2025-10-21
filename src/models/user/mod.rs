@@ -4,7 +4,7 @@ use sqlx::{
     PgConnection,
 };
 
-use crate::models::auth::LoginForm;
+use crate::models::{auth::LoginForm, error::ModelError};
 
 pub mod get;
 pub mod paginate;
@@ -18,7 +18,7 @@ pub enum OrderType {
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
-pub struct UserMinimal {
+pub struct UserPubInfo {
     pub id: i32,
     pub display_name: String,
     pub avatar_url: Option<String>,
@@ -44,21 +44,21 @@ impl ToString for UserRole {
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
-pub struct User {
-    pub pub_info: UserMinimal,
+pub struct UserFullDetail {
+    pub pub_info: UserPubInfo,
     pub email: String,
     pub password_hash: Option<String>,
     pub google_id: Option<String>,
 }
 
-impl User {
+impl UserFullDetail {
     fn create_from(
         fetched_user: FetchedUser,
         quiz_created_count: i64,
         quiz_completed_count: i64,
-    ) -> User {
-        User {
-            pub_info: UserMinimal {
+    ) -> UserFullDetail {
+        UserFullDetail {
+            pub_info: UserPubInfo {
                 id: fetched_user.id,
                 display_name: fetched_user.display_name,
                 avatar_url: fetched_user.avatar_url,
@@ -72,7 +72,7 @@ impl User {
         }
     }
 
-    pub async fn count(connection: &mut PgConnection) -> Result<i64, sqlx::Error> {
+    pub async fn count(connection: &mut PgConnection) -> Result<i64, ModelError> {
         Ok(sqlx::query_scalar("SELECT COUNT(*) FROM users")
             .fetch_one(connection)
             .await?)
@@ -81,7 +81,7 @@ impl User {
     pub async fn is_email_exist(
         email: &str,
         connection: &mut PgConnection,
-    ) -> Result<bool, sqlx::Error> {
+    ) -> Result<bool, ModelError> {
         Ok(sqlx::query_scalar!(
             r#"SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)"#,
             email
@@ -94,13 +94,13 @@ impl User {
     pub async fn validate_login(
         login_form: &LoginForm,
         connection: &mut PgConnection,
-    ) -> Result<User, sqlx::Error> {
-        let user = User::get_by_email(&login_form.email, connection).await?;
+    ) -> Result<UserFullDetail, ModelError> {
+        let user = UserFullDetail::get_by_email(&login_form.email, connection).await?;
         let hash = user.password_hash.as_deref().unwrap_or("");
         if bcrypt::verify(&login_form.password, hash).unwrap_or(false) {
             Ok(user)
         } else {
-            Err(sqlx::Error::RowNotFound)
+            Err(ModelError::WrongPasswordForEmail { email: user.email })
         }
     }
 }

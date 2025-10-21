@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::Type, PgConnection};
 
+use crate::models::error::ModelError;
+
 pub mod get;
 pub mod paginate;
 pub mod post;
@@ -39,7 +41,7 @@ impl Question {
     pub async fn count_by_quiz_id(
         quiz_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<i64, sqlx::Error> {
+    ) -> Result<i64, ModelError> {
         Ok(
             sqlx::query_scalar("SELECT COUNT(*) FROM questions WHERE quiz_id = $1")
                 .bind(quiz_id)

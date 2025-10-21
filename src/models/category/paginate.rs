@@ -3,6 +3,7 @@ use sqlx::PgConnection;
 
 use crate::models::{
     category::QuizCategory,
+    error::ModelError,
     pagination::{Page, Paginate},
 };
 
@@ -16,7 +17,7 @@ impl Paginate<QuizCategoryQuery> for QuizCategory {
     async fn page(
         query: &QuizCategoryQuery,
         connection: &mut PgConnection,
-    ) -> Result<Page<Self>, sqlx::Error> {
+    ) -> Result<Page<Self>, ModelError> {
         let total_items = QuizCategory::count(connection).await?;
         let offset = (query.page.saturating_sub(1)) * query.size;
 

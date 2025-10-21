@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use sqlx::{prelude::FromRow, PgConnection};
 
-use crate::models::question::AnswerOption;
+use crate::models::{error::ModelError, question::AnswerOption};
 
 #[derive(Debug, FromRow)]
 struct FetchedAnswerOption {
@@ -15,7 +15,7 @@ impl AnswerOption {
     pub async fn get_by_question_ids(
         question_ids: &[i32],
         connection: &mut PgConnection,
-    ) -> Result<HashMap<i32, Vec<AnswerOption>>, sqlx::Error> {
+    ) -> Result<HashMap<i32, Vec<AnswerOption>>, ModelError> {
         if question_ids.is_empty() {
             return Ok(HashMap::new());
         }

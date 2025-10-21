@@ -1,8 +1,8 @@
 use axum::{routing::post, Router};
 
 use crate::{
+    controller::auth::{handle_login, handle_logout, handle_refresh, handle_register},
     database::pool::QuizBankPool,
-    services::auth::{handle_login, handle_logout, handle_refresh, handle_register},
 };
 
 pub fn create_route(pool: QuizBankPool) -> Router {

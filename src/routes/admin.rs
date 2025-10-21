@@ -4,10 +4,10 @@ use axum::{
 };
 
 use crate::{
-    database::pool::QuizBankPool,
-    services::quizzes::{
+    controller::quizzes::{
         add_question, create_quiz, delete_question, delete_quiz, update_question, update_quiz_info,
     },
+    database::pool::QuizBankPool,
 };
 
 pub fn create_route(pool: QuizBankPool) -> Router {

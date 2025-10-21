@@ -1,12 +1,9 @@
 use sqlx::PgConnection;
 
-use crate::models::{result::QuizResultSummary, submission::SubmissionResult};
+use crate::models::{error::ModelError, result::QuizResult};
 
-impl QuizResultSummary {
-    pub async fn create(
-        submission_result: SubmissionResult,
-        connection: &mut PgConnection,
-    ) -> Result<QuizResultSummary, sqlx::Error> {
+impl QuizResult {
+    pub async fn store(&self, connection: &mut PgConnection) -> Result<(), ModelError> {
         todo!()
     }
 }
