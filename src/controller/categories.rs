@@ -5,10 +5,12 @@ use axum::{
 use serde_json::{json, Value};
 
 use crate::{
-    controller::error::ControllerError, database::pool::QuizBankPool, models::{
+    controller::error::ControllerError,
+    database::pool::QuizBankPool,
+    models::{
         category::{paginate::QuizCategoryQuery, QuizCategory},
         pagination::Paginate,
-    }
+    },
 };
 
 pub async fn get_categories(
@@ -18,6 +20,6 @@ pub async fn get_categories(
     let mut connection = pool.get_connection().await?;
 
     let page = QuizCategory::page(&query, &mut *connection).await?;
-    
+
     Ok(Json(json!(page)))
 }

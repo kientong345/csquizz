@@ -6,10 +6,12 @@ use axum::{
 use serde_json::{json, Value};
 
 use crate::{
-    controller::error::ControllerError, database::pool::QuizBankPool, models::{
+    controller::error::ControllerError,
+    database::pool::QuizBankPool,
+    models::{
         result::paginate::QuestionAnswerResultQuery,
         user::{UserFullDetail, UserPubInfo},
-    }
+    },
 };
 
 pub async fn get_my_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, ControllerError> {

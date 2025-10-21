@@ -6,12 +6,14 @@ use axum::{
 use serde_json::{json, Value};
 
 use crate::{
-    controller::error::ControllerError, database::pool::QuizBankPool, models::{
+    controller::error::ControllerError,
+    database::pool::QuizBankPool,
+    models::{
         pagination::{PageQuery, Paginate},
         question::{paginate::QuestionQuery, Question},
         quiz::{paginate::QuizQuery, QuizInfo},
         submission::{PostQuiz, Submission},
-    }
+    },
 };
 
 pub async fn get_quizzes(
@@ -21,7 +23,7 @@ pub async fn get_quizzes(
     let mut connection = pool.get_connection().await?;
 
     let page = QuizInfo::page(&query, &mut *connection).await?;
-    
+
     Ok(Json(json!(page)))
 }
 
@@ -64,7 +66,7 @@ pub async fn submit_quiz(
     }
     let submission_result = submission.evaluate();
     let mut connection = pool.get_connection().await?;
-    
+
     submission_result.store(&mut *connection).await?;
     Ok(Json(json!(submission_result.summary.id)))
 }

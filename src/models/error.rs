@@ -19,6 +19,9 @@ pub enum ModelError {
 
     #[error("wrong password for email: {email}")]
     WrongPasswordForEmail { email: String },
+
+    #[error("invalid auth request: {0}")]
+    InvalidAuthRequest(String),
 }
 
 impl ModelError {
@@ -30,6 +33,7 @@ impl ModelError {
             ModelError::EmailTaken { .. } => 40001,
             ModelError::EmailNotExist { .. } => 40002,
             ModelError::WrongPasswordForEmail { .. } => 40003,
+            ModelError::InvalidAuthRequest(_) => 40004,
         }
     }
 }

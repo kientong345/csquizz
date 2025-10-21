@@ -1,7 +1,10 @@
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sqlx::PgConnection;
 
-use crate::models::{error::ModelError, user::UserFullDetail};
+use crate::{
+    models::{error::ModelError, user::UserFullDetail},
+    utils::validate_email_name,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct Registration {
@@ -11,8 +14,15 @@ pub struct Registration {
 }
 
 impl Registration {
-    pub fn is_valid(&self) -> bool {
-        true
+    pub fn validate(&self) -> Result<&Self, ModelError> {
+        if let Err(e) = validate_email_name(&self.email) {
+            return Err(ModelError::InvalidAuthRequest(format!(
+                "Invalid email name: {}",
+                &e
+            )));
+        }
+
+        Ok(self)
     }
 }
 
@@ -23,8 +33,15 @@ pub struct LoginForm {
 }
 
 impl LoginForm {
-    pub fn is_valid(&self) -> bool {
-        true
+    pub fn validate(&self) -> Result<&Self, ModelError> {
+        if let Err(e) = validate_email_name(&self.email) {
+            return Err(ModelError::InvalidAuthRequest(format!(
+                "Invalid email name: {}",
+                &e
+            )));
+        }
+
+        Ok(self)
     }
 }
 

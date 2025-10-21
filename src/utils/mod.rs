@@ -5,3 +5,7 @@ pub fn vec_stringify<T: ToString>(vec: Vec<T>) -> Vec<String> {
     }
     ret
 }
+
+pub fn validate_email_name(email: &str) -> Result<(), String> {
+    Ok(())
+}

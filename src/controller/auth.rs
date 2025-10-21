@@ -22,11 +22,7 @@ pub async fn handle_register(
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
     let mut connection = pool.start_transaction().await?;
 
-    if !registration.is_valid() {
-        return Err(ControllerError::InvalidRegistration(String::from(
-            "email, display_name or password is invalid",
-        )));
-    }
+    registration.validate()?;
 
     let user: UserFullDetail = AuthenticatedUser::register(registration, &mut connection)
         .await?
@@ -59,11 +55,7 @@ pub async fn handle_login(
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
     let mut connection = pool.get_connection().await?;
 
-    if !login_form.is_valid() {
-        return Err(ControllerError::InvalidLoginForm(String::from(
-            "email, display_name or password is invalid",
-        )));
-    }
+    login_form.validate()?;
 
     let user: UserFullDetail = AuthenticatedUser::login(login_form, &mut *connection)
         .await?
