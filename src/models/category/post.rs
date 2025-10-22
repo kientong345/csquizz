@@ -11,7 +11,7 @@ pub struct PostQuizCategory {
 }
 
 impl QuizCategory {
-    pub async fn create(
+    pub async fn create_from(
         data: PostQuizCategory,
         connection: &mut PgConnection,
     ) -> Result<QuizCategory, ModelError> {
@@ -43,7 +43,7 @@ mod tests {
             description: Some(String::from("An operating system (OS) is system software that manages computer hardware and software resources, and provides common services for computer programs.")),
         };
 
-        let category = QuizCategory::create(data, &mut conn).await.unwrap();
+        let category = QuizCategory::create_from(data, &mut conn).await.unwrap();
 
         assert_eq!(category.name, "Operating System".to_string());
         assert_eq!(category.image_url, Some(String::from("https://www.telecomreviewafrica.com/wp-content/uploads/2019/12/Operating_systemsThe_heart_of_smartphones_intro.jpg")));

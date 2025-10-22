@@ -54,7 +54,7 @@ impl UserFullDetail {
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
-        Ok(UserFullDetail::create_from(
+        Ok(UserFullDetail::build_from(
             fetched_user,
             quiz_created_count,
             quiz_completed_count,
@@ -78,7 +78,7 @@ impl UserFullDetail {
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
-        Ok(UserFullDetail::create_from(
+        Ok(UserFullDetail::build_from(
             fetched_user,
             quiz_created_count,
             quiz_completed_count,

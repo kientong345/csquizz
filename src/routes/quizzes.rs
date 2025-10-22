@@ -12,7 +12,7 @@ pub fn create_route(pool: QuizBankPool) -> Router {
     Router::new()
         .route("/api/quizzes", get(get_quizzes))
         .route("/api/quizzes/{:id}", get(get_quiz_info))
-        .route("/api/quizzes/{:id}/questions", get(get_question_page))
         .route("/api/quizzes/{:id}/submit", post(submit_quiz))
+        .route("/api/questions", get(get_question_page))
         .with_state(pool)
 }

@@ -7,7 +7,7 @@ use crate::models::{
 };
 
 impl UserFullDetail {
-    pub async fn create(
+    pub async fn create_from(
         signup_method: SignupMethod,
         connection: &mut PgConnection,
     ) -> Result<UserFullDetail, ModelError> {
@@ -26,7 +26,7 @@ impl UserFullDetail {
                 .fetch_one(connection)
                 .await?;
 
-                Ok(UserFullDetail::create_from(fetched_user, 0, 0))
+                Ok(UserFullDetail::build_from(fetched_user, 0, 0))
             }
             SignupMethod::OAuth(oauth_payload) => {
                 let fetched_user = sqlx::query_as!(
@@ -40,7 +40,7 @@ impl UserFullDetail {
                 .fetch_one(connection)
                 .await?;
 
-                Ok(UserFullDetail::create_from(fetched_user, 0, 0))
+                Ok(UserFullDetail::build_from(fetched_user, 0, 0))
             }
         }
     }

@@ -16,7 +16,7 @@ pub struct PostQuizInfo {
 }
 
 impl QuizInfo {
-    pub async fn create(
+    pub async fn create_from(
         data: PostQuizInfo,
         connection: &mut PgConnection,
     ) -> Result<QuizInfo, ModelError> {

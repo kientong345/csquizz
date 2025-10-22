@@ -56,6 +56,6 @@ impl Paginate<QuestionQuery> for Question {
 
         let total_items = Question::count_by_quiz_id(query.quiz_id, connection).await?;
 
-        Ok(Page::create_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, query.size))
     }
 }

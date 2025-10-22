@@ -52,6 +52,6 @@ impl Paginate<UserQuery> for UserPubInfo {
             .fetch_all(connection)
             .await?;
 
-        Ok(Page::create_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, query.size))
     }
 }

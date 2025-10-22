@@ -9,7 +9,7 @@ use crate::{
     controller::error::ControllerError,
     database::pool::QuizBankPool,
     models::{
-        pagination::{PageQuery, Paginate},
+        pagination::Paginate,
         question::{paginate::QuestionQuery, Question},
         quiz::{paginate::QuizQuery, QuizInfo},
         submission::{PostQuiz, Submission},
@@ -40,18 +40,9 @@ pub async fn get_quiz_info(
 
 pub async fn get_question_page(
     State(pool): State<QuizBankPool>,
-    Path(id): Path<String>,
-    Query(query): Query<PageQuery>,
+    Query(query): Query<QuestionQuery>,
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.get_connection().await?;
-
-    let quiz_id: i32 = id.parse().unwrap_or(-1);
-    let query = QuestionQuery {
-        quiz_id,
-        page: query.page,
-        size: query.size,
-    };
-
     let page = Question::page(&query, &mut *connection).await?;
     Ok(Json(json!(page)))
 }
@@ -77,9 +68,11 @@ pub async fn create_quiz(
 ) -> Result<(), ControllerError> {
     let mut connection = pool.start_transaction().await?;
 
-    let new_quiz = QuizInfo::create(data.info, &mut connection).await?;
+    QuizInfo::create_from(data.info, &mut connection).await?;
 
-    Question::create(new_quiz.id, data.questions, &mut connection).await?;
+    for question in data.questions {
+        Question::create_from(question, &mut connection).await?;
+    }
 
     connection.commit().await?;
 

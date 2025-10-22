@@ -141,7 +141,7 @@ impl QuestionAnswerResult {
         )
     }
 
-    fn create_from(
+    fn build_from(
         fetched_question: Question,
         fetched_answers: Vec<FetchedAnswer>,
     ) -> Result<QuestionAnswerResult, &'static str> {

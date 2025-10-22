@@ -137,9 +137,9 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
 -   **Endpoint:** `GET /api/quizzes/{id}`
 -   **Success Response:** `200 OK` (Nội dung không đổi)
 
-### 2.3. Lấy chi tiết một bài quiz (để làm bài)
+### 2.3. Lấy các question trong 1 quiz (để làm bài)
 
--   **Endpoint:** `GET /api/quizzes/{id}/questions`
+-   **Endpoint:** `GET /api/questions`
 -   **Success Response:** `200 OK` (Nội dung không đổi)
 
 ### 2.4. Nộp bài và chấm điểm

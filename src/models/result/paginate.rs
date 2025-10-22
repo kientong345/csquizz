@@ -43,7 +43,7 @@ impl Paginate<QuizResultSummaryQuery> for QuizResultSummary {
         .fetch_all(connection)
         .await?;
 
-        Ok(Page::create_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, query.size))
     }
 }
 
@@ -94,13 +94,13 @@ impl Paginate<QuestionAnswerResultQuery> for QuestionAnswerResult {
             .into_iter()
             .map(|q| {
                 let answers = answers_map.remove(&q.id).unwrap_or_default();
-                QuestionAnswerResult::create_from(q, answers).unwrap()
+                QuestionAnswerResult::build_from(q, answers).unwrap()
             })
             .collect();
 
         let total_items =
             QuestionAnswerResult::count_by_result_id(query.result_id, connection).await?;
 
-        Ok(Page::create_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, query.size))
     }
 }

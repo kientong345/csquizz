@@ -52,7 +52,7 @@ pub struct UserFullDetail {
 }
 
 impl UserFullDetail {
-    fn create_from(
+    fn build_from(
         fetched_user: FetchedUser,
         quiz_created_count: i64,
         quiz_completed_count: i64,

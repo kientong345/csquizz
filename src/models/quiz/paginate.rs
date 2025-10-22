@@ -84,6 +84,6 @@ impl Paginate<QuizQuery> for QuizInfo {
 
         let items: Vec<QuizInfo> = query_builder.build_query_as().fetch_all(connection).await?;
 
-        Ok(Page::create_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, query.size))
     }
 }

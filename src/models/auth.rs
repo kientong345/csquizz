@@ -144,7 +144,7 @@ impl AuthenticatedUser {
             });
         }
         let signup_method = SignupMethod::WithPassword(registration);
-        let user = UserFullDetail::create(signup_method, connection).await?;
+        let user = UserFullDetail::create_from(signup_method, connection).await?;
         Ok(AuthenticatedUser(user))
     }
 
@@ -162,7 +162,7 @@ impl AuthenticatedUser {
     ) -> Result<AuthenticatedUser, ModelError> {
         let user = if !UserFullDetail::is_email_exist(&oauth.email, connection).await? {
             let signup_method = SignupMethod::OAuth(oauth);
-            UserFullDetail::create(signup_method, connection).await?
+            UserFullDetail::create_from(signup_method, connection).await?
         } else {
             UserFullDetail::get_by_email(&oauth.email, connection).await?
         };

@@ -11,7 +11,7 @@ pub struct Page<T> {
 }
 
 impl<T> Page<T> {
-    pub fn create_from(items: Vec<T>, total_items: i64, page_size: i64) -> Self {
+    pub fn build_from(items: Vec<T>, total_items: i64, page_size: i64) -> Self {
         let total_pages = if page_size > 0 {
             (total_items as f64 / page_size as f64).ceil() as i64
         } else {
@@ -29,10 +29,4 @@ impl<T> Page<T> {
 #[allow(async_fn_in_trait)]
 pub trait Paginate<Q>: Serialize + Sized {
     async fn page(query: &Q, connection: &mut PgConnection) -> Result<Page<Self>, ModelError>;
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct PageQuery {
-    pub page: i64,
-    pub size: i64,
 }
