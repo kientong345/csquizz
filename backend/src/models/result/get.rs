@@ -9,7 +9,7 @@ impl QuizResultSummary {
     ) -> Result<QuizResultSummary, ModelError> {
         Ok(sqlx::query_as!(
             QuizResultSummary,
-            r#"SELECT r.id, q.title AS quiz_title, r.score, r.total_questions, r.correct_answers
+            r#"SELECT r.id, r.quiz_id, q.title AS quiz_title, r.score, r.total_questions, r.correct_answers
             FROM results AS r JOIN quizzes AS q ON r.quiz_id = q.id WHERE r.id = $1"#,
             id
         )

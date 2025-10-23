@@ -34,7 +34,7 @@ impl Paginate<QuizResultSummaryQuery> for QuizResultSummary {
 
         let items = sqlx::query_as!(
             QuizResultSummary,
-            r#"SELECT r.id, q.title AS quiz_title, r.score, r.total_questions, r.correct_answers
+            r#"SELECT r.id, r.quiz_id, q.title AS quiz_title, r.score, r.total_questions, r.correct_answers
             FROM results AS r JOIN quizzes AS q ON r.quiz_id = q.id WHERE r.user_id = $1 LIMIT $2 OFFSET $3"#,
             query.user_id,
             query.size,

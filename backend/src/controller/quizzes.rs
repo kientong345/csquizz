@@ -49,16 +49,22 @@ pub async fn get_question_page(
 
 pub async fn submit_quiz(
     State(pool): State<QuizBankPool>,
-    Path(id): Path<String>,
     Json(submission): Json<Submission>,
 ) -> Result<Json<Value>, ControllerError> {
-    if id.parse().unwrap_or(-1) != submission.user_id {
-        // return Err(StatusCode::BAD_REQUEST);
-    }
-    let submission_result = submission.evaluate();
-    let mut connection = pool.get_connection().await?;
+    let mut connection = pool.start_transaction().await?;
+    let submission_result = submission.evaluate(&mut *connection).await?;
+    connection.commit().await?;
+    Ok(Json(json!(submission_result)))
+}
 
-    submission_result.store(&mut *connection).await?;
+pub async fn submit_quiz_and_store_result(
+    State(pool): State<QuizBankPool>,
+    Json(submission): Json<Submission>,
+) -> Result<Json<Value>, ControllerError> {
+    let mut connection = pool.start_transaction().await?;
+    let submission_result = submission.evaluate(&mut *connection).await?;
+    submission_result.store(-1, &mut *connection).await?;
+    connection.commit().await?;
     Ok(Json(json!(submission_result.summary.id)))
 }
 

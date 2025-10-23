@@ -16,6 +16,7 @@ pub mod post;
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizResultSummary {
     pub id: i32,
+    pub quiz_id: Option<i32>,
     pub quiz_title: String,
     pub score: f64,
     pub total_questions: i32,
@@ -174,7 +175,7 @@ impl QuestionAnswerResult {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct QuizResult {
     pub summary: QuizResultSummary,
     pub result: Vec<QuestionAnswerResult>,
