@@ -18,27 +18,33 @@
         <!-- Quiz Topic Grid -->
         <g transform="translate(50, 150)">
             <!-- Row 1 -->
-            <rect width="220" height="120" rx="10" fill="#fff" stroke="#ccc"/>
-            <text x="20" y="30" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 1</text>
-            <text x="20" y="60" font-family="Arial" font-size="12" fill="#666">Mô tả ngắn về chủ đề này.</text>
-            <rect x="70" y="85" width="80" height="25" rx="5" fill="#4CAF50"/>
-            <text x="85" y="102" font-family="Arial" font-size="12" fill="#fff">Bắt đầu</text>
+            <rect width="220" height="180" rx="10" fill="#fff" stroke="#ccc"/>
+            <rect x="10" y="10" width="200" height="80" fill="#e5e7eb" rx="5"/>
+            <text x="20" y="115" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 1</text>
+            <text x="20" y="135" font-family="Arial" font-size="12" fill="#666">Mô tả ngắn...</text>
+            <rect x="70" y="150" width="80" height="25" rx="5" fill="#4CAF50"/>
+            <text x="85" y="167" font-family="Arial" font-size="12" fill="#fff">Bắt đầu</text>
 
-            <rect x="240" width="220" height="120" rx="10" fill="#fff" stroke="#ccc"/>
-            <text x="260" y="30" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 2</text>
+            <rect x="240" width="220" height="180" rx="10" fill="#fff" stroke="#ccc"/>
+            <rect x="250" y="10" width="200" height="80" fill="#e5e7eb" rx="5"/>
+            <text x="260" y="115" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 2</text>
 
-            <rect x="480" width="220" height="120" rx="10" fill="#fff" stroke="#ccc"/>
-            <text x="500" y="30" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 3</text>
+            <rect x="480" width="220" height="180" rx="10" fill="#fff" stroke="#ccc"/>
+            <rect x="490" y="10" width="200" height="80" fill="#e5e7eb" rx="5"/>
+            <text x="500" y="115" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 3</text>
 
             <!-- Row 2 -->
-            <rect y="140" width="220" height="120" rx="10" fill="#fff" stroke="#ccc"/>
-            <text x="20" y="170" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 4</text>
+            <rect y="200" width="220" height="180" rx="10" fill="#fff" stroke="#ccc"/>
+            <rect x="10" y="210" width="200" height="80" fill="#e5e7eb" rx="5"/>
+            <text x="20" y="315" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 4</text>
 
-            <rect x="240" y="140" width="220" height="120" rx="10" fill="#fff" stroke="#ccc"/>
-            <text x="260" y="170" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 5</text>
+            <rect x="240" y="200" width="220" height="180" rx="10" fill="#fff" stroke="#ccc"/>
+            <rect x="250" y="210" width="200" height="80" fill="#e5e7eb" rx="5"/>
+            <text x="260" y="315" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 5</text>
 
-            <rect x="480" y="140" width="220" height="120" rx="10" fill="#fff" stroke="#ccc"/>
-            <text x="500" y="170" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 6</text>
+            <rect x="480" y="200" width="220" height="180" rx="10" fill="#fff" stroke="#ccc"/>
+            <rect x="490" y="210" width="200" height="80" fill="#e5e7eb" rx="5"/>
+            <text x="500" y="315" font-family="Arial" font-size="16" font-weight="bold">Chủ đề 6</text>
         </g>
 
         <!-- Pagination -->

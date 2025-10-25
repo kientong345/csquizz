@@ -7,7 +7,7 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
 ### 1.1. Thanh điều hướng (Navbar)
 - **Vị trí:** Trên cùng của tất cả các trang.
 - **Thành phần:**
-  - **Bên trái:** Logo / Tên ứng dụng ("Quiz-Bank").
+  - **Bên trái:** Logo dạng ảnh SVG của "CSQuizz".
   - **Bên phải (chưa đăng nhập):**
     - Nút "Đăng nhập" (Login).
     - Nút "Đăng ký" (Sign Up).
@@ -30,7 +30,7 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
 ### 2.1. Trang chủ (Home Page)
 - **URL:** `/`
 - **File:** `app/page.tsx`
-- **Mô tả:** Hiển thị danh sách các chủ đề quiz có sẵn để người dùng lựa chọn.
+- **Mô tả:** Hiển thị danh sách các chủ đề quiz (categories) có sẵn để người dùng lựa chọn.
 - **Bố cục:**
   - **Header:** Navbar chung.
   - **Main Content:**
@@ -38,15 +38,32 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
       - Tiêu đề lớn: "Luyện tập kiến thức Khoa học máy tính".
       - Thanh tìm kiếm để lọc các chủ đề quiz.
     - **Phần dưới:**
-      - Lưới (Grid) các thẻ (Card) chủ đề quiz.
-      - Mỗi thẻ `QuizItem` bao gồm:
+      - Lưới (Grid) các thẻ (Card) chủ đề quiz, được render từ component `QuizCategory`.
+      - Mỗi thẻ `QuizCategory` bao gồm:
+        - Ảnh đại diện cho chủ đề.
         - Tên chủ đề (ví dụ: "Data Structures", "Algorithms").
         - Mô tả ngắn.
-        - Nút "Bắt đầu" (Start) -> điều hướng đến `/quiz/[id]`.
-      - Phân trang (Pagination) nếu có nhiều chủ đề. (6 chủ đề mỗi trang)
+        - Nút "Bắt đầu" (Start) -> điều hướng đến `/category/[id]`.
+      - Phân trang (Pagination) nếu có nhiều chủ đề.
   - **Footer:** Footer chung.
 
-### 2.2. Trang làm Quiz (Quiz Page)
+### 2.2. Trang Danh sách Quiz (Quiz List Page)
+- **URL:** `/category/[id]`
+- **File:** `app/category/[id]/page.tsx`
+- **Mô tả:** Hiển thị danh sách các bài quiz thuộc một chủ đề cụ thể.
+- **Bố cục:**
+  - **Header:** Navbar chung.
+  - **Main Content:**
+    - **Phần trên:**
+      - Tiêu đề: "Chủ đề: [Tên chủ đề]".
+      - Thanh tìm kiếm để lọc các bài quiz trong chủ đề này.
+    - **Phần dưới:**
+      - Danh sách (List) các bài quiz.
+      - Mỗi mục trong danh sách bao gồm: Tên bài quiz, Độ khó, Số câu, Nút "Làm bài".
+      - Phân trang (Pagination) nếu có nhiều bài quiz (khoảng 10 quiz mỗi trang).
+  - **Footer:** Footer chung.
+
+### 2.3. Trang làm Quiz (Quiz Page)
 - **URL:** `/quiz/[id]`
 - **File:** `app/quiz/[id]/page.tsx`
 - **Mô tả:** Giao diện làm bài trắc nghiệm.
@@ -66,7 +83,7 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
       - Nút "Nộp bài" (Submit) -> hiển thị khi ở câu hỏi cuối cùng hoặc sau khi người dùng xác nhận.
   - **Footer:** Footer chung.
 
-### 2.3. Trang kết quả (Result Page)
+### 2.4. Trang kết quả (Result Page)
 - **URL:** `/result/[id]`
 - **File:** `app/result/[id]/page.tsx`
 - **Mô tả:** Hiển thị kết quả chi tiết sau khi người dùng nộp bài.
@@ -88,7 +105,7 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
       - Nút "Quay về trang chủ" (Back to Home).
   - **Footer:** Footer chung.
 
-### 2.4. Trang hồ sơ cá nhân (User Profile Page)
+### 2.5. Trang hồ sơ cá nhân (User Profile Page)
 - **URL:** `/profile`
 - **File:** `app/profile/page.tsx`
 - **Mô tả:** Hiển thị thông tin và lịch sử làm bài của người dùng. Yêu cầu đăng nhập.
@@ -105,7 +122,7 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
       - Các cột: Tên Quiz, Ngày làm, Điểm số, Nút "Xem lại" -> điều hướng đến `/result/[id]`.
   - **Footer:** Footer chung.
 
-### 2.5. Trang quản trị (Admin Page)
+### 2.6. Trang quản trị (Admin Page)
 - **URL:** `/admin`
 - **File:** `app/admin/page.tsx`
 - **Mô tả:** Giao diện cho quản trị viên quản lý ngân hàng câu hỏi. Yêu cầu đăng nhập với vai trò admin.
@@ -118,7 +135,7 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
     - Các cột: ID, Tên Quiz/Câu hỏi, Chủ đề, Độ khó, Hành động (Sửa, Xóa).
   - **Footer:** Footer chung.
 
-### 2.6. Trang Đăng nhập / Đăng ký (Auth Pages)
+### 2.7. Trang Đăng nhập / Đăng ký (Auth Pages)
 - **URL:** `/login`, `/register`
 - **Mô tả:** Form cho phép người dùng đăng nhập hoặc tạo tài khoản mới.
 - **Bố cục:**

@@ -10,12 +10,12 @@ Các component sẽ được xây dựng dựa trên React, Tailwind CSS và Sha
 -   **Mô tả:** Thanh điều hướng chính ở đầu trang, chứa logo, các liên kết điều hướng và thông tin người dùng/nút đăng nhập/đăng ký.
 -   **Sử dụng:** Trên tất cả các trang.
 -   **Thuộc tính chính:** `isAuthenticated` (hiển thị trạng thái đăng nhập), `user` (thông tin người dùng).
--   **Nguồn:** Custom / Kết hợp Shadcn UI (Dropdown Menu).
+-   **Nguồn:** `components/layout/Navbar.tsx`.
 
 ### 1.2. Footer
 -   **Mô tả:** Chân trang, chứa thông tin bản quyền và các liên kết phụ.
 -   **Sử dụng:** Trên tất cả các trang.
--   **Nguồn:** Custom.
+-   **Nguồn:** `components/layout/Footer.tsx`.
 
 ### 1.3. Container
 -   **Mô tả:** Component bao bọc nội dung chính của trang, giới hạn chiều rộng để nội dung dễ đọc và căn giữa.
@@ -66,10 +66,10 @@ Các component sẽ được xây dựng dựa trên React, Tailwind CSS và Sha
 -   **Sử dụng:** Hiển thị chủ đề quiz, kết quả tóm tắt.
 -   **Nguồn:** Shadcn UI.
 
-### 3.2. QuizItem Card
--   **Mô tả:** Một dạng Card cụ thể để hiển thị thông tin về một bài quiz (tên, mô tả, nút bắt đầu).
+### 3.2. QuizCategory Card
+-   **Mô tả:** Một dạng Card cụ thể để hiển thị thông tin về một chủ đề quiz (ảnh, tên, mô tả, nút bắt đầu).
 -   **Sử dụng:** Trang chủ (danh sách quiz).
--   **Nguồn:** Custom (dựa trên Shadcn UI Card).
+-   **Nguồn:** `components/features/QuizCategory.tsx`.
 
 ### 3.3. Table
 -   **Mô tả:** Bảng để hiển thị dữ liệu có cấu trúc (hàng và cột).

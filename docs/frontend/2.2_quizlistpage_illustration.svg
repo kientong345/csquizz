@@ -1,0 +1,68 @@
+
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="100%" height="100%" fill="#f0f0f0"/>
+
+    <!-- Header / Navbar -->
+    <rect width="100%" height="60" fill="#dcdcdc"/>
+    <text x="20" y="35" font-family="Arial" font-size="18" fill="#333">Quiz-Bank Logo</text>
+    <text x="700" y="35" font-family="Arial" font-size="16" fill="#333">User Name</text>
+
+    <!-- Main Content Area -->
+    <g transform="translate(0, 60)">
+        <!-- Title and Search -->
+        <text x="50" y="50" font-family="Arial" font-size="24" font-weight="bold" fill="#333">Chủ đề: Data Structures</text>
+        <rect x="50" y="80" width="700" height="40" rx="5" fill="#fff" stroke="#ccc"/>
+        <text x="60" y="105" font-family="Arial" font-size="14" fill="#999">Tìm kiếm quiz trong chủ đề này...</text>
+
+        <!-- Quiz List -->
+        <g transform="translate(50, 150)">
+            <!-- Item 1 -->
+            <rect width="700" height="60" rx="8" fill="#fff" stroke="#ccc"/>
+            <text x="20" y="35" font-family="Arial" font-size="16" font-weight="bold">Basic Data Structures</text>
+            <text x="300" y="35" font-family="Arial" font-size="12" fill="#666">Độ khó: Dễ</text>
+            <text x="450" y="35" font-family="Arial" font-size="12" fill="#666">Số câu: 10</text>
+            <rect x="580" y="18" width="100" height="25" rx="5" fill="#2196F3"/>
+            <text x="600" y="35" font-family="Arial" font-size="12" fill="#fff">Làm bài</text>
+
+            <!-- Item 2 -->
+            <rect y="70" width="700" height="60" rx="8" fill="#fff" stroke="#ccc"/>
+            <text x="20" y="105" font-family="Arial" font-size="16" font-weight="bold">Advanced Trees</text>
+            <text x="300" y="105" font-family="Arial" font-size="12" fill="#666">Độ khó: Trung bình</text>
+            <text x="450" y="105" font-family="Arial" font-size="12" fill="#666">Số câu: 15</text>
+            <rect x="580" y="88" width="100" height="25" rx="5" fill="#2196F3"/>
+            <text x="600" y="105" font-family="Arial" font-size="12" fill="#fff">Làm bài</text>
+
+            <!-- Item 3 -->
+            <rect y="140" width="700" height="60" rx="8" fill="#fff" stroke="#ccc"/>
+            <text x="20" y="175" font-family="Arial" font-size="16" font-weight="bold">Graphs &amp; Hashing</text>
+            <text x="300" y="175" font-family="Arial" font-size="12" fill="#666">Độ khó: Khó</text>
+            <text x="450" y="175" font-family="Arial" font-size="12" fill="#666">Số câu: 20</text>
+            <rect x="580" y="158" width="100" height="25" rx="5" fill="#2196F3"/>
+            <text x="600" y="175" font-family="Arial" font-size="12" fill="#fff">Làm bài</text>
+        </g>
+
+        <!-- Pagination -->
+        <g transform="translate(250, 450)">
+            <rect x="0" y="-15" width="80" height="30" rx="5" fill="#fff" stroke="#ccc"/>
+            <text x="15" y="5" font-family="Arial" font-size="14" fill="#333">Previous</text>
+
+            <rect x="90" y="-15" width="30" height="30" rx="5" fill="#2196F3"/>
+            <text x="100" y="5" font-family="Arial" font-size="14" fill="#fff">1</text>
+            
+            <rect x="130" y="-15" width="30" height="30" rx="5" fill="#fff" stroke="#ccc"/>
+            <text x="140" y="5" font-family="Arial" font-size="14" fill="#333">2</text>
+
+            <text x="170" y="5" font-family="Arial" font-size="14" fill="#333">...</text>
+
+            <rect x="190" y="-15" width="30" height="30" rx="5" fill="#fff" stroke="#ccc"/>
+            <text x="200" y="5" font-family="Arial" font-size="14" fill="#333">10</text>
+
+            <rect x="230" y="-15" width="80" height="30" rx="5" fill="#fff" stroke="#ccc"/>
+            <text x="255" y="5" font-family="Arial" font-size="14" fill="#333">Next</text>
+        </g>
+    </g>
+
+    <!-- Footer -->
+    <rect y="560" width="100%" height="40" fill="#dcdcdc"/>
+</svg>

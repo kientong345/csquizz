@@ -68,16 +68,19 @@ backend/
 ```
 frontend/
 └── csquizz-web-app/           # Thư mục gốc của ứng dụng Next.js
-    ├── public/                # Các tài nguyên tĩnh (ảnh, icon)
+    ├── public/                # Các tài nguyên tĩnh (logo, ảnh, icon)
     ├── app/                   # Các trang và layout của ứng dụng (App Router)
     ├── components/            # Các UI component có thể tái sử dụng
+    │   ├── ui/                # Component từ shadcn/ui (Button, Card, ...)
+    │   ├── layout/            # Component layout chính (Navbar, Footer)
+    │   └── features/          # Component cho các tính năng cụ thể (QuizCategory)
+    ├── constants/             # Chứa các giá trị hằng số
+    ├── hooks/                 # Chứa các custom React hooks
     ├── lib/                   # Các hàm tiện ích và client API
     ├── styles/                # Các file CSS toàn cục
     ├── types/                 # Định nghĩa kiểu dữ liệu TypeScript
     ├── package.json           # Cấu hình dự án Node.js/npm
-    ├── next.config.ts         # Cấu hình Next.js
-    ├── tsconfig.json          # Cấu hình TypeScript
-    └── ...                    # Các file cấu hình và thư mục khác
+    └── ...                    # Các file cấu hình khác
 ```
 
 </details>

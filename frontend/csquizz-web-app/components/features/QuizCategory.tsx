@@ -36,7 +36,7 @@ export default function QuizCategory({ id, name, imageUrl, description }: QuizCa
       </CardHeader>
       <div className="flex-grow" />
       <CardFooter>
-        <Link href={`/quiz/${id}`} className="w-full">
+        <Link href={`/category/${id}`} className="w-full">
           <Button className="w-full">Bắt đầu</Button>
         </Link>
       </CardFooter>
