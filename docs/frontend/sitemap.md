@@ -11,7 +11,7 @@ Tài liệu này cung cấp cái nhìn tổng quan về cấu trúc và hệ th�
     -   **Điều hướng đến:** Trang Danh sách Quiz, Trang Đăng nhập/Đăng ký.
 
 -   **Trang Danh sách Quiz (Quiz List Page)**
-    -   **URL:** `/category/[id]` (ví dụ: `/category/data-structures`)
+    -   **URL:** `/category/[slug]` (ví dụ: `/category/data-structures`)
     -   **Mô tả:** Hiển thị danh sách các **bài quiz** thuộc một chủ đề cụ thể.
     -   **Truy cập từ:** Trang chủ (khi chọn một chủ đề).
     -   **Điều hướng đến:** Trang làm Quiz.
@@ -57,7 +57,7 @@ Tài liệu này cung cấp cái nhìn tổng quan về cấu trúc và hệ th�
 
 1.  **Người dùng chưa đăng nhập:**
     -   Truy cập `/` (Trang chủ) -> Xem danh sách **chủ đề**.
-    -   Chọn chủ đề -> `/category/[id]` (Trang danh sách quiz) -> Xem danh sách **bài quiz**.
+    -   Chọn chủ đề -> `/category/[slug]` (Trang danh sách quiz) -> Xem danh sách **bài quiz**.
     -   Chọn bài quiz -> `/quiz/[id]` (Làm quiz).
     -   Nộp bài -> `/result/[id]` (Xem kết quả).
 

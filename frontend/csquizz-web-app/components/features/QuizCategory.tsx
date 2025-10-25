@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { slugify } from "@/lib/utils";
 import {
   Card,
   CardDescription,
@@ -36,7 +37,7 @@ export default function QuizCategory({ id, name, imageUrl, description }: QuizCa
       </CardHeader>
       <div className="flex-grow" />
       <CardFooter>
-        <Link href={`/category/${id}`} className="w-full">
+        <Link href={`/category/${slugify(name)}`} className="w-full">
           <Button className="w-full">Bắt đầu</Button>
         </Link>
       </CardFooter>

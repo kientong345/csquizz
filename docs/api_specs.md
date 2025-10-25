@@ -87,9 +87,9 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
 -   **Endpoint:** `GET /api/quizzes`
 -   **Mô tả:** Lấy danh sách các bài quiz có sẵn, hỗ trợ tìm kiếm và lọc.
 -   **Query Parameters:**
-    -   `title_pattern`: `string?`
-    -   `category`: `string?`
-    -   `difficulty`: `string?`
+    -   `title_pattern?`: `string`
+    -   `category?`: `string`
+    -   `difficulty?`: `string`
     -   `page`: `number`
     -   `size`: `number`
 -   **Success Response:** `200 OK` (Nội dung không đổi)
@@ -99,10 +99,10 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
             {
                 "id": "number",
                 "title": "string",
-                "description": "string?",
+                "description?": "string",
                 "category": "string",
-                "difficulty": "difficulty?" {"easy" | "medium" | "hard"},
-                "created_by": "string?"
+                "difficulty?": "difficulty" {"easy" | "medium" | "hard"},
+                "created_by?": "string"
             }
         ],
         "total_items": "number",
@@ -118,10 +118,10 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
     {
         "id": "number",
         "title": "string",
-        "description": "string?",
+        "description?": "string",
         "category": "string",
-        "difficulty": "difficulty?" {"easy" | "medium" | "hard"},
-        "created_by": "string?"
+        "difficulty?": "difficulty" {"easy" | "medium" | "hard"},
+        "created_by?": "string"
     }
     ```
 
@@ -136,8 +136,8 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
                 "id": "number",
                 "form": "question_form" {"multiple_choice" | "single_choice" | "text_input"},
                 "text": "string",
-                "image_url": "string?",
-                "explanation": "string?", // to be deleted in later versions
+                "image_url?": "string",
+                "explanation?": "string", // to be deleted in later versions
                 "options": [
                     {
                         "id": "number",

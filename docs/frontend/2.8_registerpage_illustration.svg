@@ -1,0 +1,27 @@
+
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#f0f0f0"/>
+    <rect width="100%" height="60" fill="#dcdcdc"/>
+    <text x="20" y="35" font-family="Arial" font-size="18">Quiz-Bank Logo</text>
+
+    <g transform="translate(200, 120)">
+        <rect x="0" y="0" width="400" height="380" rx="10" fill="#fff" stroke="#ccc"/>
+        <text x="150" y="50" font-family="Arial" font-size="24" font-weight="bold">Đăng ký</text>
+
+        <text x="50" y="100" font-family="Arial" font-size="16">Tên hiển thị:</text>
+        <rect x="50" y="110" width="300" height="40" rx="5" fill="#f0f0f0" stroke="#ccc"/>
+
+        <text x="50" y="170" font-family="Arial" font-size="16">Email:</text>
+        <rect x="50" y="180" width="300" height="40" rx="5" fill="#f0f0f0" stroke="#ccc"/>
+
+        <text x="50" y="240" font-family="Arial" font-size="16">Mật khẩu:</text>
+        <rect x="50" y="250" width="300" height="40" rx="5" fill="#f0f0f0" stroke="#ccc"/>
+
+        <rect x="50" y="310" width="300" height="40" rx="5" fill="#2196F3"/>
+        <text x="160" y="335" font-family="Arial" font-size="16" fill="#fff">Tạo tài khoản</text>
+
+        <text x="110" y="365" font-family="Arial" font-size="14" fill="#666">Đã có tài khoản? <tspan fill="blue">Đăng nhập</tspan></text>
+    </g>
+
+    <rect y="560" width="100%" height="40" fill="#dcdcdc"/>
+</svg>

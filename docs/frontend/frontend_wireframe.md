@@ -43,13 +43,13 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
         - Ảnh đại diện cho chủ đề.
         - Tên chủ đề (ví dụ: "Data Structures", "Algorithms").
         - Mô tả ngắn.
-        - Nút "Bắt đầu" (Start) -> điều hướng đến `/category/[id]`.
+        - Nút "Bắt đầu" (Start) -> điều hướng đến `/category/[slug]`.
       - Phân trang (Pagination) nếu có nhiều chủ đề.
   - **Footer:** Footer chung.
 
 ### 2.2. Trang Danh sách Quiz (Quiz List Page)
-- **URL:** `/category/[id]`
-- **File:** `app/category/[id]/page.tsx`
+- **URL:** `/category/[slug]`
+- **File:** `app/category/[slug]/page.tsx`
 - **Mô tả:** Hiển thị danh sách các bài quiz thuộc một chủ đề cụ thể.
 - **Bố cục:**
   - **Header:** Navbar chung.
@@ -135,21 +135,27 @@ Tài liệu này mô tả cấu trúc wireframe cho giao diện người dùng c
     - Các cột: ID, Tên Quiz/Câu hỏi, Chủ đề, Độ khó, Hành động (Sửa, Xóa).
   - **Footer:** Footer chung.
 
-### 2.7. Trang Đăng nhập / Đăng ký (Auth Pages)
-- **URL:** `/login`, `/register`
-- **Mô tả:** Form cho phép người dùng đăng nhập hoặc tạo tài khoản mới.
+### 2.7. Trang Đăng nhập (Login Page)
+- **URL:** `/login`
+- **File:** `app/login/page.tsx`
+- **Mô tả:** Form cho phép người dùng đăng nhập vào hệ thống.
 - **Bố cục:**
   - Form đơn giản ở giữa trang.
-  - **Trang Đăng nhập:**
-    - Tiêu đề "Đăng nhập".
-    - Trường nhập Email.
-    - Trường nhập Mật khẩu.
-    - Nút "Đăng nhập".
-    - Liên kết: "Chưa có tài khoản? Đăng ký ngay".
-  - **Trang Đăng ký:**
-    - Tiêu đề "Đăng ký".
-    - Trường nhập Tên.
-    - Trường nhập Email.
-    - Trường nhập Mật khẩu.
-    - Nút "Đăng ký".
-    - Liên kết: "Đã có tài khoản? Đăng nhập".
+  - Tiêu đề "Đăng nhập".
+  - Trường nhập Email.
+  - Trường nhập Mật khẩu.
+  - Nút "Đăng nhập".
+  - Liên kết: "Chưa có tài khoản? Đăng ký ngay".
+
+### 2.8. Trang Đăng ký (Register Page)
+- **URL:** `/register`
+- **File:** `app/register/page.tsx`
+- **Mô tả:** Form cho phép người dùng tạo tài khoản mới.
+- **Bố cục:**
+  - Form đơn giản ở giữa trang.
+  - Tiêu đề "Đăng ký".
+  - Trường nhập Tên hiển thị.
+  - Trường nhập Email.
+  - Trường nhập Mật khẩu.
+  - Nút "Tạo tài khoản".
+  - Liên kết: "Đã có tài khoản? Đăng nhập".
