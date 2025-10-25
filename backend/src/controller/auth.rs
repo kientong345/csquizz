@@ -17,35 +17,17 @@ use crate::{
 
 pub async fn handle_register(
     State(pool): State<QuizBankPool>,
-    jar: CookieJar,
     Json(registration): Json<Registration>,
-) -> Result<(CookieJar, Json<Value>), ControllerError> {
+) -> Result<StatusCode, ControllerError> {
     let mut connection = pool.start_transaction().await?;
 
     registration.validate()?;
 
-    let user: UserFullDetail = AuthenticatedUser::register(registration, &mut connection)
-        .await?
-        .into();
-
-    let (access_token, refresh_token) = generate_token_pair(&user, &config::secret_key());
-
-    let cookie: Cookie = Cookie::build(refresh_token)
-        .http_only(true)
-        .secure(false)
-        .same_site(SameSite::Lax)
-        .path("/")
-        .into();
+    AuthenticatedUser::register(registration, &mut connection).await?;
 
     connection.commit().await?;
 
-    Ok((
-        jar.add(cookie),
-        Json(json!({
-            "access_token": access_token,
-            "user": user
-        })),
-    ))
+    Ok(StatusCode::CREATED)
 }
 
 pub async fn handle_login(
@@ -74,7 +56,6 @@ pub async fn handle_login(
         jar.add(cookie),
         Json(json!({
             "access_token": access_token,
-            "user": user
         })),
     ))
 }

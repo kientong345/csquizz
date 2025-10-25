@@ -1,0 +1,29 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#f0f0f0"/>
+    <rect width="100%" height="60" fill="#dcdcdc"/>
+    <text x="20" y="35" font-family="Arial" font-size="18">Quiz-Bank Logo</text>
+    <g transform="translate(0, 60)">
+        <!-- Score Summary -->
+        <text x="300" y="50" font-family="Arial" font-size="24" font-weight="bold">Kết quả Quiz</text>
+        <rect x="50" y="80" width="700" height="80" rx="10" fill="#E8F5E9" stroke="#A5D6A7"/>
+        <text x="300" y="130" font-family="Arial" font-size="20">Bạn đạt 8/10 câu!</text>
+
+        <!-- Detailed Results -->
+        <g transform="translate(50, 180)">
+            <text x="0" y="20" font-family="Arial" font-size="18">Chi tiết:</text>
+            <!-- Item 1 -->
+            <rect y="40" width="700" height="60" fill="#fff" stroke="#ccc"/>
+            <text x="20" y="75" font-family="Arial" font-size="14">Câu 1: Đáp án của bạn: A. <tspan fill="green">Đúng</tspan></text>
+            <!-- Item 2 -->
+            <rect y="110" width="700" height="60" fill="#fff" stroke="#ccc"/>
+            <text x="20" y="145" font-family="Arial" font-size="14">Câu 2: Đáp án của bạn: C. <tspan fill="red">Sai</tspan> (Đáp án đúng: B)</text>
+        </g>
+
+        <!-- Actions -->
+        <rect x="250" y="450" width="140" height="40" rx="5" fill="#f0f0f0" stroke="#ccc"/>
+        <text x="270" y="475" font-family="Arial" font-size="14">Về trang chủ</text>
+        <rect x="410" y="450" width="140" height="40" rx="5" fill="#2196F3"/>
+        <text x="440" y="475" font-family="Arial" font-size="14" fill="#fff">Làm lại</text>
+    </g>
+    <rect y="560" width="100%" height="40" fill="#dcdcdc"/>
+</svg>

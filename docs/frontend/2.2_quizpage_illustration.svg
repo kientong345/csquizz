@@ -1,0 +1,39 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#f0f0f0"/>
+    <rect width="100%" height="60" fill="#dcdcdc"/>
+    <text x="20" y="35" font-family="Arial" font-size="18">Quiz-Bank Logo</text>
+    <g transform="translate(0, 60)">
+        <!-- Progress Bar -->
+        <text x="50" y="30" font-family="Arial" font-size="14">Tiến độ: 50%</text>
+        <rect x="50" y="40" width="700" height="10" rx="5" fill="#e0e0e0"/>
+        <rect x="50" y="40" width="350" height="10" rx="5" fill="#4CAF50"/>
+
+        <!-- Question Area -->
+        <rect x="50" y="80" width="700" height="100" rx="10" fill="#fff" stroke="#ccc"/>
+        <text x="70" y="120" font-family="Arial" font-size="18">Đây là nội dung của câu hỏi số 1?</text>
+
+        <!-- Answers Area (Updated for various types) -->
+        <g transform="translate(50, 200)">
+            <text x="0" y="0" font-family="Arial" font-size="16">Chọn đáp án đúng:</text>
+            <!-- Radio Button Example -->
+            <circle cx="10" cy="30" r="8" fill="#fff" stroke="#333"/>
+            <text x="25" y="35" font-family="Arial" font-size="16">A. Lựa chọn A (Single-choice)</text>
+
+            <!-- Checkbox Example -->
+            <rect x="2" y="60" width="16" height="16" fill="#fff" stroke="#333"/>
+            <text x="25" y="75" font-family="Arial" font-size="16">B. Lựa chọn B (Multiple-choice)</text>
+
+            <!-- Text Answer Example -->
+            <text x="0" y="110" font-family="Arial" font-size="16">C. Nhập câu trả lời của bạn:</text>
+            <rect x="0" y="120" width="700" height="40" rx="5" fill="#fff" stroke="#ccc"/>
+            <text x="10" y="145" font-family="Arial" font-size="14" fill="#999">Nhập câu trả lời...</text>
+        </g>
+
+        <!-- Navigation -->
+        <rect x="50" y="450" width="120" height="40" rx="5" fill="#f0f0f0" stroke="#ccc"/>
+        <text x="70" y="475" font-family="Arial" font-size="14">Câu trước</text>
+        <rect x="630" y="450" width="120" height="40" rx="5" fill="#2196F3"/>
+        <text x="655" y="475" font-family="Arial" font-size="14" fill="#fff">Câu tiếp</text>
+    </g>
+    <rect y="560" width="100%" height="40" fill="#dcdcdc"/>
+</svg>

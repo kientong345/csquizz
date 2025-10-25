@@ -1,0 +1,16 @@
+
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #111827; } /* primary-foreground color from shadcn default */
+    .text { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 42px;
+      font-weight: bold;
+      fill: #f9fafb; /* gray-50 */
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+  </style>
+  <rect width="64" height="64" rx="12" class="bg" />
+  <text x="32" y="34" class="text">Q</text>
+</svg>

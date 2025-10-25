@@ -24,7 +24,7 @@
 -   Thêm, sửa, xóa các bài quiz.
 -   Quản lý ngân hàng câu hỏi.
 
-## 3. Đặc tả Kỹ thuật (Technical Specifications)
+## 3. Đặc tả Kỹ thuật & Thiết kế (Technical Specifications & Design)
 
 ### Công nghệ sử dụng
 
@@ -44,17 +44,20 @@
 
 ```
 backend/
-├── src/
-│   ├── main.rs                # Entry point
-│   ├── routes/                # Định nghĩa API routes
-│   │   ├── quiz.rs
-│   │   ├── auth.rs
-│   │   └── admin.rs
-│   ├── models/                # Định nghĩa data structures (Quiz, User, Result)
-│   ├── db/                    # Tương tác với database
-│   ├── services/              # Business logic
-│   └── utils/                 # Helper functions (auth, validation)
-└── Cargo.toml
+├── Cargo.toml                 # Cấu hình dự án Rust
+├── config.json                # Cấu hình ứng dụng
+├── migrations/                # Các script di chuyển database
+├── schema/                    # Định nghĩa schema database (Prisma)
+└── src/                       # Mã nguồn chính của backend
+    ├── app.rs                 # Định nghĩa ứng dụng Axum
+    ├── main.rs                # Điểm khởi chạy ứng dụng
+    ├── config/                # Cấu hình ứng dụng
+    ├── controller/            # Xử lý logic nghiệp vụ cho các route
+    ├── database/              # Kết nối và thao tác database
+    ├── middleware/            # Các middleware xử lý request
+    ├── models/                # Định nghĩa các struct dữ liệu (Quiz, User, Result, v.v.)
+    ├── routes/                # Định nghĩa các API endpoint
+    └── utils/                 # Các hàm tiện ích
 ```
 
 </details>
@@ -64,16 +67,17 @@ backend/
 
 ```
 frontend/
-├── app/
-│   ├── page.tsx               # Trang chủ (danh sách quiz)
-│   ├── quiz/[id]/page.tsx     # Trang làm quiz
-│   ├── result/[id]/page.tsx   # Trang kết quả
-│   ├── profile/page.tsx       # Trang hồ sơ cá nhân
-│   └── admin/page.tsx         # Trang quản trị
-├── components/                # UI Components (Button, Card, Navbar,...)
-├── lib/                       # Helper functions (API client, auth)
-├── styles/                    # Global styles
-└── types/                     # TypeScript type definitions
+└── csquizz-web-app/           # Thư mục gốc của ứng dụng Next.js
+    ├── public/                # Các tài nguyên tĩnh (ảnh, icon)
+    ├── app/                   # Các trang và layout của ứng dụng (App Router)
+    ├── components/            # Các UI component có thể tái sử dụng
+    ├── lib/                   # Các hàm tiện ích và client API
+    ├── styles/                # Các file CSS toàn cục
+    ├── types/                 # Định nghĩa kiểu dữ liệu TypeScript
+    ├── package.json           # Cấu hình dự án Node.js/npm
+    ├── next.config.ts         # Cấu hình Next.js
+    ├── tsconfig.json          # Cấu hình TypeScript
+    └── ...                    # Các file cấu hình và thư mục khác
 ```
 
 </details>
@@ -88,6 +92,18 @@ frontend/
 -   `POST /admin/quiz`: (Admin) Thêm quiz mới
 -   `PUT /admin/quiz/:id`: (Admin) Cập nhật quiz
 -   `DELETE /admin/quiz/:id`: (Admin) Xóa quiz
+
+### Thiết kế & Tài liệu
+
+Các tài liệu thiết kế và cấu trúc ứng dụng được tạo ra để hỗ trợ quá trình phát triển:
+
+-   **Wireframe cho Front-end:** `frontend_wireframe.md`
+    -   Mô tả bố cục và cấu trúc cơ bản của từng trang.
+    -   Kèm theo các file SVG minh họa (`*.svg`) cho từng trang để hình dung trực quan.
+-   **Thiết kế UI (Mockup) cho Front-end:** `frontend_ui_design.md`
+    -   Đặc tả chi tiết về bảng màu, typography, khoảng cách, và phong cách của các thành phần UI dựa trên Shadcn UI và Tailwind CSS.
+-   **Sitemap cho ứng dụng:** `sitemap.md`
+    -   Phác thảo cấu trúc và hệ thống phân cấp của các trang, giúp hình dung luồng điều hướng.
 
 ## 4. Cài đặt & Chạy dự án (Setup & Run)
 

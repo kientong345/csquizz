@@ -24,20 +24,6 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
     }
     ```
 -   **Success Response:** `201 Created`
-    ```
-    Set-Cookie: refresh_token=...; HttpOnly; Secure; Path=/api/auth
-    ```
-    ```json
-    {
-        "access_token": "string", // JWT Access Token (ngắn hạn)
-        "user": {
-            "id": "number",
-            "display_name": "string",
-            "email": "string",
-            "role": "string"
-        }
-    }
-    ```
 -   **Error Responses:**
     -   `400 Bad Request`: Dữ liệu đầu vào không hợp lệ.
     -   `409 Conflict`: `username` hoặc `email` đã tồn tại.
@@ -60,12 +46,6 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
     ```json
     {
         "access_token": "string", // JWT Access Token (ngắn hạn)
-        "user": {
-            "id": "number",
-            "display_name": "string",
-            "email": "string",
-            "role": "string"
-        }
     }
     ```
 
@@ -98,24 +78,6 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
 -   **Error Responses:**
     -   `401 Unauthorized`: `refresh_token` không hợp lệ.
 
-### 1.5. Lấy thông tin người dùng hiện tại
-
--   **Endpoint:** `GET /api/auth/me`
--   **Mô tả:** Lấy thông tin của người dùng đang đăng nhập dựa trên `access_token`.
--   **Authentication:** Yêu cầu `Bearer <access_token>` trong header `Authorization`.
--   **Success Response:** `200 OK`
-    ```json
-    {
-        "id": "number",
-        "display_name": "string",
-        "email": "string",
-        "role": "string",
-        "created_at": "string"
-    }
-    ```
--   **Error Responses:**
-    -   `401 Unauthorized`: `access_token` không hợp lệ hoặc hết hạn.
-
 ---
 
 ## 2. Quizzes (`/quizzes`)
@@ -125,22 +87,69 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
 -   **Endpoint:** `GET /api/quizzes`
 -   **Mô tả:** Lấy danh sách các bài quiz có sẵn, hỗ trợ tìm kiếm và lọc.
 -   **Query Parameters:**
-    -   `title_pattern`: `string` (optional)
-    -   `category`: `string` (optional)
-    -   `difficulty`: `string` (optional)
+    -   `title_pattern`: `string?`
+    -   `category`: `string?`
+    -   `difficulty`: `string?`
     -   `page`: `number`
     -   `size`: `number`
 -   **Success Response:** `200 OK` (Nội dung không đổi)
+    ```json
+    {
+        "items": [
+            {
+                "id": "number",
+                "title": "string",
+                "description": "string?",
+                "category": "string",
+                "difficulty": "difficulty?" {"easy" | "medium" | "hard"},
+                "created_by": "string?"
+            }
+        ],
+        "total_items": "number",
+        "total_pages": "number",
+    }
+    ```
 
 ### 2.2. Lấy thông tin 1 quiz
 
 -   **Endpoint:** `GET /api/quizzes/{id}`
 -   **Success Response:** `200 OK` (Nội dung không đổi)
+    ```json
+    {
+        "id": "number",
+        "title": "string",
+        "description": "string?",
+        "category": "string",
+        "difficulty": "difficulty?" {"easy" | "medium" | "hard"},
+        "created_by": "string?"
+    }
+    ```
 
 ### 2.3. Lấy các question trong 1 quiz (để làm bài)
 
 -   **Endpoint:** `GET /api/questions`
 -   **Success Response:** `200 OK` (Nội dung không đổi)
+    ```json
+    {
+        "items": [
+            {
+                "id": "number",
+                "form": "question_form" {"multiple_choice" | "single_choice" | "text_input"},
+                "text": "string",
+                "image_url": "string?",
+                "explanation": "string?", // to be deleted in later versions
+                "options": [
+                    {
+                        "id": "number",
+                        "text": "string"
+                    }
+                ]
+            }
+        ],
+        "total_items": "number",
+        "total_pages": "number",
+    }
+    ```
 
 ### 2.4. Nộp bài và chấm điểm
 
@@ -155,7 +164,25 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
 ### 3.1. Lấy danh sách category
 
 -   **Endpoint:** `GET /api/categories`
--   **Success Response:** `200 OK` (Nội dung không đổi)
+-   **Mô tả:** Lấy danh sách các thể loại quiz.
+-   **Query Parameters:**
+    -   `page`: `number` - Số trang để phân trang.
+    -   `size`: `number` - Kích thước trang.
+-   **Success Response:** `200 OK`
+    ```json
+    {
+        "items": [
+            {
+                "id": "number",
+                "name": "string",
+                "image_url?": "string",
+                "description?": "string"
+            }
+        ],
+        "total_items": "number",
+        "total_pages": "number",
+    }
+    ```
 
 ---
 

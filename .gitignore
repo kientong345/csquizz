@@ -1,3 +1,30 @@
-**/target
+# Backend/Rust rules
+*/target
 .env
-**/.sqlx
+.sqlx
+
+# General
+.DS_Store
+*.pem
+
+# Frontend rules (from frontend/csquizz-web-app/.gitignore)
+frontend/csquizz-web-app/node_modules
+frontend/csquizz-web-app/.pnp
+frontend/csquizz-web-app/.pnp.*
+frontend/csquizz-web-app/.yarn/*
+!frontend/csquizz-web-app/.yarn/patches
+!frontend/csquizz-web-app/.yarn/plugins
+!frontend/csquizz-web-app/.yarn/releases
+!frontend/csquizz-web-app/.yarn/versions
+frontend/csquizz-web-app/coverage
+frontend/csquizz-web-app/.next/
+frontend/csquizz-web-app/out/
+frontend/csquizz-web-app/build
+frontend/csquizz-web-app/npm-debug.log*
+frontend/csquizz-web-app/yarn-debug.log*
+frontend/csquizz-web-app/yarn-error.log*
+frontend/csquizz-web-app/.pnpm-debug.log*
+frontend/csquizz-web-app/.env*
+frontend/csquizz-web-app/.vercel
+frontend/csquizz-web-app/*.tsbuildinfo
+frontend/csquizz-web-app/next-env.d.ts

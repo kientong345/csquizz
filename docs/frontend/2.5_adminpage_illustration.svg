@@ -1,0 +1,31 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#f0f0f0"/>
+    <rect width="100%" height="60" fill="#dcdcdc"/>
+    <text x="20" y="35" font-family="Arial" font-size="18">Quiz-Bank Logo</text>
+    <text x="700" y="35" font-family="Arial" font-size="16">Admin</text>
+    <g transform="translate(0, 60)">
+        <text x="50" y="50" font-family="Arial" font-size="24" font-weight="bold">Trang quản trị</text>
+        <rect x="600" y="30" width="150" height="35" rx="5" fill="#4CAF50"/>
+        <text x="615" y="53" font-family="Arial" font-size="14" fill="#fff">+ Thêm câu hỏi</text>
+
+        <!-- Questions Table -->
+        <text x="50" y="100" font-family="Arial" font-size="18">Ngân hàng câu hỏi</text>
+        <rect x="50" y="120" width="700" height="350" fill="#fff" stroke="#ccc"/>
+        <!-- Table Header -->
+        <text x="70" y="145" font-family="Arial" font-size="14" font-weight="bold">Câu hỏi</text>
+        <text x="350" y="145" font-family="Arial" font-size="14" font-weight="bold">Chủ đề</text>
+        <text x="550" y="145" font-family="Arial" font-size="14" font-weight="bold">Hành động</text>
+        <line x1="50" y1="160" x2="750" y2="160" stroke="#ccc"/>
+        <!-- Table Row 1 -->
+        <text x="70" y="185" font-family="Arial" font-size="14">Câu hỏi 1...</text>
+        <text x="350" y="185" font-family="Arial" font-size="14">Data Structures</text>
+        <text x="550" y="185" font-family="Arial" font-size="14" fill="blue">Sửa</text>
+        <text x="600" y="185" font-family="Arial" font-size="14" fill="red">Xóa</text>
+        <!-- Table Row 2 -->
+        <text x="70" y="215" font-family="Arial" font-size="14">Câu hỏi 2...</text>
+        <text x="350" y="215" font-family="Arial" font-size="14">Algorithms</text>
+        <text x="550" y="215" font-family="Arial" font-size="14" fill="blue">Sửa</text>
+        <text x="600" y="215" font-family="Arial" font-size="14" fill="red">Xóa</text>
+    </g>
+    <rect y="560" width="100%" height="40" fill="#dcdcdc"/>
+</svg>
