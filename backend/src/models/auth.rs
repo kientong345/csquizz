@@ -9,8 +9,8 @@ use crate::{
 #[derive(Debug, Deserialize)]
 pub struct Registration {
     pub display_name: String,
-    pub password: String,
     pub email: String,
+    pub password: String,
 }
 
 impl Registration {

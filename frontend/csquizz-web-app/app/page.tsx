@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import QuizCategory from "@/components/features/QuizCategory";
+import CategoryCard from "@/components/features/CategoryCard";
 import {
   Pagination,
   PaginationContent,
@@ -9,6 +9,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { getCategories } from "@/lib/api";
+import { CATEGORY_PER_PAGE } from "@/constants";
 
 const mockCategories = [
   {
@@ -49,7 +51,11 @@ const mockCategories = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // const [currentPage, setCurrentPage] = useState(1);
+  let currentPage = 1;
+  const categoryPage = await getCategories({ page: 1, size: CATEGORY_PER_PAGE });
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <section className="text-center my-8 md:my-12">
@@ -73,8 +79,8 @@ export default function HomePage() {
 
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockCategories.map((category) => (
-            <QuizCategory
+          {categoryPage.items.map((category) => (
+            <CategoryCard
               key={category.id}
               id={category.id}
               name={category.name}
@@ -85,32 +91,28 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mt-12 flex justify-center">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                2
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">3</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </section>
+      {categoryPage.total_pages > 1 && (
+        <section className="mt-12 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" />
+              </PaginationItem>
+              {[...Array(categoryPage.total_pages)].map((_, i) => (
+                <PaginationItem key={i}>
+                  {/* only display, no logic for change page yet */}
+                  <PaginationLink href="#" isActive={i + 1 === currentPage}>
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext href="#" />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </section>
+      )}
     </div>
   );
 }

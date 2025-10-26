@@ -101,6 +101,7 @@ Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) v
                 "title": "string",
                 "description?": "string",
                 "category": "string",
+                "question_count": "number",
                 "difficulty?": "difficulty" {"easy" | "medium" | "hard"},
                 "created_by?": "string"
             }

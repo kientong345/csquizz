@@ -2,7 +2,7 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    quiz::QuizInfo,
+    quiz::QuizMetadata,
     result::QuizResultSummary,
     user::{FetchedUser, UserFullDetail, UserPubInfo, UserRole},
 };
@@ -21,7 +21,8 @@ impl UserPubInfo {
         .fetch_one(&mut *connection)
         .await?;
 
-        let quiz_created_count = QuizInfo::count_by_creator_id(fetched_user.id, connection).await?;
+        let quiz_created_count =
+            QuizMetadata::count_by_creator_id(fetched_user.id, connection).await?;
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
@@ -50,7 +51,8 @@ impl UserFullDetail {
         .fetch_one(&mut *connection)
         .await?;
 
-        let quiz_created_count = QuizInfo::count_by_creator_id(fetched_user.id, connection).await?;
+        let quiz_created_count =
+            QuizMetadata::count_by_creator_id(fetched_user.id, connection).await?;
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 
@@ -74,7 +76,8 @@ impl UserFullDetail {
         .fetch_one(&mut *connection)
         .await?;
 
-        let quiz_created_count = QuizInfo::count_by_creator_id(fetched_user.id, connection).await?;
+        let quiz_created_count =
+            QuizMetadata::count_by_creator_id(fetched_user.id, connection).await?;
         let quiz_completed_count =
             QuizResultSummary::count_distinct_by_user_id(fetched_user.id, connection).await?;
 

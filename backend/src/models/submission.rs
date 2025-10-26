@@ -4,7 +4,7 @@ use sqlx::PgConnection;
 use crate::models::{
     error::ModelError,
     question::{post::PostQuestion, Question},
-    quiz::{post::PostQuizInfo, QuizInfo},
+    quiz::{post::PostQuizMetadata, QuizMetadata},
     result::{
         AnswerResultType, QuestionAnswerResult, QuestionContent, QuizResult, QuizResultSummary,
     },
@@ -88,7 +88,7 @@ impl Submission {
             }
         }
 
-        let quiz_info = QuizInfo::get_by_id(self.quiz_id, connection).await?;
+        let quiz_info = QuizMetadata::get_by_id(self.quiz_id, connection).await?;
         Ok(QuizResult {
             summary: QuizResultSummary {
                 id: -1,
@@ -105,6 +105,6 @@ impl Submission {
 
 #[derive(Debug, Deserialize)]
 pub struct PostQuiz {
-    pub info: PostQuizInfo,
+    pub metadata: PostQuizMetadata,
     pub questions: Vec<PostQuestion>,
 }

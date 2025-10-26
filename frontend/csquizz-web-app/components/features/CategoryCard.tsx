@@ -1,7 +1,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { slugify } from "@/lib/utils";
 import {
   Card,
   CardDescription,
@@ -11,14 +10,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-type QuizCategoryProps = {
+type CategoryCardProps = {
   id: number;
   name: string;
   imageUrl?: string;
   description?: string;
 };
 
-export default function QuizCategory({ id, name, imageUrl, description }: QuizCategoryProps) {
+export default function CategoryCard({ id, name, imageUrl, description }: CategoryCardProps) {
   return (
     <Card className="flex flex-col h-full hover:border-primary transition-colors overflow-hidden">
       {imageUrl && (
@@ -37,7 +36,7 @@ export default function QuizCategory({ id, name, imageUrl, description }: QuizCa
       </CardHeader>
       <div className="flex-grow" />
       <CardFooter>
-        <Link href={`/category/${slugify(name)}`} className="w-full">
+        <Link href={`/category/${id}`} className="w-full">
           <Button className="w-full">Bắt đầu</Button>
         </Link>
       </CardFooter>

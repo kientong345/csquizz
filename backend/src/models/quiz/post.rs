@@ -3,11 +3,11 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    quiz::{QuizDifficulty, QuizInfo},
+    quiz::{QuizDifficulty, QuizMetadata},
 };
 
 #[derive(Debug, Deserialize)]
-pub struct PostQuizInfo {
+pub struct PostQuizMetadata {
     pub title: String,
     pub description: Option<String>,
     pub category_id: i32,
@@ -15,11 +15,11 @@ pub struct PostQuizInfo {
     pub creator_id: Option<i32>,
 }
 
-impl QuizInfo {
+impl QuizMetadata {
     pub async fn create_from(
-        data: PostQuizInfo,
+        data: PostQuizMetadata,
         connection: &mut PgConnection,
-    ) -> Result<QuizInfo, ModelError> {
+    ) -> Result<QuizMetadata, ModelError> {
         let difficulty = if let Some(diff_type) = data.difficulty {
             match diff_type {
                 QuizDifficulty::Easy => Some(String::from("easy")),
@@ -43,6 +43,6 @@ impl QuizInfo {
         .await?
         .id;
 
-        Ok(QuizInfo::get_by_id(id, connection).await?)
+        Ok(QuizMetadata::get_by_id(id, connection).await?)
     }
 }

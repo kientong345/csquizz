@@ -7,14 +7,14 @@ pub mod paginate;
 pub mod post;
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
-pub struct QuizCategory {
+pub struct Category {
     pub id: i32,
     pub name: String,
     pub image_url: Option<String>,
     pub description: Option<String>,
 }
 
-impl QuizCategory {
+impl Category {
     pub async fn count(connection: &mut PgConnection) -> Result<i64, ModelError> {
         Ok(sqlx::query_scalar("SELECT COUNT(*) FROM categories")
             .fetch_one(&mut *connection)

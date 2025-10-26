@@ -1,6 +1,6 @@
 
 import { Input } from "@/components/ui/input";
-import QuizListItem from "@/components/features/QuizListItem";
+import QuizInfoCard from "@/components/features/QuizInfoCard";
 import {
   Pagination,
   PaginationContent,
@@ -53,7 +53,7 @@ export default function QuizListPage({ params }: QuizListPageProps) {
       <section>
         <div className="flex flex-col gap-4">
           {mockQuizzes.map((quiz) => (
-            <QuizListItem
+            <QuizInfoCard
               key={quiz.id}
               id={quiz.id}
               title={quiz.title}

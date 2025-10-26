@@ -2,14 +2,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-type QuizListItemProps = {
+type QuizInfoCardProps = {
   id: number;
   title: string;
   difficulty: string;
   questionCount: number;
 };
 
-export default function QuizListItem({ id, title, difficulty, questionCount }: QuizListItemProps) {
+export default function QuizInfoCard({ id, title, difficulty, questionCount }: QuizInfoCardProps) {
   return (
     <div className="bg-card text-card-foreground border rounded-lg p-4 flex items-center justify-between hover:border-primary transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">

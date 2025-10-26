@@ -8,18 +8,18 @@ use crate::{
     controller::error::ControllerError,
     database::pool::QuizBankPool,
     models::{
-        category::{paginate::QuizCategoryQuery, QuizCategory},
+        category::{paginate::CategoryQuery, Category},
         pagination::Paginate,
     },
 };
 
 pub async fn get_categories(
     State(pool): State<QuizBankPool>,
-    Query(query): Query<QuizCategoryQuery>,
+    Query(query): Query<CategoryQuery>,
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.get_connection().await?;
 
-    let page = QuizCategory::page(&query, &mut *connection).await?;
+    let page = Category::page(&query, &mut *connection).await?;
 
     Ok(Json(json!(page)))
 }

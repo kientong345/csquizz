@@ -2,27 +2,27 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
 use crate::models::{
-    category::QuizCategory,
+    category::Category,
     error::ModelError,
     pagination::{Page, Paginate},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct QuizCategoryQuery {
+pub struct CategoryQuery {
     pub page: i64,
     pub size: i64,
 }
 
-impl Paginate<QuizCategoryQuery> for QuizCategory {
+impl Paginate<CategoryQuery> for Category {
     async fn page(
-        query: &QuizCategoryQuery,
+        query: &CategoryQuery,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, ModelError> {
-        let total_items = QuizCategory::count(connection).await?;
+        let total_items = Category::count(connection).await?;
         let offset = (query.page.saturating_sub(1)) * query.size;
 
         let items = sqlx::query_as!(
-            QuizCategory,
+            Category,
             r#"SELECT id, name, image_url, description FROM categories LIMIT $1 OFFSET $2"#,
             query.size,
             offset
@@ -41,7 +41,7 @@ mod tests {
     use crate::{
         database::load_sample,
         models::{
-            category::{paginate::QuizCategoryQuery, QuizCategory},
+            category::{paginate::CategoryQuery, Category},
             pagination::Paginate,
         },
     };
@@ -50,11 +50,9 @@ mod tests {
     async fn test_get_category_page(mut conn: PoolConnection<Postgres>) {
         load_sample(&mut conn).await;
 
-        let category_query = QuizCategoryQuery { page: 1, size: 10 };
+        let category_query = CategoryQuery { page: 1, size: 10 };
 
-        let category_page = QuizCategory::page(&category_query, &mut conn)
-            .await
-            .unwrap();
+        let category_page = Category::page(&category_query, &mut conn).await.unwrap();
 
         assert_eq!(category_page.total_items, 3);
         assert_eq!(category_page.total_pages, 1);

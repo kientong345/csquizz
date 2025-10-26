@@ -4,7 +4,7 @@ use sqlx::{PgConnection, QueryBuilder};
 use crate::models::{
     error::ModelError,
     pagination::{Page, Paginate},
-    quiz::QuizInfo,
+    quiz::QuizMetadata,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -34,8 +34,9 @@ impl QuizQuery {
 
         if let Some(difficulty) = &self.difficulty {
             builder
-                .push(" AND q.difficulty = ")
-                .push_bind(difficulty.clone());
+                .push(" AND q.difficulty = (")
+                .push_bind(difficulty.clone())
+                .push(")::quiz_difficulty");
         }
 
         if let Some(user_id) = self.created_by {
@@ -52,29 +53,34 @@ impl QuizQuery {
     fn apply_pagination_for(&self, builder: &mut QueryBuilder<sqlx::Postgres>) {
         let page_size = self.size;
         let offset = (self.page - 1) * page_size;
-        builder.push(" ORDER BY q.id DESC");
+        builder.push(" ORDER BY q.id ASC");
         builder.push(" LIMIT ").push_bind(page_size);
         builder.push(" OFFSET ").push_bind(offset);
     }
 }
 
-impl Paginate<QuizQuery> for QuizInfo {
+impl Paginate<QuizQuery> for QuizMetadata {
     async fn page(
         query: &QuizQuery,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, ModelError> {
         let mut count_builder: QueryBuilder<sqlx::Postgres> = QueryBuilder::new(
-            "SELECT count(q.id) FROM quizzes AS q JOIN categories AS c ON q.category = c.id",
+            "SELECT COUNT(q.id) FROM quizzes AS q JOIN categories AS c ON q.category = c.id",
         );
         query.apply_filters_for(&mut count_builder);
 
         let mut query_builder: QueryBuilder<sqlx::Postgres> = QueryBuilder::new(
-            r#"SELECT q.id, q.title, q.description, c.name AS category, q.difficulty, u.username AS created_by
+            "SELECT
+                q.id, q.title, q.description, c.name AS category,
+                COALESCE(COUNT(qs.quiz_id), 0) AS question_count,
+                q.difficulty, u.display_name AS created_by
             FROM quizzes AS q
-            JOIN categories AS c ON q.category = c.id
-            JOIN users AS u ON q.created_by = u.id"#,
+                JOIN categories AS c ON q.category = c.id
+                JOIN users AS u ON q.created_by = u.id
+                LEFT JOIN questions AS qs ON q.id = qs.quiz_id",
         );
         query.apply_filters_for(&mut query_builder);
+        query_builder.push(" GROUP BY q.id, c.name, u.display_name");
         query.apply_pagination_for(&mut query_builder);
 
         let total_items: i64 = count_builder
@@ -82,8 +88,65 @@ impl Paginate<QuizQuery> for QuizInfo {
             .fetch_one(&mut *connection)
             .await?;
 
-        let items: Vec<QuizInfo> = query_builder.build_query_as().fetch_all(connection).await?;
+        let items: Vec<QuizMetadata> = query_builder.build_query_as().fetch_all(connection).await?;
 
         Ok(Page::build_from(items, total_items, query.size))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use sqlx::{pool::PoolConnection, Postgres};
+
+    use crate::{
+        database::load_sample,
+        models::{
+            pagination::Paginate, quiz::{paginate::QuizQuery, QuizMetadata},
+        },
+    };
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_get_quiz_page_no_filter(mut conn: PoolConnection<Postgres>) {
+        load_sample(&mut conn).await;
+
+        let quiz_query = QuizQuery {
+            category_id: None,
+            title_pattern: None,
+            difficulty: None,
+            created_by: None,
+            completed_by: None,
+            page: 1,
+            size: 10,
+        };
+
+        let quiz_page = QuizMetadata::page(&quiz_query, &mut conn).await.unwrap();
+
+        assert_eq!(quiz_page.total_items, 3);
+        assert_eq!(quiz_page.total_pages, 1);
+        assert_eq!(quiz_page.items[0].title, "Array and String Basics".to_string());
+        assert_eq!(quiz_page.items[1].category, "Algorithms".to_string());
+        assert_eq!(quiz_page.items[2].question_count, 2);
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_get_quiz_page_with_filter(mut conn: PoolConnection<Postgres>) {
+        load_sample(&mut conn).await;
+
+        let quiz_query = QuizQuery {
+            category_id: None,
+            title_pattern: None,
+            difficulty: Some("easy".to_string()),
+            created_by: None,
+            completed_by: None,
+            page: 1,
+            size: 10,
+        };
+
+        let quiz_page = QuizMetadata::page(&quiz_query, &mut conn).await.unwrap();
+
+        assert_eq!(quiz_page.total_items, 2);
+        assert_eq!(quiz_page.total_pages, 1);
+        assert_eq!(quiz_page.items[0].category, "Data Structures".to_string());
+        assert_eq!(quiz_page.items[1].question_count, 2);
     }
 }

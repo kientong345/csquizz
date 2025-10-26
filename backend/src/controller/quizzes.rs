@@ -11,7 +11,7 @@ use crate::{
     models::{
         pagination::Paginate,
         question::{paginate::QuestionQuery, Question},
-        quiz::{paginate::QuizQuery, QuizInfo},
+        quiz::{paginate::QuizQuery, QuizMetadata},
         submission::{PostQuiz, Submission},
     },
 };
@@ -22,7 +22,7 @@ pub async fn get_quizzes(
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.get_connection().await?;
 
-    let page = QuizInfo::page(&query, &mut *connection).await?;
+    let page = QuizMetadata::page(&query, &mut *connection).await?;
 
     Ok(Json(json!(page)))
 }
@@ -34,7 +34,7 @@ pub async fn get_quiz_info(
     let mut connection = pool.get_connection().await?;
 
     let id: i32 = id.parse().unwrap_or(-1);
-    let quiz = QuizInfo::get_by_id(id, &mut *connection).await?;
+    let quiz = QuizMetadata::get_by_id(id, &mut *connection).await?;
     Ok(Json(json!(quiz)))
 }
 
@@ -74,7 +74,7 @@ pub async fn create_quiz(
 ) -> Result<(), ControllerError> {
     let mut connection = pool.start_transaction().await?;
 
-    QuizInfo::create_from(data.info, &mut connection).await?;
+    QuizMetadata::create_from(data.metadata, &mut connection).await?;
 
     for question in data.questions {
         Question::create_from(question, &mut connection).await?;
