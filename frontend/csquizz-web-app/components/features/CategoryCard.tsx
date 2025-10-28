@@ -1,14 +1,13 @@
-
-import Link from "next/link";
-import Image from "next/image";
+import Link from 'next/link';
+import Image from 'next/image';
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 type CategoryCardProps = {
   id: number;
@@ -17,7 +16,12 @@ type CategoryCardProps = {
   description?: string;
 };
 
-export default function CategoryCard({ id, name, imageUrl, description }: CategoryCardProps) {
+export default function CategoryCard({
+  id,
+  name,
+  imageUrl,
+  description,
+}: CategoryCardProps) {
   return (
     <Card className="flex flex-col h-full hover:border-primary transition-colors overflow-hidden">
       {imageUrl && (

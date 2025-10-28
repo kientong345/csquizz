@@ -2,6 +2,7 @@
 */target
 .env
 .sqlx
+target
 
 # General
 .DS_Store

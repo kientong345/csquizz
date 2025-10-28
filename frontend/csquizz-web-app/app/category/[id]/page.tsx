@@ -1,6 +1,5 @@
-
-import { Input } from "@/components/ui/input";
-import QuizInfoCard from "@/components/features/QuizInfoCard";
+import { Input } from '@/components/ui/input';
+import QuizInfoCard from '@/components/features/QuizInfoCard';
 import {
   Pagination,
   PaginationContent,
@@ -9,8 +8,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { unslugify } from "@/lib/utils";
+} from '@/components/ui/pagination';
+import { unslugify } from '@/lib/utils';
 
 type QuizListPageProps = {
   params: {
@@ -19,17 +18,52 @@ type QuizListPageProps = {
 };
 
 const mockQuizzes = [
-  { id: 101, title: "Basic Data Structures", difficulty: "Dễ", questionCount: 10 },
-  { id: 102, title: "Trees and Graphs", difficulty: "Trung bình", questionCount: 15 },
-  { id: 103, title: "Advanced Hashing", difficulty: "Khó", questionCount: 20 },
-  { id: 104, title: "Linked List Manipulations", difficulty: "Trung bình", questionCount: 12 },
+  {
+    id: 101,
+    title: 'Basic Data Structures',
+    difficulty: 'Dễ',
+    questionCount: 10,
+  },
+  {
+    id: 102,
+    title: 'Trees and Graphs',
+    difficulty: 'Trung bình',
+    questionCount: 15,
+  },
+  { id: 103, title: 'Advanced Hashing', difficulty: 'Khó', questionCount: 20 },
+  {
+    id: 104,
+    title: 'Linked List Manipulations',
+    difficulty: 'Trung bình',
+    questionCount: 12,
+  },
   // Add more mock quizzes to make pagination meaningful
-  { id: 105, title: "Array Fundamentals", difficulty: "Dễ", questionCount: 10 },
-  { id: 106, title: "Sorting Algorithms", difficulty: "Trung bình", questionCount: 15 },
-  { id: 107, title: "Dynamic Programming Basics", difficulty: "Khó", questionCount: 20 },
-  { id: 108, title: "Bit Manipulation", difficulty: "Khó", questionCount: 18 },
-  { id: 109, title: "Recursion Techniques", difficulty: "Trung bình", questionCount: 12 },
-  { id: 110, title: "Object-Oriented Design Patterns", difficulty: "Khó", questionCount: 25 },
+  { id: 105, title: 'Array Fundamentals', difficulty: 'Dễ', questionCount: 10 },
+  {
+    id: 106,
+    title: 'Sorting Algorithms',
+    difficulty: 'Trung bình',
+    questionCount: 15,
+  },
+  {
+    id: 107,
+    title: 'Dynamic Programming Basics',
+    difficulty: 'Khó',
+    questionCount: 20,
+  },
+  { id: 108, title: 'Bit Manipulation', difficulty: 'Khó', questionCount: 18 },
+  {
+    id: 109,
+    title: 'Recursion Techniques',
+    difficulty: 'Trung bình',
+    questionCount: 12,
+  },
+  {
+    id: 110,
+    title: 'Object-Oriented Design Patterns',
+    difficulty: 'Khó',
+    questionCount: 25,
+  },
 ];
 
 export default function QuizListPage({ params }: QuizListPageProps) {

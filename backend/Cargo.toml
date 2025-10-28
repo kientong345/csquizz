@@ -15,3 +15,14 @@ bcrypt = "0.17.1"
 jsonwebtoken = { version = "10.1.0", features = ["rust_crypto"] }
 axum-extra = { version = "0.10.3", features = ["cookie"] }
 thiserror = "2.0.17"
+
+[profile.prod]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+incremental = false
+codegen-units = 1
+debug = false
+strip = "symbols"
+panic = "abort"
+debug-assertions = false

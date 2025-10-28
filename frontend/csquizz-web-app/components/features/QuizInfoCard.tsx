@@ -1,6 +1,5 @@
-
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 type QuizInfoCardProps = {
   id: number;
@@ -9,7 +8,12 @@ type QuizInfoCardProps = {
   questionCount: number;
 };
 
-export default function QuizInfoCard({ id, title, difficulty, questionCount }: QuizInfoCardProps) {
+export default function QuizInfoCard({
+  id,
+  title,
+  difficulty,
+  questionCount,
+}: QuizInfoCardProps) {
   return (
     <div className="bg-card text-card-foreground border rounded-lg p-4 flex items-center justify-between hover:border-primary transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6">

@@ -27,7 +27,7 @@ pub async fn get_quizzes(
     Ok(Json(json!(page)))
 }
 
-pub async fn get_quiz_info(
+pub async fn get_quiz_by_id(
     State(pool): State<QuizBankPool>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -38,7 +38,7 @@ pub async fn get_quiz_info(
     Ok(Json(json!(quiz)))
 }
 
-pub async fn get_question_page(
+pub async fn get_questions(
     State(pool): State<QuizBankPool>,
     Query(query): Query<QuestionQuery>,
 ) -> Result<Json<Value>, ControllerError> {

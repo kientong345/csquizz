@@ -1,6 +1,5 @@
-
-import Link from "next/link";
-import Image from "next/image";
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Navbar() {
   return (
@@ -17,10 +16,16 @@ export default function Navbar() {
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link
+            href="/login"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
             Đăng nhập
           </Link>
-          <Link href="/register" className="text-sm font-medium text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-md">
+          <Link
+            href="/register"
+            className="text-sm font-medium text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-md"
+          >
             Đăng ký
           </Link>
         </div>

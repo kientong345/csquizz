@@ -1,60 +1,115 @@
-import { Input } from "@/components/ui/input";
-import CategoryCard from "@/components/features/CategoryCard";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { getCategories } from "@/lib/api";
-import { CATEGORY_PER_PAGE } from "@/constants";
+import { Input } from '@/components/ui/input';
+import CategoryCard from '@/components/features/CategoryCard';
+import { getCategories } from '@/lib/api';
+import { CATEGORY_PER_PAGE } from '@/constants';
+import { Page } from '@/types/page';
+import { Category } from '@/types/category';
+import CSQuizzPagination from '@/components/features/CSQuizzPagination';
 
-const mockCategories = [
-  {
-    id: 1,
-    name: "Data Structures",
-    description: "Test your knowledge on arrays, linked lists, trees, and more.",
-    imageUrl: "/category-data-structures.svg",
-  },
-  {
-    id: 2,
-    name: "Algorithms",
-    description: "Challenge yourself with sorting, searching, and graph algorithms.",
-    imageUrl: "/category-algorithms.svg",
-  },
-  {
-    id: 3,
-    name: "Operating Systems",
-    description: "Dive into concepts like processes, memory management, and concurrency.",
-    imageUrl: "/category-operating-systems.svg",
-  },
-  {
-    id: 4,
-    name: "Networking",
-    description: "Explore the fundamentals of network protocols and layers.",
-    imageUrl: "/category-networking.svg",
-  },
-  {
-    id: 5,
-    name: "Databases",
-    description: "Understand SQL, normalization, and database design principles.",
-    imageUrl: "/category-databases.svg",
-  },
-  {
-    id: 6,
-    name: "Artificial Intelligence",
-    description: "Get started with the basic concepts of AI and machine learning.",
-    imageUrl: "/category-ai.svg",
-  },
-];
+const mockCategoryPage: Page<Category> = {
+  items: [
+    {
+      id: 1,
+      name: 'Data Structures',
+      description:
+        'Test your knowledge on arrays, linked lists, trees, and more.',
+      imageUrl: '/category-data-structures.svg',
+    },
+    {
+      id: 2,
+      name: 'Algorithms',
+      description:
+        'Challenge yourself with sorting, searching, and graph algorithms.',
+      imageUrl: '/category-algorithms.svg',
+    },
+    {
+      id: 3,
+      name: 'Operating Systems',
+      description:
+        'Dive into concepts like processes, memory management, and concurrency.',
+      imageUrl: '/category-operating-systems.svg',
+    },
+    {
+      id: 4,
+      name: 'Networking',
+      description: 'Explore the fundamentals of network protocols and layers.',
+      imageUrl: '/category-networking.svg',
+    },
+    {
+      id: 5,
+      name: 'Databases',
+      description:
+        'Understand SQL, normalization, and database design principles.',
+      imageUrl: '/category-databases.svg',
+    },
+    {
+      id: 6,
+      name: 'Artificial Intelligence',
+      description:
+        'Get started with the basic concepts of AI and machine learning.',
+      imageUrl: '/category-ai.svg',
+    },
+    {
+      id: 7,
+      name: 'Software Engineering',
+      description:
+        'Learn about software development methodologies and best practices.',
+      imageUrl: '/category-software-engineering.svg',
+    },
+    {
+      id: 8,
+      name: 'Cybersecurity',
+      description: 'Test your knowledge on security principles and practices.',
+      imageUrl: '/category-cybersecurity.svg',
+    },
+    {
+      id: 9,
+      name: 'Web Development',
+      description: 'Explore front-end and back-end web development concepts.',
+      imageUrl: '/category-web-development.svg',
+    },
+    {
+      id: 10,
+      name: 'Programming Languages',
+      description:
+        'Understand different programming paradigms and language features.',
+      imageUrl: '/category-programming-languages.svg',
+    },
+  ],
+  total_items: 10,
+  total_pages: 2,
+};
 
-export default async function HomePage() {
-  // const [currentPage, setCurrentPage] = useState(1);
-  let currentPage = 1;
-  const categoryPage = await getCategories({ page: 1, size: CATEGORY_PER_PAGE });
+function getPage(
+  instance: Page<Category>,
+  page: number,
+  size: number
+): Page<Category> {
+  const start = (page - 1) * size;
+  const end = start + size;
+  return {
+    items: instance.items.slice(start, end),
+    total_items: instance.total_items,
+    total_pages: Math.ceil(instance.total_items / size),
+  };
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const resolvedSearchParams = await searchParams;
+  const page =
+    typeof resolvedSearchParams.page === 'string'
+      ? Number(resolvedSearchParams.page)
+      : 1;
+  // const currentCategoryPage = await getCategories({ page: page, size: CATEGORY_PER_PAGE });
+  const currentCategoryPage = getPage(
+    mockCategoryPage,
+    page,
+    CATEGORY_PER_PAGE
+  );
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -63,7 +118,8 @@ export default async function HomePage() {
           Luyện tập kiến thức Khoa học máy tính
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mx-auto max-w-3xl">
-          Chọn một chủ đề bên dưới để bắt đầu bài kiểm tra và thử thách kiến thức của bạn.
+          Chọn một chủ đề bên dưới để bắt đầu bài kiểm tra và thử thách kiến
+          thức của bạn.
         </p>
       </section>
 
@@ -79,7 +135,7 @@ export default async function HomePage() {
 
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categoryPage.items.map((category) => (
+          {currentCategoryPage.items.map((category) => (
             <CategoryCard
               key={category.id}
               id={category.id}
@@ -91,28 +147,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {categoryPage.total_pages > 1 && (
-        <section className="mt-12 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" />
-              </PaginationItem>
-              {[...Array(categoryPage.total_pages)].map((_, i) => (
-                <PaginationItem key={i}>
-                  {/* only display, no logic for change page yet */}
-                  <PaginationLink href="#" isActive={i + 1 === currentPage}>
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext href="#" />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </section>
-      )}
+      <CSQuizzPagination totalPages={currentCategoryPage.total_pages} />
     </div>
   );
 }

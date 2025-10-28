@@ -44,7 +44,7 @@ pub async fn get_my_result(State(pool): State<QuizBankPool>) -> Result<Json<Valu
     todo!()
 }
 
-pub async fn get_user_info(
+pub async fn get_user_by_id(
     State(pool): State<QuizBankPool>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {

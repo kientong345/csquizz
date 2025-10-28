@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { Category, CategoryQuery } from "@/types/category";
-import { QuizMetadata, QuizQuery } from "@/types/quiz";
-import { Page } from "@/types/page";
+import { Category, CategoryQuery } from '@/types/category';
+import { QuizMetadata, QuizQuery } from '@/types/quiz';
+import { Page } from '@/types/page';
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -27,15 +27,17 @@ const defaultQuizPage: Page<QuizMetadata> = {
  * @param {CategoryQuery} query - The query object with page and size.
  * @returns {Promise<Page<Category>>} A promise that resolves to a page of categories.
  */
-export async function getCategories(query: CategoryQuery): Promise<Page<Category>> {
+export async function getCategories(
+  query: CategoryQuery
+): Promise<Page<Category>> {
   try {
     const response = await apiClient.get('/categories', { params: query });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error("Axios error fetching categories:", error.message);
+      console.error('Axios error fetching categories:', error.message);
     } else {
-      console.error("Unexpected error fetching categories:", error);
+      console.error('Unexpected error fetching categories:', error);
     }
     return defaultCategoryPage;
   }
@@ -46,15 +48,17 @@ export async function getCategories(query: CategoryQuery): Promise<Page<Category
  * @param {QuizQuery} query - The query object with parameters like category_id, page, size, etc.
  * @returns {Promise<Page<QuizMetadata>>} A promise that resolves to a page of quiz metadata.
  */
-export async function getQuizzes(query: QuizQuery): Promise<Page<QuizMetadata>> {
+export async function getQuizzes(
+  query: QuizQuery
+): Promise<Page<QuizMetadata>> {
   try {
     const response = await apiClient.get('/quizzes', { params: query });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error("Axios error fetching quizzes:", error.message);
+      console.error('Axios error fetching quizzes:', error.message);
     } else {
-      console.error("Unexpected error fetching quizzes:", error);
+      console.error('Unexpected error fetching quizzes:', error);
     }
     return defaultQuizPage;
   }

@@ -1,0 +1,7 @@
+dist/
+build/
+.out/
+.next/
+public/
+coverage/
+node_modules/
