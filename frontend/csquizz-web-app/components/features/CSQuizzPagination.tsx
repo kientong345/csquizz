@@ -78,10 +78,10 @@ const CSQuizzPagination = ({
           return (
             <PaginationItem key={index}>
               <PaginationLink
-                href={createPageURL(page.toString())}
+                href={createPageURL(page)}
                 isActive={page === currentPage}
               >
-                {page.toString()}
+                {page}
               </PaginationLink>
             </PaginationItem>
           );

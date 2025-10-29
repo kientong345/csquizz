@@ -104,12 +104,12 @@ export default async function HomePage({
     typeof resolvedSearchParams.page === 'string'
       ? Number(resolvedSearchParams.page)
       : 1;
-  // const currentCategoryPage = await getCategories({ page: page, size: CATEGORY_PER_PAGE });
-  const currentCategoryPage = getPage(
-    mockCategoryPage,
-    page,
-    CATEGORY_PER_PAGE
-  );
+  const currentCategoryPage = await getCategories({ page: page, size: CATEGORY_PER_PAGE });
+  // const currentCategoryPage = getPage(
+  //   mockCategoryPage,
+  //   page,
+  //   CATEGORY_PER_PAGE
+  // );
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -147,7 +147,9 @@ export default async function HomePage({
         </div>
       </section>
 
-      <CSQuizzPagination totalPages={currentCategoryPage.total_pages} />
+      <div className="mt-8">
+        <CSQuizzPagination totalPages={currentCategoryPage.total_pages} />
+      </div>
     </div>
   );
 }

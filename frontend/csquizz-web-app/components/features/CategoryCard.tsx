@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { slugify } from '@/lib/utils';
 
 type CategoryCardProps = {
   id: number;
@@ -22,6 +23,11 @@ export default function CategoryCard({
   imageUrl,
   description,
 }: CategoryCardProps) {
+  const quizzesHref = {
+    pathname: `/${slugify(name)}/quizzes`,
+    query: { category_id: id },
+  };
+
   return (
     <Card className="flex flex-col h-full hover:border-primary transition-colors overflow-hidden">
       {imageUrl && (
@@ -40,7 +46,7 @@ export default function CategoryCard({
       </CardHeader>
       <div className="flex-grow" />
       <CardFooter>
-        <Link href={`/category/${id}`} className="w-full">
+        <Link href={quizzesHref} className="w-full">
           <Button className="w-full">Bắt đầu</Button>
         </Link>
       </CardFooter>
