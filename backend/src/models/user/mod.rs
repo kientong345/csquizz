@@ -18,6 +18,13 @@ pub enum OrderType {
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
+pub struct UserMinimal {
+    pub id: i32,
+    pub display_name: String,
+    pub avatar_url: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct UserPubInfo {
     pub id: i32,
     pub display_name: String,

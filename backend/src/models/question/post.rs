@@ -3,29 +3,17 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::{AnswerOption, FetchedQuestion, Question, QuestionForm},
+    question::{KeyType, OptionKey, Question, QuestionForm, QuestionWithKey, TextKey},
 };
-
-#[derive(Debug, Deserialize)]
-pub struct PostOption {
-    pub text: String,
-    pub is_correct: bool,
-}
-
-#[derive(Debug, Deserialize)]
-pub enum PostQuestionForm {
-    MultipleChoice(Vec<PostOption>),
-    SingleChoice(Vec<PostOption>),
-    TextEntry(String), // correct_entry
-}
 
 #[derive(Debug, Deserialize)]
 pub struct PostQuestion {
     pub quiz_id: i32,
+    pub form: String, // "multiple-choice" || "single-choice" || "text-entry"
     pub text: String,
     pub image_url: Option<String>,
-    pub explanation: Option<String>,
-    pub form: PostQuestionForm,
+    pub option_keys: Option<Vec<OptionKey>>,
+    pub text_key: Option<TextKey>,
 }
 
 impl Question {
@@ -33,49 +21,116 @@ impl Question {
         data: PostQuestion,
         connection: &mut PgConnection,
     ) -> Result<Question, ModelError> {
-        let (form, options_to_insert, correct_entry) = match data.form {
-            PostQuestionForm::MultipleChoice(options) => {
-                (String::from("multiple-choice"), Some(options), None)
+        let question = match data.form.as_str() {
+            "multiple-choice" => {
+                if data.option_keys.is_none() {
+                    return Err(ModelError::BadPost("no option_keys".to_string()));
+                }
+                let row = sqlx::query!(
+                    r#"INSERT INTO questions (quiz_id, question_type, question_text, image_url, answer_key)
+                    VALUES ($1, $2::text::question_form, $3, $4, $5)
+                    RETURNING id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key"#,
+                    data.quiz_id,
+                    data.form,
+                    data.text,
+                    data.image_url,
+                    serde_json::json!(data.option_keys.unwrap()),
+                ).fetch_one(connection).await?;
+
+                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
+                Question::WithKey(QuestionWithKey {
+                    id: row.id,
+                    form: QuestionForm::MultipleChoice,
+                    text: row.text,
+                    image_url: row.image_url,
+                    answer_key: KeyType::MultipleChoiceKey(option_keys).validate()?,
+                })
             }
-            PostQuestionForm::SingleChoice(options) => {
-                (String::from("single-choice"), Some(options), None)
+            "single-choice" => {
+                if data.option_keys.is_none() {
+                    return Err(ModelError::BadPost("no option_keys".to_string()));
+                }
+                let row = sqlx::query!(
+                    r#"INSERT INTO questions (quiz_id, question_type, question_text, image_url, answer_key)
+                    VALUES ($1, $2::text::question_form, $3, $4, $5)
+                    RETURNING id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key"#,
+                    data.quiz_id,
+                    data.form,
+                    data.text,
+                    data.image_url,
+                    serde_json::json!(data.option_keys.unwrap()),
+                ).fetch_one(connection).await?;
+
+                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
+                Question::WithKey(QuestionWithKey {
+                    id: row.id,
+                    form: QuestionForm::SingleChoice,
+                    text: row.text,
+                    image_url: row.image_url,
+                    answer_key: KeyType::SingleChoiceKey(option_keys).validate()?,
+                })
             }
-            PostQuestionForm::TextEntry(correct_text) => {
-                (String::from("text-entry"), None, Some(correct_text))
+            "text-entry" => {
+                if data.text_key.is_none() {
+                    return Err(ModelError::BadPost("no text_key".to_string()));
+                }
+                let row = sqlx::query!(
+                    r#"INSERT INTO questions (quiz_id, question_type, question_text, image_url, answer_key)
+                    VALUES ($1, $2::text::question_form, $3, $4, $5)
+                    RETURNING id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key"#,
+                    data.quiz_id,
+                    data.form,
+                    data.text,
+                    data.image_url,
+                    serde_json::json!(data.text_key.unwrap()),
+                ).fetch_one(connection).await?;
+
+                let text_key: TextKey = serde_json::from_value(row.answer_key)?;
+                Question::WithKey(QuestionWithKey {
+                    id: row.id,
+                    form: QuestionForm::TextEntry,
+                    text: row.text,
+                    image_url: row.image_url,
+                    answer_key: KeyType::TextEntryKey(text_key).validate()?,
+                })
+            }
+            _ => {
+                return Err(ModelError::BadPost(
+                    "wrong question form, only accept:
+                    \"multiple-choice\" || \"single-choice\" || \"text-entry\""
+                        .to_string(),
+                ));
             }
         };
 
-        let fetched_question = sqlx::query_as!(
-            FetchedQuestion,
-            r#"INSERT INTO questions (quiz_id, question_type, question_text, image_url, correct_entry, explanation)
-            VALUES ($1, $2::text::question_form, $3, $4, $5, $6)
-            RETURNING id, question_type AS "form: QuestionForm", question_text AS text, image_url, explanation"#,
-            data.quiz_id,
-            form,
-            data.text,
-            data.image_url,
-            correct_entry,
-            data.explanation,
-        ).fetch_one(&mut *connection).await?;
+        Ok(question)
+    }
+}
 
-        let mut options = Vec::new();
-        if let Some(inserted_options) = options_to_insert {
-            for option in inserted_options {
-                let inserted_option = sqlx::query_as!(
-                    AnswerOption,
-                    r#"INSERT INTO options (question_id, option_text, is_correct)
-                    VALUES ($1, $2, $3) RETURNING id, option_text AS text"#,
-                    fetched_question.id,
-                    option.text,
-                    option.is_correct,
-                )
-                .fetch_one(&mut *connection)
-                .await?;
-
-                options.push(inserted_option);
+impl KeyType {
+    fn validate(self) -> Result<Self, ModelError> {
+        match &self {
+            KeyType::MultipleChoiceKey(_) => Ok(self),
+            KeyType::SingleChoiceKey(keys) => {
+                let mut correct_option_count: u8 = 0;
+                for key in keys {
+                    if key.is_correct {
+                        correct_option_count += 1;
+                        if correct_option_count > 1 {
+                            return Err(ModelError::BadPost(
+                                "only one correct answer allowed".to_string(),
+                            ));
+                        }
+                    }
+                }
+                if correct_option_count == 0 {
+                    return Err(ModelError::BadPost(
+                        "one correct answer must be provided".to_string(),
+                    ));
+                }
+                Ok(self)
             }
+            KeyType::TextEntryKey(_) => Ok(self),
         }
-
-        Ok(fetched_question.into_full_options(options))
     }
 }

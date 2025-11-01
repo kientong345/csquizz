@@ -46,7 +46,7 @@ CREATE TABLE results (
     id              SERIAL PRIMARY KEY,
     user_id         INT REFERENCES users(id) ON DELETE CASCADE,
     quiz_id         INT REFERENCES quizzes(id) ON DELETE CASCADE,
-	score			INT NOT NULL,
+	score			FLOAT NOT NULL,
     total_questions INT NOT NULL,
     correct_answers INT NOT NULL,
     submitted_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -1,76 +1,89 @@
-use std::collections::HashMap;
-
-use sqlx::{prelude::FromRow, PgConnection};
+use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::{AnswerOption, FetchedQuestion, Question, QuestionForm},
+    question::{
+        KeyType, NoKeyType, OptionContent, OptionKey, QuestionForm, QuestionNoKey, QuestionWithKey,
+        TextKey,
+    },
 };
 
-#[derive(Debug, FromRow)]
-struct FetchedAnswerOption {
-    id: i32,
-    option_text: String,
-    question_id: i32,
-}
-
-impl AnswerOption {
-    pub async fn get_by_question_ids(
-        question_ids: &[i32],
-        connection: &mut PgConnection,
-    ) -> Result<HashMap<i32, Vec<AnswerOption>>, ModelError> {
-        if question_ids.is_empty() {
-            return Ok(HashMap::new());
-        }
-
-        let fetched_options = sqlx::query_as::<_, FetchedAnswerOption>(
-            "SELECT id, option_text, question_id FROM options WHERE question_id = ANY($1)",
-        )
-        .bind(question_ids)
-        .fetch_all(connection)
-        .await?;
-
-        let mut options_map: HashMap<i32, Vec<AnswerOption>> = HashMap::new();
-        for fetched in fetched_options {
-            options_map
-                .entry(fetched.question_id)
-                .or_default()
-                .push(AnswerOption {
-                    id: fetched.id,
-                    text: fetched.option_text,
-                });
-        }
-        Ok(options_map)
-    }
-}
-
-impl Question {
+impl QuestionNoKey {
     pub async fn get_by_id(
         question_id: i32,
         connection: &mut PgConnection,
-    ) -> Result<Question, ModelError> {
-        let fetched_question = sqlx::query_as!(
-            FetchedQuestion,
-            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, explanation FROM questions
-            WHERE id = $1"#,
+    ) -> Result<QuestionNoKey, ModelError> {
+        let row = sqlx::query!(
+            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key
+            FROM questions WHERE id = $1"#,
             question_id,
-        ).fetch_one(&mut *connection).await?;
+        ).fetch_one(connection).await?;
 
-        let options = sqlx::query_as!(
-            AnswerOption,
-            "SELECT id, option_text AS text FROM options WHERE question_id = $1",
+        let answer_no_key = match row.form {
+            QuestionForm::MultipleChoice => {
+                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
+                let mut option_contents = Vec::new();
+                for key in option_keys {
+                    option_contents.push(OptionContent(key.content));
+                }
+                NoKeyType::MultipleChoiceKey(option_contents)
+            }
+            QuestionForm::SingleChoice => {
+                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
+                let mut option_contents = Vec::new();
+                for key in option_keys {
+                    option_contents.push(OptionContent(key.content));
+                }
+                NoKeyType::SingleChoiceKey(option_contents)
+            }
+            QuestionForm::TextEntry => {
+                let _text_key: TextKey = serde_json::from_value(row.answer_key)?;
+                NoKeyType::TextEntryKey
+            }
+        };
+
+        Ok(QuestionNoKey {
+            id: row.id,
+            form: row.form,
+            text: row.text,
+            image_url: row.image_url,
+            answer_no_key,
+        })
+    }
+}
+
+impl QuestionWithKey {
+    pub async fn get_by_id(
+        question_id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<QuestionWithKey, ModelError> {
+        let row = sqlx::query!(
+            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key
+            FROM questions WHERE id = $1"#,
             question_id,
-        )
-        .fetch_all(connection)
-        .await?;
+        ).fetch_one(connection).await?;
 
-        Ok(Question {
-            id: question_id,
-            form: fetched_question.form,
-            text: fetched_question.text,
-            image_url: fetched_question.image_url,
-            explanation: fetched_question.explanation,
-            options,
+        let answer_key = match row.form {
+            QuestionForm::MultipleChoice => {
+                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
+                KeyType::MultipleChoiceKey(option_keys)
+            }
+            QuestionForm::SingleChoice => {
+                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
+                KeyType::SingleChoiceKey(option_keys)
+            }
+            QuestionForm::TextEntry => {
+                let text_key: TextKey = serde_json::from_value(row.answer_key)?;
+                KeyType::TextEntryKey(text_key)
+            }
+        };
+
+        Ok(QuestionWithKey {
+            id: row.id,
+            form: row.form,
+            text: row.text,
+            image_url: row.image_url,
+            answer_key,
         })
     }
 }

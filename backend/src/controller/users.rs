@@ -9,7 +9,7 @@ use crate::{
     controller::error::ControllerError,
     database::pool::QuizBankPool,
     models::{
-        result::paginate::QuestionAnswerResultQuery,
+        result::paginate::QuestionResultQuery,
         user::{UserFullDetail, UserPubInfo},
     },
 };
@@ -57,7 +57,7 @@ pub async fn get_user_by_id(
 
 pub async fn get_user_results(
     State(pool): State<QuizBankPool>,
-    Query(query): Query<QuestionAnswerResultQuery>,
+    Query(query): Query<QuestionResultQuery>,
 ) -> Result<Json<Value>, StatusCode> {
     todo!()
 }

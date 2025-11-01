@@ -10,9 +10,9 @@ use crate::{
     database::pool::QuizBankPool,
     models::{
         pagination::Paginate,
-        question::{paginate::QuestionQuery, Question},
+        question::{paginate::QuestionQuery, Question, QuestionNoKey},
         quiz::{paginate::QuizQuery, QuizMetadata},
-        submission::{PostQuiz, Submission},
+        submission::{PostQuiz, SubmittedQuiz},
     },
 };
 
@@ -43,29 +43,42 @@ pub async fn get_questions(
     Query(query): Query<QuestionQuery>,
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.get_connection().await?;
-    let page = Question::page(&query, &mut *connection).await?;
+    let page = QuestionNoKey::page(&query, &mut *connection).await?;
     Ok(Json(json!(page)))
 }
 
 pub async fn submit_quiz(
     State(pool): State<QuizBankPool>,
-    Json(submission): Json<Submission>,
+    Json(submission): Json<SubmittedQuiz>,
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.start_transaction().await?;
-    let submission_result = submission.evaluate(&mut *connection).await?;
+
+    let quiz_result = submission
+        .evaluate(&mut *connection)
+        .await?
+        .into_tmp_quiz_result(&mut *connection)
+        .await?;
+
     connection.commit().await?;
-    Ok(Json(json!(submission_result)))
+
+    Ok(Json(json!(quiz_result)))
 }
 
 pub async fn submit_quiz_and_store_result(
     State(pool): State<QuizBankPool>,
-    Json(submission): Json<Submission>,
+    Json(submission): Json<SubmittedQuiz>,
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.start_transaction().await?;
-    let submission_result = submission.evaluate(&mut *connection).await?;
-    submission_result.store(-1, &mut *connection).await?;
+
+    let quiz_result = submission
+        .evaluate(&mut *connection)
+        .await?
+        .into_quiz_result(&mut *connection)
+        .await?;
+
     connection.commit().await?;
-    Ok(Json(json!(submission_result.summary.id)))
+
+    Ok(Json(json!(quiz_result)))
 }
 
 pub async fn create_quiz(

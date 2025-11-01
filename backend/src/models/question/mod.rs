@@ -8,15 +8,33 @@ pub mod paginate;
 pub mod post;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct AnswerOption {
-    pub id: i32,
-    pub text: String,
+pub struct OptionKey {
+    pub content: String,
+    pub is_correct: bool,
+    pub explanation: Option<String>,
 }
 
-impl ToString for AnswerOption {
-    fn to_string(&self) -> String {
-        String::from(&self.text)
-    }
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct OptionContent(String);
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct TextKey {
+    pub correct_entry: String,
+    pub explanation: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum KeyType {
+    SingleChoiceKey(Vec<OptionKey>),
+    MultipleChoiceKey(Vec<OptionKey>),
+    TextEntryKey(TextKey),
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum NoKeyType {
+    SingleChoiceKey(Vec<OptionContent>),
+    MultipleChoiceKey(Vec<OptionContent>),
+    TextEntryKey,
 }
 
 #[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq, Clone, Copy)]
@@ -28,13 +46,27 @@ pub enum QuestionForm {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Question {
+pub struct QuestionNoKey {
     pub id: i32,
     pub form: QuestionForm,
     pub text: String,
     pub image_url: Option<String>,
-    pub explanation: Option<String>,
-    pub options: Vec<AnswerOption>,
+    pub answer_no_key: NoKeyType,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct QuestionWithKey {
+    pub id: i32,
+    pub form: QuestionForm,
+    pub text: String,
+    pub image_url: Option<String>,
+    pub answer_key: KeyType,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum Question {
+    NoKey(QuestionNoKey),
+    WithKey(QuestionWithKey),
 }
 
 impl Question {
@@ -42,33 +74,12 @@ impl Question {
         quiz_id: i32,
         connection: &mut PgConnection,
     ) -> Result<i64, ModelError> {
-        Ok(
-            sqlx::query_scalar("SELECT COUNT(*) FROM questions WHERE quiz_id = $1")
-                .bind(quiz_id)
-                .fetch_one(connection)
-                .await?,
+        Ok(sqlx::query_scalar!(
+            r#"SELECT COUNT(*) FROM questions WHERE quiz_id = $1"#,
+            quiz_id
         )
-    }
-}
-
-#[derive(Debug)]
-struct FetchedQuestion {
-    id: i32,
-    form: QuestionForm,
-    text: String,
-    image_url: Option<String>,
-    explanation: Option<String>,
-}
-
-impl FetchedQuestion {
-    fn into_full_options(self, options: Vec<AnswerOption>) -> Question {
-        Question {
-            id: self.id,
-            form: self.form,
-            text: self.text,
-            image_url: self.image_url,
-            explanation: self.explanation,
-            options,
-        }
+        .fetch_one(connection)
+        .await?
+        .unwrap_or(0))
     }
 }

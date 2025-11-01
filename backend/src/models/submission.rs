@@ -3,103 +3,151 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::{post::PostQuestion, Question},
-    quiz::{post::PostQuizMetadata, QuizMetadata},
-    result::{
-        AnswerResultType, QuestionAnswerResult, QuestionContent, QuizResult, QuizResultSummary,
-    },
+    question::post::PostQuestion,
+    quiz::post::PostQuizMetadata,
+    result::{QuizResult, UserAnswer},
 };
-
-#[derive(Debug, Deserialize)]
-pub enum AnswerType {
-    ChoicesAnswer(Vec<i32>), // Vec<option_id>
-    TextAnswer(String),
-}
 
 #[derive(Debug, Deserialize)]
 pub struct SubmittedAnswer {
     pub question_id: i32,
-    pub answer: AnswerType,
+    pub question_form: String, // "single-choice" || "multiple-choice" || "text-entry"
+    pub single_choice: Option<i32>,
+    pub multiple_choices: Option<Vec<i32>>,
+    pub entry: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Submission {
-    pub user_id: i32,
+pub struct SubmittedQuiz {
+    pub user_id: Option<i32>,
     pub quiz_id: i32,
     pub answers: Vec<SubmittedAnswer>,
 }
 
-impl Submission {
-    pub async fn evaluate(self, connection: &mut PgConnection) -> Result<QuizResult, ModelError> {
-        let mut result = Vec::new();
-        let total_questions = self.answers.len() as i32;
-        let mut correct_answers = 0;
+impl SubmittedQuiz {
+    pub async fn evaluate(
+        self,
+        connection: &mut PgConnection,
+    ) -> Result<EvaluatedResult, ModelError> {
+        // let mut result = Vec::new();
+        // let total_questions = self.answers.len() as i32;
+        // let mut correct_answers = 0;
 
-        for SubmittedAnswer {
-            question_id,
-            answer,
-        } in self.answers
-        {
-            match answer {
-                AnswerType::ChoicesAnswer(choices) => {
-                    let question =
-                        QuestionContent::from(Question::get_by_id(question_id, connection).await?);
-                    let mut answer_results = Vec::new();
-                    for choice in choices {
-                        let is_correct = sqlx::query!(
-                            r#"SELECT is_correct FROM options WHERE id = $1"#,
-                            choice,
-                        )
-                        .fetch_one(&mut *connection)
-                        .await?
-                        .is_correct
-                        .unwrap_or(false);
-                        answer_results.push((choice, is_correct));
-                    }
+        // for SubmittedAnswer {
+        //     question_id,
+        //     answer,
+        // } in self.answers
+        // {
+        //     match answer {
+        //         AnswerType::ChoicesAnswer(choices) => {
+        //             let question =
+        //                 QuestionContent::from(Question::get_by_id(question_id, connection).await?);
+        //             let mut answer_results = Vec::new();
+        //             for choice in choices {
+        //                 let is_correct = sqlx::query!(
+        //                     r#"SELECT is_correct FROM options WHERE id = $1"#,
+        //                     choice,
+        //                 )
+        //                 .fetch_one(&mut *connection)
+        //                 .await?
+        //                 .is_correct
+        //                 .unwrap_or(false);
+        //                 answer_results.push((choice, is_correct));
+        //             }
 
-                    result.push(QuestionAnswerResult {
-                        question_id,
-                        question,
-                        answer: AnswerResultType::ChoicesResult(answer_results),
-                    });
-                }
-                AnswerType::TextAnswer(text_entry) => {
-                    let question =
-                        QuestionContent::from(Question::get_by_id(question_id, connection).await?);
-                    let correct_entry = sqlx::query!(
-                        r#"SELECT correct_entry FROM questions WHERE id = $1"#,
-                        question_id,
-                    )
-                    .fetch_one(&mut *connection)
-                    .await?
-                    .correct_entry
-                    .unwrap_or_default();
-                    let is_correct = &text_entry == &correct_entry;
-                    if is_correct {
-                        correct_answers += 1;
-                    }
+        //             result.push(QuestionAnswerResult {
+        //                 question_id,
+        //                 question,
+        //                 answer: AnswerResultType::ChoicesResult(answer_results),
+        //             });
+        //         }
+        //         AnswerType::TextAnswer(text_entry) => {
+        //             let question =
+        //                 QuestionContent::from(Question::get_by_id(question_id, connection).await?);
+        //             let correct_entry = sqlx::query!(
+        //                 r#"SELECT correct_entry FROM questions WHERE id = $1"#,
+        //                 question_id,
+        //             )
+        //             .fetch_one(&mut *connection)
+        //             .await?
+        //             .correct_entry
+        //             .unwrap_or_default();
+        //             let is_correct = &text_entry == &correct_entry;
+        //             if is_correct {
+        //                 correct_answers += 1;
+        //             }
 
-                    result.push(QuestionAnswerResult {
-                        question_id,
-                        question,
-                        answer: AnswerResultType::TextResult(text_entry, is_correct),
-                    });
-                }
-            }
+        //             result.push(QuestionAnswerResult {
+        //                 question_id,
+        //                 question,
+        //                 answer: AnswerResultType::TextResult(text_entry, is_correct),
+        //             });
+        //         }
+        //     }
+        // }
+
+        // let quiz_info = QuizMetadata::get_by_id(self.quiz_id, connection).await?;
+        // Ok(QuizResult {
+        //     summary: QuizResultSummary {
+        //         id: -1,
+        //         quiz_id: Some(quiz_info.id),
+        //         quiz_title: quiz_info.title,
+        //         score: (correct_answers / total_questions) as f64,
+        //         total_questions,
+        //         correct_answers,
+        //     },
+        //     result,
+        // })
+        todo!()
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct EvaluatedQuizResultSummary {
+    pub quiz_id: i32,
+    pub score: f64,
+    pub total_questions: i32,
+    pub correct_answers: i32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct EvaluatedQuestionResult {
+    pub result_id: i32,
+    pub question_id: i32,
+    pub answer_data: UserAnswer,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct EvaluatedResult {
+    pub user_id: Option<i32>,
+    pub summary: EvaluatedQuizResultSummary,
+    pub result: Vec<EvaluatedQuestionResult>,
+}
+
+impl EvaluatedResult {
+    pub async fn into_quiz_result(
+        self,
+        connection: &mut PgConnection,
+    ) -> Result<QuizResult, ModelError> {
+        if self.user_id.is_none() {
+            return Err(ModelError::BadPost(
+                "unauthorized users won't be able to store their results".to_string(),
+            ));
         }
+        Ok(QuizResult::create_from(
+            self.user_id.unwrap(),
+            &self.summary,
+            &self.result,
+            connection,
+        )
+        .await?)
+    }
 
-        let quiz_info = QuizMetadata::get_by_id(self.quiz_id, connection).await?;
-        Ok(QuizResult {
-            summary: QuizResultSummary {
-                id: -1,
-                quiz_id: Some(quiz_info.id),
-                quiz_title: quiz_info.title,
-                score: (correct_answers / total_questions) as f64,
-                total_questions,
-                correct_answers,
-            },
-            result,
-        })
+    pub async fn into_tmp_quiz_result(
+        self,
+        connection: &mut PgConnection,
+    ) -> Result<QuizResult, ModelError> {
+        Ok(QuizResult::get_from(&self.summary, &self.result, connection).await?)
     }
 }
 

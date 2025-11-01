@@ -18,6 +18,14 @@ pub enum QuizDifficulty {
     Hard,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QuizMinimal {
+    pub id: i32,
+    pub title: String,
+    pub category: String,
+    pub difficulty: Option<QuizDifficulty>,
+}
+
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct QuizMetadata {
     pub id: i32,

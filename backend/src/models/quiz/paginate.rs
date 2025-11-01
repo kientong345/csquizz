@@ -101,7 +101,8 @@ mod tests {
     use crate::{
         database::load_sample,
         models::{
-            pagination::Paginate, quiz::{paginate::QuizQuery, QuizMetadata},
+            pagination::Paginate,
+            quiz::{paginate::QuizQuery, QuizMetadata},
         },
     };
 
@@ -123,7 +124,10 @@ mod tests {
 
         assert_eq!(quiz_page.total_items, 3);
         assert_eq!(quiz_page.total_pages, 1);
-        assert_eq!(quiz_page.items[0].title, "Array and String Basics".to_string());
+        assert_eq!(
+            quiz_page.items[0].title,
+            "Array and String Basics".to_string()
+        );
         assert_eq!(quiz_page.items[1].category, "Algorithms".to_string());
         assert_eq!(quiz_page.items[2].question_count, 2);
     }

@@ -50,21 +50,9 @@ model Question {
   question_type   QuestionType
   question_text   String
   image_url       String?
-  correct_entry   String?
-  explanation     String?
+  answer_key      Json
  
   quiz            Quiz        @relation(fields: [quiz_id], references: [id])
-  options         Option[]
-  user_answers    UserAnswer[]
-}
- 
-model Option {
-  id              Int         @id @default(autoincrement())
-  question_id     Int
-  option_text     String
-  is_correct      Boolean     @default(false)
- 
-  question        Question    @relation(fields: [question_id], references: [id])
   user_answers    UserAnswer[]
 }
  
@@ -72,7 +60,7 @@ model Result {
   id              Int         @id @default(autoincrement())
   user_id         Int
   quiz_id         Int
-  score           Int
+  score           Float
   total_questions Int
   correct_answers Int
   submitted_at    DateTime    @default(now())
@@ -86,13 +74,10 @@ model UserAnswer {
   id              Int         @id @default(autoincrement())
   result_id       Int
   question_id     Int
-  selected_option Int?
-  entried_text    String?
-  is_correct      Boolean?
+  answer_data     Json
  
   result          Result      @relation(fields: [result_id], references: [id])
   question        Question    @relation(fields: [question_id], references: [id])
-  option          Option?     @relation(fields: [selected_option], references: [id])
 }
  
 enum Role {
@@ -111,3 +96,36 @@ enum QuestionType {
   multiple_choice
   text_entry
 }
+
+/* jsonb types
+// key == 'đáp án'
+OptionKeys {
+  keys: [
+    {
+      content: string,
+      image_url?: string,
+      is_correct: boolean,
+      explanation?: string
+    },
+    ...
+  ]
+}
+
+TextKey {
+  correct_entry: string,
+  explanation?: string
+}
+
+UserChoices {
+  choices: [
+    {
+      option_index: number
+    },
+    ...
+  ]
+}
+
+UserEntry {
+  entry: string
+}
+*/
