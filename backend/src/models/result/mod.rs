@@ -108,6 +108,20 @@ pub struct QuizResult {
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
+pub struct TmpQuizResultSummary {
+    pub quiz: QuizMinimal,
+    pub score: f64,
+    pub total_questions: i32,
+    pub correct_answers: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TmpQuizResult {
+    pub summary: TmpQuizResultSummary,
+    pub result: Vec<QuestionResult>,
+}
+
+#[derive(Debug, Deserialize, Serialize, FromRow)]
 struct FetchedQuizSummary {
     id: i32,
     user_id: i32,

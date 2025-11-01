@@ -5,7 +5,7 @@ use crate::models::{
     error::ModelError,
     question::post::PostQuestion,
     quiz::post::PostQuizMetadata,
-    result::{QuizResult, UserAnswer},
+    result::{QuizResult, TmpQuizResult, UserAnswer},
 };
 
 #[derive(Debug, Deserialize)]
@@ -146,8 +146,8 @@ impl EvaluatedResult {
     pub async fn into_tmp_quiz_result(
         self,
         connection: &mut PgConnection,
-    ) -> Result<QuizResult, ModelError> {
-        Ok(QuizResult::get_from(&self.summary, &self.result, connection).await?)
+    ) -> Result<TmpQuizResult, ModelError> {
+        Ok(TmpQuizResult::create_from(&self.summary, &self.result, connection).await?)
     }
 }
 

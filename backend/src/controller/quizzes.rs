@@ -53,7 +53,7 @@ pub async fn submit_quiz(
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = pool.start_transaction().await?;
 
-    let quiz_result = submission
+    let tmp_quiz_result = submission
         .evaluate(&mut *connection)
         .await?
         .into_tmp_quiz_result(&mut *connection)
@@ -61,7 +61,7 @@ pub async fn submit_quiz(
 
     connection.commit().await?;
 
-    Ok(Json(json!(quiz_result)))
+    Ok(Json(json!(tmp_quiz_result)))
 }
 
 pub async fn submit_quiz_and_store_result(

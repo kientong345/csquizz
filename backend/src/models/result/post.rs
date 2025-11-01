@@ -2,7 +2,7 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    result::{QuestionResult, QuizResult, QuizResultSummary, UserAnswer},
+    result::{QuestionResult, QuizResult, QuizResultSummary, TmpQuizResult, UserAnswer},
     submission::{EvaluatedQuestionResult, EvaluatedQuizResultSummary},
 };
 
@@ -72,5 +72,15 @@ impl QuizResult {
             result.push(QuestionResult::create_from(data, connection).await?);
         }
         Ok(QuizResult { summary, result })
+    }
+}
+
+impl TmpQuizResult {
+    pub async fn create_from(
+        summary_data: &EvaluatedQuizResultSummary,
+        result_data: &Vec<EvaluatedQuestionResult>,
+        connection: &mut PgConnection,
+    ) -> Result<TmpQuizResult, ModelError> {
+        todo!()
     }
 }

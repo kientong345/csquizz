@@ -5,10 +5,8 @@ use crate::models::{
     question::{QuestionForm, QuestionWithKey},
     quiz::{QuizDifficulty, QuizMinimal},
     result::{
-        FetchedQuizSummary, QuestionResult, QuizResult, QuizResultSummary, UserAnswer, UserChoice,
-        UserEntry,
+        FetchedQuizSummary, QuestionResult, QuizResultSummary, UserAnswer, UserChoice, UserEntry,
     },
-    submission::{EvaluatedQuestionResult, EvaluatedQuizResultSummary},
 };
 
 impl QuizResultSummary {
@@ -77,15 +75,5 @@ impl QuestionResult {
             question_with_key,
             user_answer,
         })
-    }
-}
-
-impl QuizResult {
-    pub async fn get_from(
-        summary_data: &EvaluatedQuizResultSummary,
-        result_data: &Vec<EvaluatedQuestionResult>,
-        connection: &mut PgConnection,
-    ) -> Result<QuizResult, ModelError> {
-        todo!()
     }
 }
