@@ -7,30 +7,30 @@ pub mod get;
 pub mod paginate;
 pub mod post;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct OptionKey {
     pub content: String,
     pub is_correct: bool,
     pub explanation: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct OptionContent(String);
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct TextKey {
     pub correct_entry: String,
     pub explanation: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum KeyType {
     SingleChoiceKey(Vec<OptionKey>),
     MultipleChoiceKey(Vec<OptionKey>),
     TextEntryKey(TextKey),
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum NoKeyType {
     SingleChoiceKey(Vec<OptionContent>),
     MultipleChoiceKey(Vec<OptionContent>),
@@ -45,7 +45,7 @@ pub enum QuestionForm {
     TextEntry,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct QuestionNoKey {
     pub id: i32,
     pub form: QuestionForm,
@@ -54,7 +54,7 @@ pub struct QuestionNoKey {
     pub answer_no_key: NoKeyType,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct QuestionWithKey {
     pub id: i32,
     pub form: QuestionForm,
@@ -63,7 +63,7 @@ pub struct QuestionWithKey {
     pub answer_key: KeyType,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum Question {
     NoKey(QuestionNoKey),
     WithKey(QuestionWithKey),

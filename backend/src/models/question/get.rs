@@ -87,3 +87,74 @@ impl QuestionWithKey {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use sqlx::{pool::PoolConnection, Postgres};
+
+    use crate::{
+        database::load_sample,
+        models::question::{
+            KeyType, NoKeyType, QuestionForm, QuestionNoKey, QuestionWithKey, TextKey,
+        },
+    };
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_get_nokey_by_id(mut conn: PoolConnection<Postgres>) {
+        load_sample(&mut conn).await;
+
+        let question_id1 = QuestionNoKey::get_by_id(1, &mut conn).await.unwrap();
+        let question_id3 = QuestionNoKey::get_by_id(3, &mut conn).await.unwrap();
+        let question_id2 = QuestionNoKey::get_by_id(2, &mut conn).await.unwrap();
+
+        assert_eq!(question_id1.form, QuestionForm::SingleChoice);
+        let option_3rd = if let NoKeyType::SingleChoiceKey(no_keys) = question_id1.answer_no_key {
+            no_keys[2].0.clone()
+        } else {
+            "".to_string()
+        };
+        assert_eq!(option_3rd, String::from("O(log n)"));
+        assert_eq!(question_id3.form, QuestionForm::TextEntry);
+        assert_eq!(question_id3.answer_no_key, NoKeyType::TextEntryKey);
+        let option_1st = if let NoKeyType::MultipleChoiceKey(no_keys) = question_id2.answer_no_key {
+            no_keys[0].0.clone()
+        } else {
+            "".to_string()
+        };
+        assert_eq!(option_1st, String::from("String"));
+    }
+
+    #[sqlx::test(migrations = "./migrations")]
+    async fn test_get_key_by_id(mut conn: PoolConnection<Postgres>) {
+        load_sample(&mut conn).await;
+
+        let question_id1 = QuestionWithKey::get_by_id(1, &mut conn).await.unwrap();
+        let question_id3 = QuestionWithKey::get_by_id(3, &mut conn).await.unwrap();
+        let question_id2 = QuestionWithKey::get_by_id(2, &mut conn).await.unwrap();
+
+        assert_eq!(question_id1.form, QuestionForm::SingleChoice);
+        let (option_3rd, is_correct) =
+            if let KeyType::SingleChoiceKey(keys) = question_id1.answer_key {
+                (keys[2].content.clone(), keys[2].is_correct)
+            } else {
+                ("".to_string(), false)
+            };
+        assert_eq!((option_3rd, is_correct), (String::from("O(log n)"), false));
+        assert_eq!(question_id3.form, QuestionForm::TextEntry);
+        assert_eq!(question_id3.answer_key, KeyType::TextEntryKey(
+            TextKey {
+                correct_entry: "<vector>".to_string(),
+                explanation: Some("The <vector> header is required to use the std::vector class, which provides a dynamic array implementation.".to_string())
+            }));
+        let (option_2nd, is_correct) =
+            if let KeyType::MultipleChoiceKey(keys) = question_id2.answer_key {
+                (keys[1].content.clone(), keys[1].is_correct)
+            } else {
+                ("".to_string(), false)
+            };
+        assert_eq!(
+            (option_2nd, is_correct),
+            (String::from("StringBuilder"), true)
+        );
+    }
+}
