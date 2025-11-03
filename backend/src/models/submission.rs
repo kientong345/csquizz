@@ -3,9 +3,9 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::post::PostQuestion,
+    question::{post::PostQuestion, KeyType, Question, QuestionWithKey},
     quiz::post::PostQuizMetadata,
-    result::{QuizResult, TmpQuizResult, UserAnswer},
+    result::{QuizResult, TmpQuizResult, UserAnswer, UserChoice, UserEntry},
 };
 
 #[derive(Debug, Deserialize)]
@@ -29,76 +29,42 @@ impl SubmittedQuiz {
         self,
         connection: &mut PgConnection,
     ) -> Result<EvaluatedResult, ModelError> {
-        // let mut result = Vec::new();
-        // let total_questions = self.answers.len() as i32;
-        // let mut correct_answers = 0;
+        let mut result = Vec::new();
+        let total_questions: i32 =
+            Question::count_by_quiz_id(self.quiz_id, connection).await? as i32;
+        let mut correct_answers = 0;
 
-        // for SubmittedAnswer {
-        //     question_id,
-        //     answer,
-        // } in self.answers
-        // {
-        //     match answer {
-        //         AnswerType::ChoicesAnswer(choices) => {
-        //             let question =
-        //                 QuestionContent::from(Question::get_by_id(question_id, connection).await?);
-        //             let mut answer_results = Vec::new();
-        //             for choice in choices {
-        //                 let is_correct = sqlx::query!(
-        //                     r#"SELECT is_correct FROM options WHERE id = $1"#,
-        //                     choice,
-        //                 )
-        //                 .fetch_one(&mut *connection)
-        //                 .await?
-        //                 .is_correct
-        //                 .unwrap_or(false);
-        //                 answer_results.push((choice, is_correct));
-        //             }
+        for answer in self.answers {
+            let (question_id, answer) = answer.try_into()?;
+            let key = QuestionWithKey::get_by_id(question_id, connection)
+                .await?
+                .answer_key;
+            result.push(EvaluatedQuestionResult {
+                question_id,
+                answer_data: answer.clone(),
+            });
 
-        //             result.push(QuestionAnswerResult {
-        //                 question_id,
-        //                 question,
-        //                 answer: AnswerResultType::ChoicesResult(answer_results),
-        //             });
-        //         }
-        //         AnswerType::TextAnswer(text_entry) => {
-        //             let question =
-        //                 QuestionContent::from(Question::get_by_id(question_id, connection).await?);
-        //             let correct_entry = sqlx::query!(
-        //                 r#"SELECT correct_entry FROM questions WHERE id = $1"#,
-        //                 question_id,
-        //             )
-        //             .fetch_one(&mut *connection)
-        //             .await?
-        //             .correct_entry
-        //             .unwrap_or_default();
-        //             let is_correct = &text_entry == &correct_entry;
-        //             if is_correct {
-        //                 correct_answers += 1;
-        //             }
+            if is_matched(answer, key) {
+                correct_answers += 1;
+            }
+        }
 
-        //             result.push(QuestionAnswerResult {
-        //                 question_id,
-        //                 question,
-        //                 answer: AnswerResultType::TextResult(text_entry, is_correct),
-        //             });
-        //         }
-        //     }
-        // }
+        let score = if total_questions != 0 {
+            (correct_answers as f64 / total_questions as f64) * 100.0
+        } else {
+            0.00
+        };
 
-        // let quiz_info = QuizMetadata::get_by_id(self.quiz_id, connection).await?;
-        // Ok(QuizResult {
-        //     summary: QuizResultSummary {
-        //         id: -1,
-        //         quiz_id: Some(quiz_info.id),
-        //         quiz_title: quiz_info.title,
-        //         score: (correct_answers / total_questions) as f64,
-        //         total_questions,
-        //         correct_answers,
-        //     },
-        //     result,
-        // })
-        todo!()
+        Ok(EvaluatedResult {
+            user_id: self.user_id,
+            summary: EvaluatedQuizResultSummary {
+                quiz_id: self.quiz_id,
+                score,
+                total_questions,
+                correct_answers,
+            },
+            result,
+        })
     }
 }
 
@@ -112,7 +78,6 @@ pub struct EvaluatedQuizResultSummary {
 
 #[derive(Debug, Deserialize)]
 pub struct EvaluatedQuestionResult {
-    pub result_id: i32,
     pub question_id: i32,
     pub answer_data: UserAnswer,
 }
@@ -155,4 +120,100 @@ impl EvaluatedResult {
 pub struct PostQuiz {
     pub metadata: PostQuizMetadata,
     pub questions: Vec<PostQuestion>,
+}
+
+impl TryInto<(i32, UserAnswer)> for SubmittedAnswer {
+    type Error = ModelError;
+    fn try_into(self) -> Result<(i32, UserAnswer), Self::Error> {
+        match self.question_form.as_str() {
+            "single-choice" => {
+                if let Some(choice) = self.single_choice {
+                    Ok((
+                        self.question_id,
+                        UserAnswer::SingleChoiceAnswer(UserChoice {
+                            option_index: choice,
+                        }),
+                    ))
+                } else {
+                    Err(ModelError::BadPost("no single choice provided".to_string()))
+                }
+            }
+            "multiple-choice" => {
+                if let Some(choices) = self.multiple_choices {
+                    let mut user_choices = Vec::new();
+                    for choice in choices {
+                        user_choices.push(UserChoice {
+                            option_index: choice,
+                        });
+                    }
+                    Ok((
+                        self.question_id,
+                        UserAnswer::MultipleChoiceAnswer(user_choices),
+                    ))
+                } else {
+                    Err(ModelError::BadPost(
+                        "no multiple choice provided".to_string(),
+                    ))
+                }
+            }
+            "text-entry" => {
+                if let Some(entry) = self.entry {
+                    Ok((
+                        self.question_id,
+                        UserAnswer::TextEntryAnswer(UserEntry {
+                            text_entried: entry,
+                        }),
+                    ))
+                } else {
+                    Err(ModelError::BadPost("no text entry provided".to_string()))
+                }
+            }
+            _ => Err(ModelError::BadPost("wrong question form".to_string())),
+        }
+    }
+}
+
+fn is_matched(answer: UserAnswer, key: KeyType) -> bool {
+    match key {
+        KeyType::MultipleChoiceKey(option_keys) => {
+            if let UserAnswer::MultipleChoiceAnswer(choices) = answer {
+                let mut is_all_correct = true;
+                let mut is_any_incorrect = false;
+                for (index, option) in option_keys.iter().enumerate() {
+                    let is_chosen = choices
+                        .iter()
+                        .any(|choice| choice.option_index as usize == index);
+                    if option.is_correct && !is_chosen {
+                        is_all_correct = false;
+                    }
+                    if !option.is_correct && is_chosen {
+                        is_any_incorrect = true;
+                    }
+                }
+                if is_all_correct && !is_any_incorrect {
+                    return true;
+                }
+            }
+        }
+        KeyType::SingleChoiceKey(option_keys) => {
+            if let UserAnswer::SingleChoiceAnswer(choice) = answer {
+                if option_keys[choice.option_index as usize].is_correct {
+                    return true;
+                }
+            }
+        }
+        KeyType::TextEntryKey(text_entry) => {
+            if let UserAnswer::TextEntryAnswer(entry) = answer {
+                if entry
+                    .text_entried
+                    .trim()
+                    .eq_ignore_ascii_case(&text_entry.correct_entry.trim())
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
 }

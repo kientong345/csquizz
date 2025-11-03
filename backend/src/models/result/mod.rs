@@ -11,17 +11,17 @@ pub mod get;
 pub mod paginate;
 pub mod post;
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserChoice {
     pub option_index: i32,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserEntry {
     pub text_entried: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum UserAnswer {
     SingleChoiceAnswer(UserChoice),
     MultipleChoiceAnswer(Vec<UserChoice>),

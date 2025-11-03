@@ -30,6 +30,7 @@ impl QuizResultSummary {
 
 impl QuestionResult {
     async fn create_from(
+        result_id: i32,
         data: &EvaluatedQuestionResult,
         connection: &mut PgConnection,
     ) -> Result<QuestionResult, ModelError> {
@@ -48,7 +49,7 @@ impl QuestionResult {
         let id = sqlx::query_scalar!(
             r#"INSERT INTO user_answers (result_id, question_id, answer_data)
             VALUES ($1, $2, $3) RETURNING id"#,
-            data.result_id,
+            result_id,
             data.question_id,
             answer_data,
         )
@@ -69,7 +70,7 @@ impl QuizResult {
         let summary = QuizResultSummary::create_from(user_id, summary_data, connection).await?;
         let mut result = Vec::new();
         for data in result_data {
-            result.push(QuestionResult::create_from(data, connection).await?);
+            result.push(QuestionResult::create_from(summary.id, data, connection).await?);
         }
         Ok(QuizResult { summary, result })
     }
