@@ -53,7 +53,7 @@ pub struct OAuthPayload {
 }
 
 #[derive(Debug, Deserialize)]
-pub enum SignupMethod {
+pub enum AuthenticationType {
     WithPassword(Registration),
     OAuth(OAuthPayload),
 }
@@ -143,7 +143,7 @@ impl AuthenticatedUser {
                 email: registration.email,
             });
         }
-        let signup_method = SignupMethod::WithPassword(registration);
+        let signup_method = AuthenticationType::WithPassword(registration);
         let user = UserFullDetail::create_from(signup_method, connection).await?;
         Ok(AuthenticatedUser(user))
     }
@@ -161,7 +161,7 @@ impl AuthenticatedUser {
         connection: &mut PgConnection,
     ) -> Result<AuthenticatedUser, ModelError> {
         let user = if !UserFullDetail::is_email_exist(&oauth.email, connection).await? {
-            let signup_method = SignupMethod::OAuth(oauth);
+            let signup_method = AuthenticationType::OAuth(oauth);
             UserFullDetail::create_from(signup_method, connection).await?
         } else {
             UserFullDetail::get_by_email(&oauth.email, connection).await?
