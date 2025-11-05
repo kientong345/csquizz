@@ -1,14 +1,16 @@
+use std::sync::Arc;
+
 use axum::{extract::State, http::StatusCode, Json};
 use axum_extra::extract::{
     cookie::{Cookie, SameSite},
     CookieJar,
 };
 use serde_json::{json, Value};
+use tokio::sync::RwLock;
 
 use crate::{
-    config,
+    app::AppState,
     controller::error::ControllerError,
-    database::pool::QuizBankPool,
     models::{
         auth::{generate_token_pair, AuthenticatedUser, LoginForm, Registration},
         user::UserFullDetail,
@@ -16,10 +18,11 @@ use crate::{
 };
 
 pub async fn handle_register(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Json(registration): Json<Registration>,
 ) -> Result<StatusCode, ControllerError> {
-    let mut connection = pool.start_transaction().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.start_transaction().await?;
 
     registration.validate()?;
 
@@ -31,11 +34,12 @@ pub async fn handle_register(
 }
 
 pub async fn handle_login(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     jar: CookieJar,
     Json(login_form): Json<LoginForm>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
-    let mut connection = pool.get_connection().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
 
     login_form.validate()?;
 
@@ -43,7 +47,13 @@ pub async fn handle_login(
         .await?
         .into();
 
-    let (access_token, refresh_token) = generate_token_pair(&user, &config::secret_key());
+    let secret = state_locked
+        .config
+        .auth_config
+        .jwt_secret
+        .as_bytes()
+        .to_vec();
+    let (access_token, refresh_token) = generate_token_pair(&user, &secret);
 
     let cookie: Cookie = Cookie::build(refresh_token)
         .http_only(true)
@@ -60,10 +70,28 @@ pub async fn handle_login(
     ))
 }
 
-pub async fn handle_refresh(State(pool): State<QuizBankPool>) -> StatusCode {
+pub async fn handle_login_by_google(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<(CookieJar, Json<Value>), ControllerError> {
+    let client = &state.read().await.client;
+
     todo!()
 }
 
-pub async fn handle_logout(State(pool): State<QuizBankPool>) -> StatusCode {
+pub async fn handle_oauth_callback(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<(CookieJar, Json<Value>), ControllerError> {
+    todo!()
+}
+
+pub async fn handle_refresh(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<(CookieJar, Json<Value>), ControllerError> {
+    todo!()
+}
+
+pub async fn handle_logout(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<(CookieJar, Json<Value>), ControllerError> {
     todo!()
 }

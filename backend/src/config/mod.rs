@@ -1,25 +1,29 @@
-use std::fs;
-
 use serde::{Deserialize, Serialize};
+
+use crate::config::{
+    app::AppConfig, auth::AuthConfig, database::DatabaseConfig, oauth::OAuthConfig,
+};
+
+pub mod app;
+pub mod auth;
+pub mod database;
+pub mod oauth;
 
 #[derive(Debug, Deserialize, Serialize, Clone, Default)]
 pub struct Configuration {
-    pub port: u16,
+    pub app_config: AppConfig,
+    pub db_config: DatabaseConfig,
+    pub auth_config: AuthConfig,
+    pub oauth_config: OAuthConfig,
 }
 
 impl Configuration {
     pub fn get() -> Configuration {
-        let content = fs::read_to_string("config.json").expect("cannot get config data");
-
-        serde_json::from_str(&content).expect("cannot get config data")
+        Configuration {
+            app_config: AppConfig::get(),
+            db_config: DatabaseConfig::get(),
+            auth_config: AuthConfig::get(),
+            oauth_config: OAuthConfig::get(),
+        }
     }
-}
-
-pub fn database_url() -> String {
-    std::env::var("DATABASE_URL").expect("DATABASE_URL is not set")
-}
-
-pub fn secret_key() -> Vec<u8> {
-    let key = std::env::var("SECRET_KEY").expect("SECRET_KEY is not set");
-    key.as_bytes().to_vec()
 }

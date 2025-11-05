@@ -1,21 +1,26 @@
+use std::sync::Arc;
+
 use axum::{
     extract::{Path, Query, State},
-    http::StatusCode,
     Json,
 };
 use serde_json::{json, Value};
+use tokio::sync::RwLock;
 
 use crate::{
+    app::AppState,
     controller::error::ControllerError,
-    database::pool::QuizBankPool,
     models::{
         result::paginate::QuestionResultQuery,
         user::{UserFullDetail, UserPubInfo},
     },
 };
 
-pub async fn get_my_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.get_connection().await?;
+pub async fn get_my_info(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
 
     // let auth_header = headers
     //     .get("Authorization")
@@ -40,15 +45,18 @@ pub async fn get_my_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>
     Ok(Json(json!(user)))
 }
 
-pub async fn get_my_result(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+pub async fn get_my_result(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
     todo!()
 }
 
 pub async fn get_user_by_id(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.get_connection().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
 
     let id: i32 = id.parse().unwrap_or(-1);
     let user = UserPubInfo::get_by_id(id, &mut *connection).await?;
@@ -56,8 +64,8 @@ pub async fn get_user_by_id(
 }
 
 pub async fn get_user_results(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Query(query): Query<QuestionResultQuery>,
-) -> Result<Json<Value>, StatusCode> {
+) -> Result<Json<Value>, ControllerError> {
     todo!()
 }

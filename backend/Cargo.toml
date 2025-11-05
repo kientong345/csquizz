@@ -13,8 +13,9 @@ dotenvy = "0.15"
 chrono = { version = "0.4", features = ["serde"] }
 bcrypt = "0.17.1"
 jsonwebtoken = { version = "10.1.0", features = ["rust_crypto"] }
-axum-extra = { version = "0.10.3", features = ["cookie"] }
+axum-extra = { version = "0.12.1", features = ["cookie"] }
 thiserror = "2.0.17"
+oauth2 = "5.0.0"
 
 [profile.prod]
 inherits = "release"

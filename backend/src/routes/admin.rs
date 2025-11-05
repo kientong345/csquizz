@@ -1,16 +1,19 @@
+use std::sync::Arc;
+
 use axum::{
     routing::{patch, post, put},
     Router,
 };
+use tokio::sync::RwLock;
 
 use crate::{
+    app::AppState,
     controller::quizzes::{
         add_question, create_quiz, delete_question, delete_quiz, update_question, update_quiz_info,
     },
-    database::pool::QuizBankPool,
 };
 
-pub fn create_route(pool: QuizBankPool) -> Router {
+pub fn create_route(state: Arc<RwLock<AppState>>) -> Router {
     Router::new()
         .route("/api/admin/quizzes", post(create_quiz))
         .route(
@@ -25,5 +28,5 @@ pub fn create_route(pool: QuizBankPool) -> Router {
             "/api/admin/quizzes/{:quiz_id}/questions/{:question_id}",
             put(update_question).delete(delete_question),
         )
-        .with_state(pool)
+        .with_state(state)
 }

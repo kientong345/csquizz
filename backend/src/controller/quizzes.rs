@@ -1,13 +1,15 @@
+use std::sync::Arc;
+
 use axum::{
     extract::{Path, Query, State},
-    http::StatusCode,
     Json,
 };
 use serde_json::{json, Value};
+use tokio::sync::RwLock;
 
 use crate::{
+    app::AppState,
     controller::error::ControllerError,
-    database::pool::QuizBankPool,
     models::{
         pagination::Paginate,
         question::{paginate::QuestionQuery, Question, QuestionNoKey},
@@ -17,10 +19,11 @@ use crate::{
 };
 
 pub async fn get_quizzes(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Query(query): Query<QuizQuery>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.get_connection().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
 
     let page = QuizMetadata::page(&query, &mut *connection).await?;
 
@@ -28,10 +31,11 @@ pub async fn get_quizzes(
 }
 
 pub async fn get_quiz_by_id(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.get_connection().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
 
     let id: i32 = id.parse().unwrap_or(-1);
     let quiz = QuizMetadata::get_by_id(id, &mut *connection).await?;
@@ -39,19 +43,21 @@ pub async fn get_quiz_by_id(
 }
 
 pub async fn get_questions(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Query(query): Query<QuestionQuery>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.get_connection().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
     let page = QuestionNoKey::page(&query, &mut *connection).await?;
     Ok(Json(json!(page)))
 }
 
 pub async fn submit_quiz(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Json(submission): Json<SubmittedQuiz>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.start_transaction().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.start_transaction().await?;
 
     let tmp_quiz_result = submission
         .evaluate(&mut *connection)
@@ -65,10 +71,11 @@ pub async fn submit_quiz(
 }
 
 pub async fn submit_quiz_and_store_result(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Json(submission): Json<SubmittedQuiz>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = pool.start_transaction().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.start_transaction().await?;
 
     let quiz_result = submission
         .evaluate(&mut *connection)
@@ -82,10 +89,11 @@ pub async fn submit_quiz_and_store_result(
 }
 
 pub async fn create_quiz(
-    State(pool): State<QuizBankPool>,
+    State(state): State<Arc<RwLock<AppState>>>,
     Json(data): Json<PostQuiz>,
 ) -> Result<(), ControllerError> {
-    let mut connection = pool.start_transaction().await?;
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.start_transaction().await?;
 
     QuizMetadata::create_from(data.metadata, &mut connection).await?;
 
@@ -98,22 +106,47 @@ pub async fn create_quiz(
     Ok(())
 }
 
-pub async fn update_quiz_info(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+pub async fn update_quiz_info(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
+
     todo!()
 }
 
-pub async fn delete_quiz(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+pub async fn delete_quiz(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
+
     todo!()
 }
 
-pub async fn add_question(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+pub async fn add_question(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
+
     todo!()
 }
 
-pub async fn update_question(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+pub async fn update_question(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
+
     todo!()
 }
 
-pub async fn delete_question(State(pool): State<QuizBankPool>) -> Result<Json<Value>, StatusCode> {
+pub async fn delete_question(
+    State(state): State<Arc<RwLock<AppState>>>,
+) -> Result<Json<Value>, ControllerError> {
+    let state_locked = state.read().await;
+    let mut connection = state_locked.pool.get_connection().await?;
+
     todo!()
 }

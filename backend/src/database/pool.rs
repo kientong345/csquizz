@@ -1,7 +1,5 @@
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Pool, Postgres, Transaction};
 
-use crate::config;
-
 #[derive(Clone)]
 pub struct QuizBankPool {
     connection_pool: Pool<Postgres>,
@@ -9,11 +7,11 @@ pub struct QuizBankPool {
 
 impl QuizBankPool {
     /// Initializes the connection pool and runs any pending migrations
-    pub async fn init() -> Self {
+    pub async fn init(database_url: &str) -> Self {
         let pool = Self {
             connection_pool: PgPoolOptions::new()
                 .max_connections(20)
-                .connect(&config::database_url())
+                .connect(database_url)
                 .await
                 .expect("Failed to connect to quiz-bank database"),
         };

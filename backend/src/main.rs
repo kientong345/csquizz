@@ -1,21 +1,45 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
 
-use csquizz::{app, config, database::pool::QuizBankPool};
-use tokio::net::TcpListener;
+use csquizz::{
+    app::{self, AppState},
+    config::Configuration,
+    database::pool::QuizBankPool,
+};
+use tokio::{net::TcpListener, sync::RwLock};
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let port = config::Configuration::get().port;
-    let address = SocketAddr::from(([127, 0, 0, 1], port));
+    // Load configuration
+    let config = Configuration::get();
+    #[allow(unused_variables)]
+    let Configuration {
+        app_config,
+        db_config,
+        auth_config,
+        oauth_config,
+    } = config.clone();
 
-    let pool = QuizBankPool::init().await;
-    let app = app::create_app(pool).await;
+    // Start server
+    let address = SocketAddr::from(([127, 0, 0, 1], app_config.port));
     let listener = TcpListener::bind(address)
         .await
         .expect("cannot bind address");
 
+    // Initialize application state
+    let pool = QuizBankPool::init(&db_config.database_url).await;
+    let client = app::create_oauth_client(&oauth_config);
+    let app_state = Arc::new(RwLock::new(AppState {
+        pool,
+        client,
+        config,
+    }));
+
+    // Create app
+    let app = app::create_app(app_state).await;
+
+    // Serve app
     axum::serve(listener, app)
         .await
         .expect("cannot serving app");
