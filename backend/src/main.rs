@@ -13,22 +13,15 @@ async fn main() {
 
     // Load configuration
     let config = Configuration::get();
-    #[allow(unused_variables)]
-    let Configuration {
-        app_config,
-        db_config,
-        auth_config,
-        oauth_config,
-    } = config.clone();
 
     // Start server
-    let address = SocketAddr::from(([127, 0, 0, 1], app_config.port));
+    let address = SocketAddr::from(([127, 0, 0, 1], config.app_config.port));
     let listener = TcpListener::bind(address)
         .await
         .expect("cannot bind address");
 
     // Initialize application state
-    let pool = QuizBankPool::init(&db_config).await;
+    let pool = QuizBankPool::init(&config.db_config).await;
     let app_state = Arc::new(RwLock::new(AppState { pool, config }));
 
     // Create app

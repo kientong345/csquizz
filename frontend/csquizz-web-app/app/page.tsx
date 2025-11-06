@@ -104,12 +104,17 @@ export default async function HomePage({
     typeof resolvedSearchParams.page === 'string'
       ? Number(resolvedSearchParams.page)
       : 1;
-  const currentCategoryPage = await getCategories({ page: page, size: CATEGORY_PER_PAGE });
-  // const currentCategoryPage = getPage(
-  //   mockCategoryPage,
-  //   page,
-  //   CATEGORY_PER_PAGE
-  // );
+
+  let currentCategoryPage;
+  if (process.env.NEXT_RUNTIME_ENV === 'production') {
+    currentCategoryPage = await getCategories({ page: page, size: CATEGORY_PER_PAGE });
+  } else {
+    currentCategoryPage = getPage(
+      mockCategoryPage,
+      page,
+      CATEGORY_PER_PAGE
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

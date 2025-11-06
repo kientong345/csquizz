@@ -130,12 +130,17 @@ export default async function QuizListPage({
       : 1;
 
   const categoryName = unslugify(resolvedParams.category_name);
-  const currentQuizPage = await getQuizzes({
-    category_id: category_id,
-    page: page,
-    size: QUIZ_INFO_PER_PAGE,
-  });
-  // const currentQuizPage = getPage(mockQuizzes, page, QUIZ_INFO_PER_PAGE);
+
+  let currentQuizPage;
+  if (process.env.NEXT_RUNTIME_ENV === 'production') {
+    currentQuizPage = await getQuizzes({
+      category_id: category_id,
+      page: page,
+      size: QUIZ_INFO_PER_PAGE,
+    });
+  } else {
+    currentQuizPage = getPage(mockQuizzes, page, QUIZ_INFO_PER_PAGE);
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

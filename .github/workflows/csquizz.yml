@@ -1,0 +1,52 @@
+name: csquizz
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  backend_ci:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || contains(toJson(github.event.commits.*.modified), 'backend/') || contains(toJson(github.event.commits.*.added), 'backend/')
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: |
+        cd backend
+        cargo build --profile prod
+    # no database available for testing yet
+    # - name: Run tests
+    #   run: |
+    #     cd backend
+    #     cargo test --profile prod
+
+  frontend_ci:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || contains(toJson(github.event.commits.*.modified), 'frontend/') || contains(toJson(github.event.commits.*.added), 'frontend/')
+    env:
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+      NEXT_RUNTIME_ENV: ${{ secrets.NEXT_RUNTIME_ENV }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    - run: |
+        cd frontend
+        npm install
+        npm run build
+        npm test
