@@ -4,7 +4,7 @@ use sqlx::{
     PgConnection,
 };
 
-use crate::models::{auth::LoginForm, error::ModelError};
+use crate::models::error::ModelError;
 
 pub mod get;
 pub mod paginate;
@@ -99,12 +99,13 @@ impl UserFullDetail {
     }
 
     pub async fn validate_login(
-        login_form: &LoginForm,
+        email: &str,
+        password: &str,
         connection: &mut PgConnection,
     ) -> Result<UserFullDetail, ModelError> {
-        let user = UserFullDetail::get_by_email(&login_form.email, connection).await?;
+        let user = UserFullDetail::get_by_email(email, connection).await?;
         let hash = user.password_hash.as_deref().unwrap_or("");
-        if bcrypt::verify(&login_form.password, hash).unwrap_or(false) {
+        if bcrypt::verify(password, hash).unwrap_or(false) {
             Ok(user)
         } else {
             Err(ModelError::WrongPasswordForEmail { email: user.email })

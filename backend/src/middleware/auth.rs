@@ -9,7 +9,10 @@ use axum::{
 };
 use tokio::sync::RwLock;
 
-use crate::{app::AppState, models::auth::AccessClaims};
+use crate::{
+    app::AppState,
+    services::auth::{AccessClaims, JwtMachine},
+};
 
 pub async fn auth_middleware(
     State(state): State<Arc<RwLock<AppState>>>,
@@ -29,13 +32,9 @@ pub async fn auth_middleware(
         .strip_prefix("Bearer ")
         .unwrap();
 
-    let secret = state_locked
-        .config
-        .auth_config
-        .jwt_secret
-        .as_bytes()
-        .to_vec();
-    let access_claims = match AccessClaims::decode(access_token, &secret) {
+    let jwt_machine = JwtMachine::init(&state_locked.config.auth_config);
+
+    let access_claims = match jwt_machine.decode::<AccessClaims>(access_token) {
         Ok(access_claims) => access_claims,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };

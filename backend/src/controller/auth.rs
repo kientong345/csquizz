@@ -1,6 +1,11 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    response::Redirect,
+    Json,
+};
 use axum_extra::extract::{
     cookie::{Cookie, SameSite},
     CookieJar,
@@ -11,15 +16,16 @@ use tokio::sync::RwLock;
 use crate::{
     app::AppState,
     controller::error::ControllerError,
-    models::{
-        auth::{generate_token_pair, AuthenticatedUser, LoginForm, Registration},
-        user::UserFullDetail,
+    models::user::UserFullDetail,
+    services::{
+        auth::{AuthenticatedUser, JwtMachine, LoginSchema, RegisterSchema},
+        oauth_client::{AuthorizationCode, OAuthClient},
     },
 };
 
 pub async fn handle_register(
     State(state): State<Arc<RwLock<AppState>>>,
-    Json(registration): Json<Registration>,
+    Json(registration): Json<RegisterSchema>,
 ) -> Result<StatusCode, ControllerError> {
     let state_locked = state.read().await;
     let mut connection = state_locked.pool.start_transaction().await?;
@@ -36,7 +42,7 @@ pub async fn handle_register(
 pub async fn handle_login(
     State(state): State<Arc<RwLock<AppState>>>,
     jar: CookieJar,
-    Json(login_form): Json<LoginForm>,
+    Json(login_form): Json<LoginSchema>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
     let state_locked = state.read().await;
     let mut connection = state_locked.pool.get_connection().await?;
@@ -47,13 +53,8 @@ pub async fn handle_login(
         .await?
         .into();
 
-    let secret = state_locked
-        .config
-        .auth_config
-        .jwt_secret
-        .as_bytes()
-        .to_vec();
-    let (access_token, refresh_token) = generate_token_pair(&user, &secret);
+    let jwt_machine = JwtMachine::init(&state_locked.config.auth_config);
+    let (access_token, refresh_token) = jwt_machine.generate_token_pair(&user);
 
     let cookie: Cookie = Cookie::build(refresh_token)
         .http_only(true)
@@ -72,16 +73,58 @@ pub async fn handle_login(
 
 pub async fn handle_login_by_google(
     State(state): State<Arc<RwLock<AppState>>>,
-) -> Result<(CookieJar, Json<Value>), ControllerError> {
-    let client = &state.read().await.client;
+) -> Result<Redirect, ControllerError> {
+    // let client = &state.read().await.client;
+
+    // let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+    // let (auth_url, csrf_state) = client
+    //     .authorize_url(CsrfToken::new_random)
+    //     .add_scope(Scope::new("".to_string()))
+    //     .set_pkce_challenge(pkce_challenge)
+    //     .url();
+
+    // Ok(Redirect::to(auth_url.as_str()))
 
     todo!()
 }
 
 pub async fn handle_oauth_callback(
     State(state): State<Arc<RwLock<AppState>>>,
+    Query(auth_code): Query<AuthorizationCode>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
-    todo!()
+    let state_locked = state.read().await;
+    let oauth_client = OAuthClient::init(&state_locked.config.oauth_config);
+
+    let token_response = oauth_client.request_token(&auth_code.code).await?;
+
+    let google_user = oauth_client
+        .get_google_user(&token_response.access_token, &token_response.id_token)
+        .await?;
+
+    let mut connection = state_locked.pool.start_transaction().await?;
+    let user: UserFullDetail =
+        AuthenticatedUser::login_by_google(google_user.into(), &mut *connection)
+            .await?
+            .into();
+
+    let jwt_machine = JwtMachine::init(&state_locked.config.auth_config);
+    let (access_token, refresh_token) = jwt_machine.generate_token_pair(&user);
+
+    let cookie: Cookie = Cookie::build(refresh_token)
+        .http_only(true)
+        .secure(false)
+        .same_site(SameSite::Lax)
+        .path("/")
+        .into();
+
+    let jar = CookieJar::new();
+
+    Ok((
+        jar.add(cookie),
+        Json(json!({
+            "access_token": access_token,
+        })),
+    ))
 }
 
 pub async fn handle_refresh(

@@ -28,13 +28,8 @@ async fn main() {
         .expect("cannot bind address");
 
     // Initialize application state
-    let pool = QuizBankPool::init(&db_config.database_url).await;
-    let client = app::create_oauth_client(&oauth_config);
-    let app_state = Arc::new(RwLock::new(AppState {
-        pool,
-        client,
-        config,
-    }));
+    let pool = QuizBankPool::init(&db_config).await;
+    let app_state = Arc::new(RwLock::new(AppState { pool, config }));
 
     // Create app
     let app = app::create_app(app_state).await;

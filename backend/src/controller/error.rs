@@ -6,12 +6,15 @@ use axum::{
 use serde_json::json;
 use thiserror::Error;
 
-use crate::models::error::ModelError;
+use crate::{models::error::ModelError, services::error::ServiceError};
 
 #[derive(Error, Debug)]
 pub enum ControllerError {
     #[error("model error: {0}")]
     Model(#[from] ModelError),
+
+    #[error("service error: {0}")]
+    Service(#[from] ServiceError),
 
     #[error("database error: {0}")]
     Database(#[from] sqlx::Error),
@@ -21,6 +24,9 @@ pub enum ControllerError {
 
     #[error("login error: {0}")]
     InvalidLoginForm(String),
+
+    #[error("token exchange error: {0}")]
+    TokenExchange(#[from] reqwest::Error),
 }
 
 impl ControllerError {
@@ -33,9 +39,17 @@ impl ControllerError {
                     err_code,
                 )
             }
+            ControllerError::Service(e) => {
+                let err_code = e.get_code();
+                (
+                    StatusCode::from_u16(err_code / 100).unwrap_or_default(),
+                    err_code,
+                )
+            }
             ControllerError::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, 50010),
             ControllerError::InvalidRegistration(_) => (StatusCode::BAD_REQUEST, 40010),
             ControllerError::InvalidLoginForm(_) => (StatusCode::BAD_REQUEST, 40011),
+            ControllerError::TokenExchange(_) => (StatusCode::INTERNAL_SERVER_ERROR, 50011),
         }
     }
 }
