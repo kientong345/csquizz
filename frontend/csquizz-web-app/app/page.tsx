@@ -13,67 +13,77 @@ const mockCategoryPage: Page<Category> = {
       name: 'Data Structures',
       description:
         'Test your knowledge on arrays, linked lists, trees, and more.',
-      imageUrl: '/category-data-structures.svg',
+      // imageUrl: '/category-data-structures.svg',
+      imageUrl: 'https://images.shiksha.com/mediadata/ugcDocuments/images/wordpressImages/2020_05_2167870_21e8.jpg'
     },
     {
       id: 2,
       name: 'Algorithms',
       description:
         'Challenge yourself with sorting, searching, and graph algorithms.',
-      imageUrl: '/category-algorithms.svg',
+      // imageUrl: '/category-algorithms.svg',
+      imageUrl: 'https://www.snexplores.org/wp-content/uploads/2020/11/1030_algorithm_explainer-1028x579.jpg'
     },
     {
       id: 3,
       name: 'Operating Systems',
       description:
         'Dive into concepts like processes, memory management, and concurrency.',
-      imageUrl: '/category-operating-systems.svg',
+      // imageUrl: '/category-operating-systems.svg',
+      imageUrl: 'https://cloudpso.com/wp-content/uploads/2024/01/ops2.jpg'
     },
     {
       id: 4,
       name: 'Networking',
       description: 'Explore the fundamentals of network protocols and layers.',
-      imageUrl: '/category-networking.svg',
+      // imageUrl: '/category-networking.svg',
+      imageUrl: 'https://www.microsoft.com/en-us/research/wp-content/uploads/2018/08/01_MSR_SIGCOMM_Data_Network_1400x788.png'
     },
     {
       id: 5,
       name: 'Databases',
       description:
         'Understand SQL, normalization, and database design principles.',
-      imageUrl: '/category-databases.svg',
+      // imageUrl: '/category-databases.svg',
+      imageUrl: 'https://techvccloud.mediacdn.vn/2020/11/4/database-la-gi-2-16044569615001962544461.png'
     },
     {
       id: 6,
       name: 'Artificial Intelligence',
       description:
         'Get started with the basic concepts of AI and machine learning.',
-      imageUrl: '/category-ai.svg',
+      // imageUrl: '/category-ai.svg',
+      imageUrl: 'https://engineering.fb.com/wp-content/uploads/2019/05/grid-AI.jpg'
     },
     {
       id: 7,
       name: 'Software Engineering',
       description:
         'Learn about software development methodologies and best practices.',
-      imageUrl: '/category-software-engineering.svg',
+      // imageUrl: '/category-software-engineering.svg',
+      imageUrl: 'https://investin.org/cdn/shop/articles/software-engineering-skills_resize_md.jpg'
     },
     {
       id: 8,
       name: 'Cybersecurity',
       description: 'Test your knowledge on security principles and practices.',
-      imageUrl: '/category-cybersecurity.svg',
+      // imageUrl: '/category-cybersecurity.svg',
+      imageUrl: 'https://www.iare.ac.in/sites/default/files/department_images/Cybersecurity.jpg'
     },
     {
       id: 9,
       name: 'Web Development',
       description: 'Explore front-end and back-end web development concepts.',
-      imageUrl: '/category-web-development.svg',
+      // imageUrl: '/category-web-development.svg',
+      imageUrl: 'https://spec.nith.ac.in/BLOGS/a1%20(5).jpg'
     },
     {
       id: 10,
       name: 'Programming Languages',
       description:
         'Understand different programming paradigms and language features.',
-      imageUrl: '/category-programming-languages.svg',
+      // imageUrl: '/category-programming-languages.svg',
+      imageUrl: 'https://binarapps.com/wp-content/uploads/2021/09/Top-10-Programming-Languages-of-the-Future.png'
     },
   ],
   total_items: 10,
