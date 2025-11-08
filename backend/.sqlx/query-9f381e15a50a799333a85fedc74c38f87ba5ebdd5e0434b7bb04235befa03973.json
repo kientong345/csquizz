@@ -1,0 +1,45 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT q.id AS question_id, a.answer_data, q.question_type AS \"question_form: QuestionForm\"\n            FROM user_answers AS a JOIN questions AS q ON a.question_id = q.id\n            WHERE result_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "question_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "answer_data",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 2,
+        "name": "question_form: QuestionForm",
+        "type_info": {
+          "Custom": {
+            "name": "question_form",
+            "kind": {
+              "Enum": [
+                "multiple-choice",
+                "single-choice",
+                "text-entry"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9f381e15a50a799333a85fedc74c38f87ba5ebdd5e0434b7bb04235befa03973"
+}

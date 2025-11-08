@@ -1,7 +1,6 @@
 # Backend/Rust rules
 */target
 .env
-.sqlx
 target
 
 # General

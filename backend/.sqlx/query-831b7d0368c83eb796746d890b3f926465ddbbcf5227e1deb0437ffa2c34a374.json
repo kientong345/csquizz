@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, question_type AS \"form: QuestionForm\", question_text AS text, image_url, answer_key\n            FROM questions WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "form: QuestionForm",
+        "type_info": {
+          "Custom": {
+            "name": "question_form",
+            "kind": {
+              "Enum": [
+                "multiple-choice",
+                "single-choice",
+                "text-entry"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "text",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "image_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "answer_key",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "831b7d0368c83eb796746d890b3f926465ddbbcf5227e1deb0437ffa2c34a374"
+}

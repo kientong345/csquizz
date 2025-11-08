@@ -1,0 +1,81 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                r.id, r.user_id AS \"user_id!\", r.quiz_id AS \"quiz_id!\", q.title AS quiz_title, c.name AS quiz_category,\n                q.difficulty AS \"quiz_difficulty: QuizDifficulty\", r.score, r.total_questions, r.correct_answers\n            FROM results AS r JOIN quizzes AS q ON r.quiz_id = q.id JOIN categories AS c ON q.category = c.id WHERE r.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "quiz_title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "quiz_category",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "quiz_difficulty: QuizDifficulty",
+        "type_info": {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "total_questions",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "correct_answers",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e2e19cc43cbbf6f6f3720377f21dbaae741478c21a196ec80e689e2cfaf9a280"
+}
