@@ -21,7 +21,6 @@ COPY --from=builder /usr/src/vibing-storage/target/release/csquizz .
 
 # copy runtime configuration files
 COPY config.json .
-COPY .env .
 COPY migrations ./migrations
 
 EXPOSE 3001
