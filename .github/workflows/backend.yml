@@ -1,0 +1,39 @@
+name: Backend CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+    - 'backend/**'
+  pull_request:
+    branches: ["main"]
+    paths:
+    - 'backend/**'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  backend_ci:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build
+      run: |
+        cd backend
+        cargo build --profile prod
+
+    - name: Run tests
+      run: |
+        cd backend
+        cargo test
+          
