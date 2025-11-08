@@ -12,12 +12,14 @@ pub struct OAuthClient {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct OAuthResponse {
     pub access_token: String,
     pub id_token: String,
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct GoogleUserResult {
     pub id: String,
     pub email: String,
@@ -40,6 +42,7 @@ impl Into<OAuthSchema> for GoogleUserResult {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct AuthorizationCode {
     pub code: String,
     pub state: String,

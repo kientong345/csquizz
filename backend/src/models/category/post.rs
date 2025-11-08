@@ -4,6 +4,7 @@ use sqlx::PgConnection;
 use crate::models::{category::Category, error::ModelError};
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct PostCategory {
     pub name: String,
     pub image_url: Option<String>,

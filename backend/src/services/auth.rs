@@ -9,6 +9,7 @@ use crate::{
 };
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct RegisterSchema {
     pub display_name: String,
     pub email: String,
@@ -16,12 +17,14 @@ pub struct RegisterSchema {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct LoginSchema {
     pub email: String,
     pub password: String,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct OAuthSchema {
     pub google_id: String,
     pub display_name: String,

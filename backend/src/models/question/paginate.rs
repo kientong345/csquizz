@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::PgConnection;
 
 use crate::models::{
@@ -10,7 +10,8 @@ use crate::models::{
     },
 };
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct QuestionQuery {
     pub quiz_id: i32,
     pub page: i64,

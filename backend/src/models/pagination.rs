@@ -1,9 +1,10 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::PgConnection;
 
 use crate::models::error::ModelError;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Page<T> {
     pub items: Vec<T>,
     pub total_items: i64,

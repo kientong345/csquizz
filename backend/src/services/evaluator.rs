@@ -4,6 +4,7 @@ use sqlx::PgConnection;
 use crate::{models::{question::{KeyType, Question, QuestionWithKey}, result::{QuizResult, TmpQuizResult, UserAnswer, UserChoice, UserEntry}}, services::error::ServiceError};
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct SubmittedAnswer {
     pub question_id: i32,
     pub question_form: String, // "single-choice" || "multiple-choice" || "text-entry"
@@ -13,6 +14,7 @@ pub struct SubmittedAnswer {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct SubmittedQuiz {
     pub user_id: Option<i32>,
     pub quiz_id: i32,
@@ -68,7 +70,7 @@ impl Evaluator {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct EvaluatedQuizResultSummary {
     pub quiz_id: i32,
     pub score: f64,
@@ -76,13 +78,13 @@ pub struct EvaluatedQuizResultSummary {
     pub correct_answers: i32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct EvaluatedQuestionResult {
     pub question_id: i32,
     pub answer_data: UserAnswer,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct EvaluatedResult {
     pub user_id: Option<i32>,
     pub summary: EvaluatedQuizResultSummary,

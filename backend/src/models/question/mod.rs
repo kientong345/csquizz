@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::Type, PgConnection};
+use crate::utils::{serializeCamelCase, deserialize_snake_case};
 
 use crate::models::error::ModelError;
 
@@ -10,6 +11,10 @@ pub mod post;
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct OptionKey {
     pub content: String,
+    #[serde(
+        serialize_with = "serializeCamelCase",
+        deserialize_with = "deserialize_snake_case"
+    )]
     pub is_correct: bool,
     pub explanation: Option<String>,
 }
@@ -19,25 +24,29 @@ pub struct OptionContent(String);
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct TextKey {
+    #[serde(
+        serialize_with = "serializeCamelCase",
+        deserialize_with = "deserialize_snake_case"
+    )]
     pub correct_entry: String,
     pub explanation: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 pub enum KeyType {
     SingleChoiceKey(Vec<OptionKey>),
     MultipleChoiceKey(Vec<OptionKey>),
     TextEntryKey(TextKey),
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 pub enum NoKeyType {
     SingleChoiceKey(Vec<OptionContent>),
     MultipleChoiceKey(Vec<OptionContent>),
     TextEntryKey,
 }
 
-#[derive(Debug, Type, Deserialize, Serialize, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Type, Serialize, PartialEq, Eq, Clone, Copy)]
 #[sqlx(type_name = "question_form", rename_all = "kebab-case")]
 pub enum QuestionForm {
     MultipleChoice,
@@ -45,7 +54,8 @@ pub enum QuestionForm {
     TextEntry,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionNoKey {
     pub id: i32,
     pub form: QuestionForm,
@@ -54,7 +64,8 @@ pub struct QuestionNoKey {
     pub answer_no_key: NoKeyType,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionWithKey {
     pub id: i32,
     pub form: QuestionForm,
@@ -63,7 +74,7 @@ pub struct QuestionWithKey {
     pub answer_key: KeyType,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
 pub enum Question {
     NoKey(QuestionNoKey),
     WithKey(QuestionWithKey),

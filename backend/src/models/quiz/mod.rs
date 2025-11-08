@@ -18,7 +18,8 @@ pub enum QuizDifficulty {
     Hard,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QuizMinimal {
     pub id: i32,
     pub title: String,
@@ -26,7 +27,8 @@ pub struct QuizMinimal {
     pub difficulty: Option<QuizDifficulty>,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct QuizMetadata {
     pub id: i32,
     pub title: String,

@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::PgConnection;
 
 use crate::models::{
@@ -7,7 +7,8 @@ use crate::models::{
     pagination::{Page, Paginate},
 };
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct CategoryQuery {
     pub page: i64,
     pub size: i64,

@@ -7,6 +7,7 @@ use crate::models::{
 };
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct PostQuestion {
     pub quiz_id: i32,
     pub form: String, // "multiple-choice" || "single-choice" || "text-entry"

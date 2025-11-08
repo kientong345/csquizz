@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::{PgConnection, QueryBuilder};
 
 use crate::models::{
@@ -7,7 +7,8 @@ use crate::models::{
     quiz::QuizMetadata,
 };
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct QuizQuery {
     pub category_id: Option<i32>,
     pub title_pattern: Option<String>,

@@ -17,14 +17,16 @@ pub enum OrderType {
     MostCreated,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct UserMinimal {
     pub id: i32,
     pub display_name: String,
     pub avatar_url: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct UserPubInfo {
     pub id: i32,
     pub display_name: String,
@@ -50,7 +52,8 @@ impl ToString for UserRole {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct UserFullDetail {
     pub pub_info: UserPubInfo,
     pub email: String,
@@ -113,6 +116,7 @@ impl UserFullDetail {
     }
 }
 
+#[derive(Debug)]
 struct FetchedUser {
     id: i32,
     display_name: String,

@@ -7,6 +7,7 @@ use crate::models::{
 };
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct PostQuizMetadata {
     pub title: String,
     pub description: Option<String>,

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, PgConnection};
+use crate::utils::{serializeCamelCase, deserialize_snake_case};
 
 use crate::models::{
     error::ModelError,
@@ -13,11 +14,19 @@ pub mod post;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserChoice {
+    #[serde(
+        serialize_with = "serializeCamelCase",
+        deserialize_with = "deserialize_snake_case"
+    )]
     pub option_index: i32,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserEntry {
+    #[serde(
+        serialize_with = "serializeCamelCase",
+        deserialize_with = "deserialize_snake_case"
+    )]
     pub text_entried: String,
 }
 
@@ -28,7 +37,8 @@ pub enum UserAnswer {
     TextEntryAnswer(UserEntry),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionResult {
     pub question_with_key: QuestionWithKey,
     pub user_answer: UserAnswer,
@@ -49,7 +59,8 @@ impl QuestionResult {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct QuizResultSummary {
     pub id: i32,
     pub user_id: i32,
@@ -101,13 +112,15 @@ impl QuizResultSummary {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct QuizResult {
     pub summary: QuizResultSummary,
     pub result: Vec<QuestionResult>,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct TmpQuizResultSummary {
     pub quiz: QuizMinimal,
     pub score: f64,
@@ -115,13 +128,14 @@ pub struct TmpQuizResultSummary {
     pub correct_answers: i32,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TmpQuizResult {
     pub summary: TmpQuizResultSummary,
     pub result: Vec<QuestionResult>,
 }
 
-#[derive(Debug, Deserialize, Serialize, FromRow)]
+#[derive(Debug, FromRow)]
 struct FetchedQuizSummary {
     id: i32,
     user_id: i32,
