@@ -15,7 +15,12 @@ async fn main() {
     let config = Configuration::get();
 
     // Start server
+    #[cfg(feature = "local")]
     let address = SocketAddr::from(([127, 0, 0, 1], config.app_config.port));
+
+    #[cfg(not(feature = "local"))]
+    let address = SocketAddr::from(([0, 0, 0, 0], config.app_config.port));
+
     let listener = TcpListener::bind(address)
         .await
         .expect("cannot bind address");

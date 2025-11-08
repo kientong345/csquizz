@@ -22,4 +22,5 @@ pub async fn create_app(state: Arc<RwLock<AppState>>) -> Router {
         .merge(routes::categories::create_route(state.clone()))
         .merge(routes::admin::create_route(state.clone()))
         .merge(routes::auth::create_route(state))
+        .merge(routes::create_default_route())
 }
