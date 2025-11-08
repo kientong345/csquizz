@@ -7,8 +7,16 @@ pub struct DatabaseConfig {
 
 impl DatabaseConfig {
     pub fn get() -> DatabaseConfig {
-        DatabaseConfig {
-            database_url: std::env::var("DATABASE_URL").expect("DATABASE_URL is not set"),
-        }
+        #[cfg(feature = "dev")]
+        let database_url = std::env::var("DATABASE_URL_DEV").expect("DATABASE_URL_DEV is not set");
+
+        #[cfg(feature = "local")]
+        let database_url =
+            std::env::var("DATABASE_URL_LOCAL").expect("DATABASE_URL_LOCAL is not set");
+
+        #[cfg(not(any(feature = "dev", feature = "local")))]
+        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
+
+        DatabaseConfig { database_url }
     }
 }

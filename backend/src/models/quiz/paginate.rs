@@ -94,6 +94,7 @@ impl Paginate<QuizQuery> for QuizMetadata {
     }
 }
 
+#[cfg(feature = "local")]
 #[cfg(test)]
 mod tests {
     use sqlx::{pool::PoolConnection, Postgres};
