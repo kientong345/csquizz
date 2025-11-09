@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{routing::post, Router};
+use axum::{Router, routing::post};
 use tokio::sync::RwLock;
 
 use crate::{
@@ -13,11 +13,11 @@ use crate::{
 
 pub fn create_route(state: Arc<RwLock<AppState>>) -> Router {
     Router::new()
-        .route("/api/register", post(handle_register))
-        .route("/api/login", post(handle_login))
-        .route("/api/oauth/google", post(handle_login_by_google))
-        .route("/api/oauth/google/callback", post(handle_oauth_callback))
-        .route("/api/logout", post(handle_logout))
-        .route("/api/refresh", post(handle_refresh))
+        .route("/api/auth/register", post(handle_register))
+        .route("/api/auth/login", post(handle_login))
+        .route("/api/auth/oauth/google", post(handle_login_by_google))
+        .route("/api/auth/oauth/google/callback", post(handle_oauth_callback))
+        .route("/api/auth/logout", post(handle_logout))
+        .route("/api/auth/refresh", post(handle_refresh))
         .with_state(state)
 }

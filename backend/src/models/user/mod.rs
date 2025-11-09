@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    prelude::{FromRow, Type},
     PgConnection,
+    prelude::{FromRow, Type},
 };
 
 use crate::models::error::ModelError;

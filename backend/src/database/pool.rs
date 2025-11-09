@@ -1,4 +1,4 @@
-use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, Pool, Postgres, Transaction};
+use sqlx::{Pool, Postgres, Transaction, pool::PoolConnection, postgres::PgPoolOptions};
 
 use crate::config::database::DatabaseConfig;
 

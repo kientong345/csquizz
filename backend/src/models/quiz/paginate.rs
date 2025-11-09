@@ -98,13 +98,13 @@ impl Paginate<QuizQuery> for QuizMetadata {
 #[cfg(feature = "local")]
 #[cfg(test)]
 mod tests {
-    use sqlx::{pool::PoolConnection, Postgres};
+    use sqlx::{Postgres, pool::PoolConnection};
 
     use crate::{
         database::load_sample,
         models::{
             pagination::Paginate,
-            quiz::{paginate::QuizQuery, QuizMetadata},
+            quiz::{QuizMetadata, paginate::QuizQuery},
         },
     };
 

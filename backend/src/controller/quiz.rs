@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::{Path, Query, State},
     Json,
+    extract::{Path, Query, State},
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tokio::sync::RwLock;
 
 use crate::{
@@ -12,13 +12,13 @@ use crate::{
     controller::error::ControllerError,
     models::{
         pagination::Paginate,
-        question::{paginate::QuestionQuery, Question, QuestionNoKey},
-        quiz::{paginate::QuizQuery, QuizMetadata},
-        submission::{PostQuiz, SubmittedQuiz},
+        question::Question,
+        quiz::{QuizMetadata, paginate::QuizQuery},
+        submission::PostQuiz,
     },
 };
 
-pub async fn get_quizzes(
+pub async fn paginate(
     State(state): State<Arc<RwLock<AppState>>>,
     Query(query): Query<QuizQuery>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -30,7 +30,7 @@ pub async fn get_quizzes(
     Ok(Json(json!(page)))
 }
 
-pub async fn get_quiz_by_id(
+pub async fn get(
     State(state): State<Arc<RwLock<AppState>>>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -42,53 +42,7 @@ pub async fn get_quiz_by_id(
     Ok(Json(json!(quiz)))
 }
 
-pub async fn get_questions(
-    State(state): State<Arc<RwLock<AppState>>>,
-    Query(query): Query<QuestionQuery>,
-) -> Result<Json<Value>, ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.get_connection().await?;
-    let page = QuestionNoKey::page(&query, &mut *connection).await?;
-    Ok(Json(json!(page)))
-}
-
-pub async fn submit_quiz(
-    State(state): State<Arc<RwLock<AppState>>>,
-    Json(submission): Json<SubmittedQuiz>,
-) -> Result<Json<Value>, ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.start_transaction().await?;
-
-    let tmp_quiz_result = submission
-        .evaluate(&mut *connection)
-        .await?
-        .into_tmp_quiz_result(&mut *connection)
-        .await?;
-
-    connection.commit().await?;
-
-    Ok(Json(json!(tmp_quiz_result)))
-}
-
-pub async fn submit_quiz_and_store_result(
-    State(state): State<Arc<RwLock<AppState>>>,
-    Json(submission): Json<SubmittedQuiz>,
-) -> Result<Json<Value>, ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.start_transaction().await?;
-
-    let quiz_result = submission
-        .evaluate(&mut *connection)
-        .await?
-        .into_quiz_result(&mut *connection)
-        .await?;
-
-    connection.commit().await?;
-
-    Ok(Json(json!(quiz_result)))
-}
-
-pub async fn create_quiz(
+pub async fn post(
     State(state): State<Arc<RwLock<AppState>>>,
     Json(data): Json<PostQuiz>,
 ) -> Result<(), ControllerError> {
@@ -106,7 +60,7 @@ pub async fn create_quiz(
     Ok(())
 }
 
-pub async fn update_quiz_info(
+pub async fn update(
     State(state): State<Arc<RwLock<AppState>>>,
 ) -> Result<Json<Value>, ControllerError> {
     let state_locked = state.read().await;
@@ -115,7 +69,7 @@ pub async fn update_quiz_info(
     todo!()
 }
 
-pub async fn delete_quiz(
+pub async fn delete(
     State(state): State<Arc<RwLock<AppState>>>,
 ) -> Result<Json<Value>, ControllerError> {
     let state_locked = state.read().await;

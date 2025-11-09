@@ -1,6 +1,6 @@
+use crate::utils::{deserialize_snake_case, serializeCamelCase};
 use serde::{Deserialize, Serialize};
-use sqlx::{prelude::FromRow, PgConnection};
-use crate::utils::{serializeCamelCase, deserialize_snake_case};
+use sqlx::{PgConnection, prelude::FromRow};
 
 use crate::models::{
     error::ModelError,

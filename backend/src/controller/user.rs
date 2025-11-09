@@ -1,22 +1,19 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::{Path, Query, State},
     Json,
+    extract::{Path, State},
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tokio::sync::RwLock;
 
 use crate::{
     app::AppState,
     controller::error::ControllerError,
-    models::{
-        result::paginate::QuestionResultQuery,
-        user::{UserFullDetail, UserPubInfo},
-    },
+    models::user::{UserFullDetail, UserPubInfo},
 };
 
-pub async fn get_my_info(
+pub async fn get_me(
     State(state): State<Arc<RwLock<AppState>>>,
 ) -> Result<Json<Value>, ControllerError> {
     let state_locked = state.read().await;
@@ -45,13 +42,7 @@ pub async fn get_my_info(
     Ok(Json(json!(user)))
 }
 
-pub async fn get_my_result(
-    State(state): State<Arc<RwLock<AppState>>>,
-) -> Result<Json<Value>, ControllerError> {
-    todo!()
-}
-
-pub async fn get_user_by_id(
+pub async fn get(
     State(state): State<Arc<RwLock<AppState>>>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -61,11 +52,4 @@ pub async fn get_user_by_id(
     let id: i32 = id.parse().unwrap_or(-1);
     let user = UserPubInfo::get_by_id(id, &mut *connection).await?;
     Ok(Json(json!(user)))
-}
-
-pub async fn get_user_results(
-    State(state): State<Arc<RwLock<AppState>>>,
-    Query(query): Query<QuestionResultQuery>,
-) -> Result<Json<Value>, ControllerError> {
-    todo!()
 }
