@@ -1,12 +1,12 @@
 use serde::Serialize;
-use sqlx::{prelude::FromRow, PgConnection};
+use sqlx::PgConnection;
 
 use crate::models::error::ModelError;
 
 pub mod paginate;
 pub mod post;
 
-#[derive(Debug, Serialize, FromRow)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Category {
     pub id: i32,

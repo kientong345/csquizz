@@ -10,6 +10,7 @@ use crate::models::{
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CategoryQuery {
+    pub name_pattern: Option<String>,
     pub page: i64,
     pub size: i64,
 }
@@ -19,17 +20,27 @@ impl Paginate<CategoryQuery> for Category {
         query: &CategoryQuery,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, ModelError> {
-        let total_items = Category::count(connection).await?;
+        let name_pattern = format!("%{}%", query.name_pattern.clone().unwrap_or("".to_string()));
         let offset = (query.page.saturating_sub(1)) * query.size;
 
         let items = sqlx::query_as!(
             Category,
-            r#"SELECT id, name, image_url, description FROM categories LIMIT $1 OFFSET $2"#,
+            r#"SELECT id, name, image_url, description FROM categories
+            WHERE name LIKE $1 LIMIT $2 OFFSET $3"#,
+            name_pattern,
             query.size,
             offset
         )
-        .fetch_all(connection)
+        .fetch_all(&mut *connection)
         .await?;
+
+        let total_items = sqlx::query_scalar!(
+            r#"SELECT COUNT(id) FROM categories WHERE name LIKE $1"#,
+            name_pattern,
+        )
+        .fetch_one(connection)
+        .await?
+        .unwrap_or(0);
 
         Ok(Page::build_from(items, total_items, query.size))
     }
@@ -38,12 +49,12 @@ impl Paginate<CategoryQuery> for Category {
 #[cfg(feature = "local")]
 #[cfg(test)]
 mod tests {
-    use sqlx::{pool::PoolConnection, Postgres};
+    use sqlx::{Postgres, pool::PoolConnection};
 
     use crate::{
         database::load_sample,
         models::{
-            category::{paginate::CategoryQuery, Category},
+            category::{Category, paginate::CategoryQuery},
             pagination::Paginate,
         },
     };

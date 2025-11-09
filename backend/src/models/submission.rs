@@ -3,7 +3,7 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::{post::PostQuestion, KeyType, Question, QuestionWithKey},
+    question::{KeyType, Question, QuestionWithKey, post::PostQuestion},
     quiz::post::PostQuizMetadata,
     result::{QuizResult, TmpQuizResult, UserAnswer, UserChoice, UserEntry},
 };

@@ -1,32 +1,24 @@
 use std::sync::Arc;
 
-use axum::{
-    routing::{patch, post, put},
-    Router,
-};
+use axum::Router;
 use tokio::sync::RwLock;
 
-use crate::{
-    app::AppState,
-    controller::quizzes::{
-        add_question, create_quiz, delete_question, delete_quiz, update_question, update_quiz_info,
-    },
-};
+use crate::app::AppState;
 
-pub fn create_route(state: Arc<RwLock<AppState>>) -> Router {
+pub fn create_protected_route(state: Arc<RwLock<AppState>>) -> Router {
     Router::new()
-        .route("/api/admin/quizzes", post(create_quiz))
-        .route(
-            "/api/admin/quizzes/{:id}",
-            patch(update_quiz_info).delete(delete_quiz),
-        )
-        .route(
-            "/api/admin/quizzes/{:quiz_id}/questions/",
-            post(add_question),
-        )
-        .route(
-            "/api/admin/quizzes/{:quiz_id}/questions/{:question_id}",
-            put(update_question).delete(delete_question),
-        )
+        // .route("/api/admin/quizzes", post(quiz))
+        // .route(
+        //     "/api/admin/quizzes/{:id}",
+        //     patch(update_quiz_info).delete(delete_quiz),
+        // )
+        // .route(
+        //     "/api/admin/quizzes/{:quiz_id}/questions/",
+        //     post(add_question),
+        // )
+        // .route(
+        //     "/api/admin/quizzes/{:quiz_id}/questions/{:question_id}",
+        //     put(update_question).delete(delete_question),
+        // )
         .with_state(state)
 }

@@ -1,5 +1,8 @@
 pub mod auth;
-pub mod categories;
+pub mod category;
 pub mod error;
-pub mod quizzes;
-pub mod users;
+pub mod question;
+pub mod quiz;
+pub mod result;
+pub mod submission;
+pub mod user;

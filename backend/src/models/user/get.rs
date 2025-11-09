@@ -92,7 +92,7 @@ impl UserFullDetail {
 #[cfg(feature = "local")]
 #[cfg(test)]
 mod tests {
-    use sqlx::{pool::PoolConnection, Postgres};
+    use sqlx::{Postgres, pool::PoolConnection};
 
     use crate::{
         database::load_sample,

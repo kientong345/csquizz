@@ -1,9 +1,9 @@
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sqlx::PgConnection;
 
 use crate::{
     config::auth::AuthConfig,
-    models::user::{post::PostUser, UserFullDetail},
+    models::user::{UserFullDetail, post::PostUser},
     services::error::ServiceError,
     utils::{bcrypt_hash, decode_jwt, generate_jwt, validate_email_name},
 };

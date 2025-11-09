@@ -6,7 +6,7 @@ use sqlx::PgConnection;
 use crate::models::{
     error::ModelError,
     pagination::{Page, Paginate},
-    question::{paginate::QuestionQuery, QuestionForm, QuestionWithKey},
+    question::{QuestionForm, QuestionWithKey, paginate::QuestionQuery},
     quiz::{QuizDifficulty, QuizMinimal},
     result::{
         FetchedQuizSummary, QuestionResult, QuizResultSummary, UserAnswer, UserChoice, UserEntry,
