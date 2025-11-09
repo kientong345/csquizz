@@ -14,74 +14,74 @@ const mockQuizzes: Page<QuizMetadata> = {
       title: 'Basic Data Structures',
       category: 'Data Structure',
       difficulty: QuizDifficulty.Easy,
-      question_count: 10,
+      questionCount: 10,
     },
     {
       id: 102,
       title: 'Trees and Graphs',
       category: 'Data Structure',
       difficulty: QuizDifficulty.Medium,
-      question_count: 15,
+      questionCount: 15,
     },
     {
       id: 103,
       title: 'Advanced Hashing',
       category: 'Algorithm',
       difficulty: QuizDifficulty.Hard,
-      question_count: 20,
+      questionCount: 20,
     },
     {
       id: 104,
       title: 'Linked List Manipulations',
       category: 'Algorithm',
       difficulty: QuizDifficulty.Medium,
-      question_count: 12,
+      questionCount: 12,
     },
     {
       id: 105,
       title: 'Array Fundamentals',
       category: 'Data Structure',
       difficulty: QuizDifficulty.Easy,
-      question_count: 10,
+      questionCount: 10,
     },
     {
       id: 106,
       title: 'Sorting Algorithms',
       category: 'Algorithm',
       difficulty: QuizDifficulty.Medium,
-      question_count: 15,
+      questionCount: 15,
     },
     {
       id: 107,
       title: 'Dynamic Programming Basics',
       category: 'Algorithm',
       difficulty: QuizDifficulty.Hard,
-      question_count: 20,
+      questionCount: 20,
     },
     {
       id: 108,
       title: 'Bit Manipulation',
       category: 'Algorithm',
       difficulty: QuizDifficulty.Hard,
-      question_count: 18,
+      questionCount: 18,
     },
     {
       id: 109,
       title: 'Recursion Techniques',
       category: 'Algorithm',
       difficulty: QuizDifficulty.Medium,
-      question_count: 12,
+      questionCount: 12,
     },
     {
       id: 110,
       title: 'Object-Oriented Design Patterns',
       category: 'OOP',
       difficulty: QuizDifficulty.Hard,
-      question_count: 25,
+      questionCount: 25,
     },
   ],
-  total_items: 10,
-  total_pages: 1,
+  totalItems: 10,
+  totalPages: 1,
 };
 
 function getPage(
@@ -93,8 +93,8 @@ function getPage(
   const end = start + size;
   return {
     items: instance.items.slice(start, end),
-    total_items: instance.total_items,
-    total_pages: Math.ceil(instance.total_items / size),
+    totalItems: instance.totalItems,
+    totalPages: Math.ceil(instance.totalItems / size),
   };
 }
 
@@ -120,9 +120,9 @@ export default async function QuizListPage({
 }) {
   const resolvedSearchParams = await searchParams;
   const resolvedParams = await params;
-  const category_id =
-    typeof resolvedSearchParams.category_id === 'string'
-      ? Number(resolvedSearchParams.category_id)
+  const categoryId =
+    typeof resolvedSearchParams.categoryId === 'string'
+      ? Number(resolvedSearchParams.categoryId)
       : -1;
   const page =
     typeof resolvedSearchParams.page === 'string'
@@ -134,7 +134,7 @@ export default async function QuizListPage({
   let currentQuizPage;
   if (process.env.NEXT_RUNTIME_ENV === 'production') {
     currentQuizPage = await getQuizzes({
-      category_id: category_id,
+      categoryId: categoryId,
       page: page,
       size: QUIZ_INFO_PER_PAGE,
     });
@@ -165,14 +165,14 @@ export default async function QuizListPage({
               id={quiz.id}
               title={quiz.title}
               difficulty={stringifyDifficulty(quiz.difficulty)}
-              questionCount={quiz.question_count}
+              questionCount={quiz.questionCount}
             />
           ))}
         </div>
       </section>
 
       <div className="mt-8">
-        <CSQuizzPagination totalPages={currentQuizPage.total_pages} />
+        <CSQuizzPagination totalPages={currentQuizPage.totalPages} />
       </div>
     </div>
   );

@@ -14,8 +14,8 @@ export interface UserPubInfo {
 
 export interface UserPubInfoPage {
   items: UserPubInfo[];
-  total_items: number;
-  total_pages: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 export interface UserFullDetail {

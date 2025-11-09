@@ -86,8 +86,8 @@ const mockCategoryPage: Page<Category> = {
       imageUrl: 'https://binarapps.com/wp-content/uploads/2021/09/Top-10-Programming-Languages-of-the-Future.png'
     },
   ],
-  total_items: 10,
-  total_pages: 2,
+  totalItems: 10,
+  totalPages: 2,
 };
 
 function getPage(
@@ -99,8 +99,8 @@ function getPage(
   const end = start + size;
   return {
     items: instance.items.slice(start, end),
-    total_items: instance.total_items,
-    total_pages: Math.ceil(instance.total_items / size),
+    totalItems: instance.totalItems,
+    totalPages: Math.ceil(instance.totalItems / size),
   };
 }
 
@@ -163,7 +163,7 @@ export default async function HomePage({
       </section>
 
       <div className="mt-8">
-        <CSQuizzPagination totalPages={currentCategoryPage.total_pages} />
+        <CSQuizzPagination totalPages={currentCategoryPage.totalPages} />
       </div>
     </div>
   );

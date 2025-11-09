@@ -39,5 +39,6 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Test
-      run: npm test
+    # not any UT for frontend yet
+    # - name: Test
+    #   run: npm test

@@ -9,17 +9,17 @@ export interface QuizMetadata {
   title: string;
   description?: string;
   category: string;
-  question_count: number;
+  questionCount: number;
   difficulty?: QuizDifficulty;
-  created_by?: string;
+  createdBy?: string;
 }
 
 export interface QuizQuery {
-  category_id?: number;
-  title_pattern?: string;
+  categoryId?: number;
+  titlePattern?: string;
   difficulty?: string;
-  created_by?: number;
-  completed_by?: number;
+  createdBy?: number;
+  completedBy?: number;
   page: number;
   size: number;
 }
@@ -27,7 +27,7 @@ export interface QuizQuery {
 export interface PostQuizMetadata{
   title: string;
   description?: string;
-  category_id: number;
+  categoryId: number;
   difficulty?: QuizDifficulty;
-  creator_id?: number;
+  creatorId?: number;
 }

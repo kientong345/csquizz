@@ -12,14 +12,14 @@ const apiClient = axios.create({
 
 const defaultCategoryPage: Page<Category> = {
   items: [],
-  total_items: 0,
-  total_pages: 0,
+  totalItems: 0,
+  totalPages: 0,
 };
 
 const defaultQuizPage: Page<QuizMetadata> = {
   items: [],
-  total_items: 0,
-  total_pages: 0,
+  totalItems: 0,
+  totalPages: 0,
 };
 
 /**

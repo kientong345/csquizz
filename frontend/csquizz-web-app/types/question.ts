@@ -13,7 +13,7 @@ export interface Question {
   id: number;
   form: QuestionForm;
   text: string;
-  image_url?: string;
+  imageUrl?: string;
   explanation?: string;
   options: AnswerOption[],
 }
