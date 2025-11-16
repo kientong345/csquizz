@@ -1,14 +1,15 @@
 # Đặc tả API (API Specification) cho Dự án csquizz
 
--   **Phiên bản:** 1.0
+-   **Phiên bản:** 1.1
 -   **Định dạng:** JSON
 
 ## 1. Nguyên tắc thiết kế
 
--   **RESTful:** API được thiết kế theo các nguyên tắc REST.
--   **Stateless:** Mọi request từ client phải chứa đủ thông tin để server có thể hiểu và xử lý (thường là qua JWT).
--   **Không lồng ghép tài nguyên (No-nesting):** Các endpoint được giữ phẳng. Để truy vấn tài nguyên con, sử dụng query parameter (ví dụ: `GET /questions?quiz_id=...`).
--   **Authentication:** Sử dụng `Bearer Token` (JWT) trong header `Authorization` cho các request cần xác thực.
+-   **RESTful & No-nesting:** API được thiết kế theo các nguyên tắc REST. Các endpoint được giữ phẳng.
+-   **Stateless & JWT:** Mọi request cần xác thực phải chứa `Bearer Token` (JWT) trong header `Authorization`.
+-   **Summary vs. Detail DTOs:**
+    -   Các endpoint trả về danh sách (List View) sẽ sử dụng DTO dạng **Summary** (tóm tắt), chứa các thông tin cần thiết để hiển thị trên danh sách, bao gồm cả các dữ liệu tổng hợp (như `question_count`, `like_count`).
+    -   Các endpoint trả về chi tiết một đối tượng (Detail View) sẽ sử dụng DTO dạng **Detail**, chứa đầy đủ thông tin của đối tượng đó.
 
 ---
 
@@ -145,272 +146,177 @@
     }
     ```
 
-### FR2: Quản lý Nội dung (Admin)
-
-#### `GET /categories`
-
--   **Mô tả:** Lấy danh sách tất cả các chủ đề.
--   **Response (200 OK):**
-    ```json
-    [
-      {
-        "id": 1,
-        "name": "Data Structures",
-        "image_url": "url-to-image",
-        "description": "..."
-      }
-    ]
-    ```
-
-#### `POST /categories`
-
--   **Mô tả:** Tạo một chủ đề mới.
--   **Xác thực:** Admin.
--   **Body:**
-    ```json
-    {
-      "name": "Algorithms",
-      "image_url": "url-to-image",
-      "description": "..."
-    }
-    ```
--   **Response (201- Created):** (Trả về đối tượng vừa tạo)
-
-#### `PUT /categories/{id}`
-
--   **Mô tả:** Cập nhật một chủ đề.
--   **Xác thực:** Admin.
--   **Response (200 OK):** (Trả về đối tượng vừa cập nhật)
-
-#### `DELETE /categories/{id}`
-
--   **Mô tả:** Xóa một chủ đề.
--   **Xác thực:** Admin.
--   **Response (204 No Content):**
-
 ---
+
+### FR2 & FR3: Quản lý và Trải nghiệm Quiz
 
 #### `GET /quizzes`
 
--   **Mô tả:** Lấy danh sách các bài quiz, hỗ trợ lọc, tìm kiếm và phân trang.
+-   **Mô tả:** Lấy danh sách các bài quiz (dạng tóm tắt), hỗ trợ lọc, tìm kiếm và phân trang.
 -   **Query Params:**
-    -   `category_id` (int): Lọc theo ID chủ đề.
-    -   `difficulty` (string): Lọc theo độ khó (`easy`, `medium`, `hard`).
-    -   `q` (string): Tìm kiếm theo tiêu đề.
+    -   `category_id` (int, optional): Lọc theo ID chủ đề.
+    -   `difficulty` (string, optional): Lọc theo độ khó (`easy`, `medium`, `hard`).
+    -   `q` (string, optional): Tìm kiếm theo tiêu đề.
     -   `page` (int, optional, default: 1): Số trang.
     -   `limit` (int, optional, default: 10): Số mục trên mỗi trang.
--   **Response (200 OK):**
+    -   `sort_by` (string, optional): Trường để sắp xếp. Các giá trị hợp lệ: `created_at` (mặc định), `like_count`, `comment_count`, `question_count`, `title`.
+    -   `order` (string, optional): Hướng sắp xếp. Các giá trị hợp lệ: `asc` (tăng dần), `desc` (giảm dần, mặc định).
+-   **Response (200 OK):** `PaginatedQuizzesDto`
     ```json
     {
-      "data": [
-        {
-          "id": 1,
-          "title": "Basics of Arrays",
-          "description": "...",
-          "difficulty": "easy",
-          "category_id": 1,
-          "creator_id": 1
-        }
-      ],
       "pagination": {
         "current_page": 1,
         "total_pages": 5,
         "total_items": 50,
         "limit": 10
-      }
+      },
+      "data": [
+        {
+          "id": 1,
+          "title": "Basics of Arrays",
+          "difficulty": "easy",
+          "question_count": 15,
+          "like_count": 128,
+          "comment_count": 23,
+          "category_id": 1,
+          "category_name": "Data Structures"
+        }
+      ]
     }
     ```
 
 #### `POST /quizzes`
 
--   **Mô tả:** Tạo một bài quiz mới.
--   **Xác thực:** Admin.
--   **Body:**
-    ```json
-    {
-      "title": "Advanced Sorting Algorithms",
-      "description": "...",
-      "difficulty": "hard",
-      "category_id": 2
-    }
-    ```
--   **Response (201 Created):** (Trả về đối tượng quiz vừa tạo)
+-   **Mô tả:** (Admin) Tạo một bài quiz mới.
+-   **Body:** `CreateQuizDto`
+-   **Response (201 Created):** `QuizDetailDto` (trả về chi tiết quiz vừa tạo).
 
 #### `GET /quizzes/{id}`
 
 -   **Mô tả:** Lấy thông tin chi tiết một bài quiz.
--   **Response (200 OK):** (Tương tự một object trong `GET /quizzes`)
+-   **Response (200 OK):** `QuizDetailDto`
+    ```json
+    {
+      "id": 1,
+      "title": "Basics of Arrays",
+      "description": "A quiz to test fundamental knowledge of arrays.",
+      "difficulty": "easy",
+      "question_count": 15,
+      "like_count": 128,
+      "comment_count": 23,
+      "category_id": 1,
+      "category_name": "Data Structures",
+      "creator_id": 1,
+      "creator_display_name": "John Doe",
+      "creator_avatar_url": "https://example.com/avatar.png",
+      "created_at": "2023-10-27T10:00:00Z",
+      "updated_at": "2023-10-27T10:00:00Z"
+    }
+    ```
 
 #### `PUT /quizzes/{id}`
 
--   **Mô tả:** Cập nhật một bài quiz.
--   **Xác thực:** Admin.
--   **Response (200 OK):** (Trả về đối tượng quiz vừa cập nhật)
+-   **Mô tả:** (Admin) Cập nhật một bài quiz.
+-   **Body:** `UpdateQuizDto`.
+-   **Response (200 OK):** `QuizDetailDto`.
 
 #### `DELETE /quizzes/{id}`
 
--   **Mô tả:** Xóa một bài quiz.
--   **Xác thực:** Admin.
+-   **Mô tả:** (Admin) Xóa một bài quiz.
 -   **Response (204 No Content):**
 
 ---
 
-#### `GET /questions`
+#### `GET /categories`
 
--   **Mô tả:** Lấy danh sách câu hỏi cho một bài quiz, có phân trang.
+-   **Mô tả:** Lấy danh sách tất cả các chủ đề, có phân trang.
 -   **Query Params:**
-    -   `quiz_id` (int, **bắt buộc**): ID của bài quiz.
+    -   `name_pattern` (string, optional): Tìm kiếm theo tên chủ đề.
     -   `page` (int, optional, default: 1): Số trang.
     -   `limit` (int, optional, default: 10): Số mục trên mỗi trang.
--   **Response (200 OK):**
+-   **Response (200 OK):** `PaginatedCategoriesDto`
     ```json
     {
-      "data": [
-        {
-          "id": 101,
-          "type": "single_choice",
-          "content": "What is a Stack?",
-          "image_url": null,
-          "quiz_id": 1,
-          "key": { // Đáp án và giải thích
-            "options": [
-              {"content": "LIFO", "is_correct": true, "explanation": "Stack is Last-In, First-Out."},
-              {"content": "FIFO", "is_correct": false}
-            ]
-          }
-        }
-      ],
-      "pagination": {
-        "current_page": 1,
-        "total_pages": 2,
-        "total_items": 15,
-        "limit": 10
-      }
-    }
-    ```
-
-#### `POST /questions`
-
--   **Mô tả:** Tạo một câu hỏi mới và gán vào một quiz.
--   **Xác thực:** Admin.
--   **Body:**
-    ```json
-    {
-      "quiz_id": 1,
-      "type": "single_choice",
-      "content": "What is a Queue?",
-      "key": {
-        "options": [
-          {"content": "LIFO", "is_correct": false},
-          {"content": "FIFO", "is_correct": true, "explanation": "Queue is First-In, First-Out."}
-        ]
-      }
-    }
-    ```
--   **Response (201 Created):** (Trả về đối tượng câu hỏi vừa tạo)
-
-### FR3: Trải nghiệm Làm Quiz
-
-#### `POST /submissions`
-
--   **Mô tả:** Nộp bài quiz đã làm để chấm điểm.
--   **Xác thực:** Yêu cầu JWT.
--   **Body:**
-    ```json
-    {
-      "quiz_id": 1,
-      "answers": [
-        {
-          "question_id": 101,
-          "data": { "option_index": 0 } // UserChoice
-        },
-        {
-          "question_id": 102,
-          "data": { "entry": "O(n)" } // UserEntry
-        }
-      ]
-    }
-    ```
--   **Response (201 Created):**
-    ```json
-    {
-      "id": 1,
-      "user_id": 1,
-      "quiz_id": 1,
-      "score": 50.0,
-      "submitted_at": "2023-10-27T11:00:00Z",
-      "details": [ // Chi tiết từng câu trả lời
-        {
-          "question_id": 101,
-          "user_answer": { "option_index": 0 },
-          "correct_answer": { "option_index": 0 },
-          "is_correct": true,
-          "explanation": "Stack is Last-In, First-Out."
-        }
-      ]
-    }
-    ```
-
-#### `GET /submissions/{id}`
-
--   **Mô tả:** Lấy chi tiết kết quả của một lần nộp bài.
--   **Xác thực:** Yêu cầu JWT (người dùng chỉ xem được bài của mình, admin xem được mọi bài).
--   **Response (200 OK):** (Tương tự response của `POST /submissions`)
-
-### FR4: Tương tác & Cộng đồng
-
-#### `POST /quiz-likes`
-
--   **Mô tả:** Thích một bài quiz.
--   **Xác thực:** Yêu cầu JWT.
--   **Body:**
-    ```json
-    {
-      "quiz_id": 1
-    }
-    ```
--   **Response (201 Created):**
-    ```json
-    { "status": "success", "message": "Quiz liked." }
-    ```
-
-#### `DELETE /quiz-likes`
-
--   **Mô tả:** Bỏ thích một bài quiz.
--   **Xác thực:** Yêu cầu JWT.
--   **Body:**
-    ```json
-    {
-      "quiz_id": 1
-    }
-    ```
--   **Response (204 No Content):**
-
-#### `GET /comments`
-
--   **Mô tả:** Lấy danh sách bình luận của một quiz, có phân trang.
--   **Query Params:**
-    -   `quiz_id` (int, **bắt buộc**): ID của bài quiz.
-    -   `page` (int, optional, default: 1): Số trang.
-    -   `limit` (int, optional, default: 10): Số mục trên mỗi trang.
--   **Response (200 OK):**
-    ```json
-    {
-      "data": [
-        {
-          "id": 1,
-          "user_id": 2,
-          "user_display_name": "Jane Doe",
-          "content": "Great quiz!",
-          "created_at": "..."
-        }
-      ],
       "pagination": {
         "current_page": 1,
         "total_pages": 3,
         "total_items": 25,
         "limit": 10
+      },
+      "data": [
+        {
+          "id": 1,
+          "name": "Data Structures",
+          "image_url": "url-to-image",
+          "description": "A collection of quizzes about fundamental data structures."
+        }
+      ]
+    }
+    ```
+
+#### `POST /categories`
+
+-   **Mô tả:** (Admin) Tạo một chủ đề mới.
+-   **Body:** `CreateCategoryDto`.
+-   **Response (201 Created):** `CategoryDto`.
+
+#### `PUT /categories/{id}`
+
+-   **Mô tả:** (Admin) Cập nhật một chủ đề.
+-   **Body:** `UpdateCategoryDto`.
+-   **Response (200 OK):** `CategoryDto`.
+
+#### `DELETE /categories/{id}`
+
+-   **Mô tả:** (Admin) Xóa một chủ đề.
+-   **Response (204 No Content):**
+
+---
+
+#### `GET /quizzes/{id}/questions`
+
+-   **Mô tả:** Lấy danh sách câu hỏi cho một bài quiz (dành cho người dùng làm bài).
+-   **Response (200 OK):** `Vec<PublicQuestionDto>`
+    ```json
+    [
+      {
+        "id": 101,
+        "type": "single_choice",
+        "content": "What is a Stack?",
+        "image_url": null,
+        "options": [
+          { "content": "LIFO", "image_url": null },
+          { "content": "FIFO", "image_url": null }
+        ]
       }
+    ]
+    ```
+    *Lưu ý: Response này **không** chứa đáp án.*
+
+---
+
+### FR4: Tương tác & Cộng đồng
+
+#### `GET /comments`
+
+-   **Mô tả:** Lấy danh sách bình luận của một quiz, có phân trang.
+-   **Query Params:** `quiz_id` (bắt buộc), `page`, `limit`.
+-   **Response (200 OK):** `PaginatedCommentsDto`
+    ```json
+    {
+      "pagination": { ... },
+      "data": [
+        {
+          "id": 1,
+          "content": "Great quiz!",
+          "created_at": "2023-10-28T11:00:00Z",
+          "user_id": 2,
+          "user_display_name": "Jane Doe",
+          "user_avatar_url": "...",
+          "like_count": 15,
+          "is_liked_by_user": true
+        }
+      ]
     }
     ```
 
@@ -418,41 +324,74 @@
 
 -   **Mô tả:** Gửi một bình luận mới.
 -   **Xác thực:** Yêu cầu JWT.
--   **Body:**
+-   **Body:** `CreateCommentDto`
+-   **Response (201- Created):** `CommentDto`.
+
+#### `DELETE /comments/{id}`
+
+-   **Mô tả:** Xóa một bình luận (chỉ chủ sở hữu hoặc admin).
+-   **Xác thực:** Yêu cầu JWT.
+-   **Response (204 No Content):**
+
+---
+
+#### `POST /likes/quiz`
+
+-   **Mô tả:** Thích một bài quiz.
+-   **Xác thực:** Yêu cầu JWT.
+-   **Body:** `CreateLikeDto` (`{ "target_id": <quiz_id> }`)
+-   **Response (201 Created):**
+
+#### `DELETE /likes/quiz`
+
+-   **Mô tả:** Bỏ thích một bài quiz.
+-   **Xác thực:** Yêu cầu JWT.
+-   **Body:** `DeleteLikeDto` (`{ "target_id": <quiz_id> }`).
+-   **Response (204 No Content):**
+
+#### `POST /likes/comment`
+
+-   **Mô tả:** Thích một bình luận.
+-   **Xác thực:** Yêu cầu JWT.
+-   **Body:** `CreateLikeDto` (`{ "target_id": <comment_id> }`)
+-   **Response (201 Created):**
+
+#### `DELETE /likes/comment`
+
+-   **Mô tả:** Bỏ thích một bình luận.
+-   **Xác thực:** Yêu cầu JWT.
+-   **Body:** `DeleteLikeDto` (`{ "target_id": <comment_id> }`).
+-   **Response (204 No Content):**
+
+---
+
+### FR5: Hồ sơ cá nhân & Lịch sử
+
+#### `POST /submissions`
+
+-   **Mô tả:** Nộp bài quiz đã làm để chấm điểm.
+-   **Xác thực:** Yêu cầu JWT.
+-   **Body:** `SubmissionRequestDto`
     ```json
     {
       "quiz_id": 1,
-      "content": "This was very helpful, thanks!"
+      "answers": [
+        { "question_id": 101, "data": { "option_index": 0 } },
+        { "question_id": 102, "data": { "entry": "O(n)" } }
+      ]
     }
     ```
--   **Response (201 Created):** (Trả về đối tượng comment vừa tạo)
+-   **Response (201 Created):** `SubmissionDetailDto`
 
-### FR5: Hồ sơ cá nhân & Lịch sử
+#### `GET /submissions/{id}`
+
+-   **Mô tả:** Lấy chi tiết kết quả của một lần nộp bài.
+-   **Xác thực:** Yêu cầu JWT (người dùng chỉ xem được bài của mình, admin xem được mọi bài).
+-   **Response (200 OK):** `SubmissionDetailDto`
 
 #### `GET /users/me/submissions`
 
 -   **Mô tả:** Lấy lịch sử làm bài của người dùng hiện tại, có phân trang.
 -   **Xác thực:** Yêu cầu JWT.
--   **Query Params:**
-    -   `page` (int, optional, default: 1): Số trang.
-    -   `limit` (int, optional, default: 10): Số mục trên mỗi trang.
--   **Response (200 OK):**
-    ```json
-    {
-      "data": [
-        {
-          "submission_id": 1,
-          "quiz_id": 1,
-          "quiz_title": "Basics of Arrays",
-          "score": 85.0,
-          "submitted_at": "2023-10-26T14:30:00Z"
-        }
-      ],
-      "pagination": {
-        "current_page": 1,
-        "total_pages": 4,
-        "total_items": 38,
-        "limit": 10
-      }
-    }
-    ```
+-   **Query Params:** `page`, `limit`.
+-   **Response (200 OK):** `PaginatedSubmissionsDto`

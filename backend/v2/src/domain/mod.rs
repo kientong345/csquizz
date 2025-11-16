@@ -1,2 +1,9 @@
-pub mod models;
-pub mod repositories;
+pub mod category;
+pub mod comment;
+pub mod error;
+pub mod like;
+pub mod page;
+pub mod question;
+pub mod quiz;
+pub mod submission_result;
+pub mod user;

@@ -2,8 +2,8 @@
 
 -   **Tên dự án:** csquizz - Nền tảng Test Online về Computer Science
 -   **Ngày tạo:** 2023-10-27
--   **Phiên bản:** 1.0
--   **Tình trạng:** Sơ bộ
+-   **Phiên bản:** 1.1 (Cập nhật ngày 2025-11-13)
+-   **Tình trạng:** Đang phát triển
 
 ---
 
@@ -11,70 +11,79 @@
 
 csquizz là một nền tảng test trực tuyến về Khoa học Máy tính. Backend của dự án cung cấp các API để quản lý người dùng, quiz, câu hỏi, kết quả nộp bài, và các tính năng tương tác xã hội như bình luận, thích.
 
-## 2. Kiến trúc Hệ thống: Kiến trúc Phân lớp Lấy Domain làm Trung tâm (Domain-Centric Layered Architecture)
+## 2. Kiến trúc Hệ thống: Hybrid giữa Lát cắt dọc (VSA) và Thiết kế Hướng Miền (DDD)
 
-Dự án áp dụng một kiến trúc phân lớp rõ ràng, dựa trên các nguyên tắc của Clean Architecture, nhằm đảm bảo khả năng bảo trì, mở rộng và kiểm thử cao.
+Dự án áp dụng một kiến trúc hybrid tiên tiến, kết hợp sức mạnh của hai trường phái thiết kế phần mềm hiện đại:
+
+1.  **Thiết kế Hướng Miền (Domain-Driven Design - DDD):** Được sử dụng để xây dựng một lõi nghiệp vụ (domain core) vững chắc, độc lập và dễ hiểu. DDD giúp mô hình hóa các quy tắc nghiệp vụ phức tạp một cách rõ ràng.
+2.  **Kiến trúc Lát cắt dọc (Vertical Slice Architecture - VSA):** Được sử dụng để tổ chức mã nguồn theo từng tính năng (feature). Mỗi "lát cắt" là một module độc lập chứa tất cả logic cần thiết cho một use case cụ thể, từ API endpoint đến logic ứng dụng.
+
+Sự kết hợp này cho phép dự án vừa có một nền tảng nghiệp vụ ổn định, vừa có cấu trúc code dễ bảo trì và mở rộng theo từng tính năng.
 
 ### 2.1. Quy tắc Phụ thuộc (The Dependency Rule)
 
-Nguyên tắc cốt lõi là các lớp bên ngoài chỉ được phép phụ thuộc vào các lớp bên trong. Điều này tạo ra một hệ thống với lõi nghiệp vụ tách biệt và độc lập với các chi tiết kỹ thuật bên ngoài.
+Quy tắc cốt lõi vẫn được tuân thủ: các thành phần bên ngoài chỉ được phụ thuộc vào các thành phần bên trong.
 
-`Interface (Web API) -> Application (Use Cases) -> Domain (Core Business Logic)`
-`Infrastructure (DB, External Services) phục vụ các Interface và Application`
+`API (Routes) -> Features (Slices) -> Domain (Core Business Logic)`
+`Infrastructure (DB, External Services) -> Domain (implements Repository Traits)`
 
-### 2.2. Chi tiết các Lớp và Module
+### 2.2. Chi tiết các Lớp và Thành phần
 
-#### a. Lớp `domain` (Lõi nghiệp vụ)
+#### a. Lớp `domain` (Lõi DDD)
 
--   **Mô tả:** Chứa các quy tắc nghiệp vụ cốt lõi, độc lập với bất kỳ chi tiết kỹ thuật (`framework`, `database`, `UI` nào). Đây là nơi code ít thay đổi nhất.
--   **Module con:**
-    -   **`domain/models/`**: Định nghĩa các struct đại diện cho các thực thể nghiệp vụ (`User`, `Quiz`, `Question`, `Category`, `SubmissionResult`, `Answer`, `Comment`, `QuizLike`, `CommentLike`). Các enum (`UserRole`, `QuizDifficulty`, `QuestionType`) cũng được định nghĩa tại đây.
-    -   **`domain/repositories/`**: Định nghĩa các trait (interface) cho các hoạt động CRUD và truy vấn dữ liệu. Ví dụ: `UserRepository`, `QuizRepository`. Lớp này chỉ định nghĩa "cần làm gì" chứ không phải "làm như thế nào".
--   **Phụ thuộc:** Không phụ thuộc vào lớp nào khác.
+-   **Mô tả:** Là trái tim của ứng dụng, chứa các quy tắc nghiệp vụ cốt lõi và hoàn toàn độc lập với các chi tiết kỹ thuật. Đây là lớp ổn định nhất, được xây dựng theo các nguyên tắc của DDD.
+-   **Thành phần chính:**
+    -   **`domain/{entity}/model.rs`**: Định nghĩa các **Entities** (`User`, `Quiz`, `Comment`...) - các đối tượng nghiệp vụ có định danh và vòng đời.
+    -   **`domain/{entity}/repository.rs`**: Định nghĩa các **Repository Traits** (interfaces). Đây là "hợp đồng" quy định các phương thức truy xuất dữ liệu cho các entity, giúp tách biệt hoàn toàn lớp domain khỏi cách lưu trữ dữ liệu cụ thể.
 
-#### b. Lớp `application` (Dịch vụ ứng dụng)
+#### b. Lớp `features` (Các Lát cắt dọc)
 
--   **Mô tả:** Chứa các dịch vụ (services) điều phối các use case của ứng dụng. Chúng chứa logic nghiệp vụ cụ thể hơn, sử dụng các repository từ lớp `domain` để thao tác với dữ liệu.
--   **Module con:**
-    -   **`application/services/`**: Chứa các service triển khai logic nghiệp vụ cụ thể (`AuthService`, `UserService`, `QuizService`, `QuestionService`, `SubmissionService`, `CategoryService`, `CommentService`, `LikeService`). Mỗi service sẽ phụ thuộc vào một hoặc nhiều `trait repository` thông qua cơ chế Dependency Injection.
-    -   **`application/error.rs`**: Định nghĩa các kiểu lỗi tùy chỉnh (`ServiceError`) riêng cho lớp dịch vụ, bao gồm cả việc wrap các lỗi từ lớp `domain` (RepositoryError).
-    -   **`application/app_state.rs`**: Định nghĩa struct `AppState` chứa các instance của tất cả các service và DB connection pool, được khởi tạo ở `main.rs` và truyền vào các handler của Axum.
--   **Phụ thuộc:** Chỉ phụ thuộc vào lớp `domain`.
+-   **Mô tả:** Đây là nơi triển khai VSA. Mỗi thư mục con trong `features` là một "lát cắt dọc" tương ứng với một nhóm tính năng nghiệp vụ (ví dụ: `features/quiz`, `features/user`).
+-   **Cấu trúc một lát cắt:** Mỗi lát cắt chứa logic ứng dụng và giao diện cho tính năng đó, giúp tăng tính gắn kết (cohesion) và giảm sự phụ thuộc (coupling) giữa các tính năng.
+    -   **`controller.rs`**: Chứa các handler của Axum (API endpoints). Đây là điểm bắt đầu của một use case.
+    -   **`service.rs`**: Đóng vai trò **Application Service** trong DDD, điều phối luồng thực thi của use case, gọi các phương pháp từ repository (thông qua traits) và xử lý logic ứng dụng.
+    -   **`dto.rs`**: Chứa các Data Transfer Objects (DTOs) được sử dụng để giao tiếp với client, đảm bảo dữ liệu của lớp `domain` không bị lộ ra ngoài.
+    -   **`error.rs`**: Định nghĩa các lỗi cụ thể cho tính năng đó.
 
-#### c. Lớp `interface` (Cổng giao tiếp API)
+#### c. Lớp `api` (Gateway và Middleware)
 
--   **Mô tả:** Là điểm tiếp xúc của ứng dụng với thế giới bên ngoài (cụ thể là API HTTP). Chịu trách nhiệm nhận yêu cầu, gọi dịch vụ ứng dụng và định dạng phản hồi.
--   **Module con:**
-    -   **`interface/controllers/`**: Chứa các handler (async functions) của Axum framework. Chúng parse request từ client, gọi các phương thức tương ứng trong lớp `application/services` và trả về HTTP response.
-    -   **`interface/dto/`**: Chứa các Data Transfer Objects (`DTO`) được sử dụng cho request body, response body và query parameters của API. Các DTO này được thiết kế để tách biệt khỏi Domain Models, đảm bảo tính ổn định của API. Bao gồm các `Request DTO`, `Response DTO` và `Query Parameter DTO` (ví dụ: `RegisterUserDto`, `UserDto`, `ListQuizzesQuery`). Module này cũng chứa `shared_dto.rs` cho các cấu trúc chung như `PaginatedResponse` và `PaginationInfo`.
-    -   **`interface/middleware/`**: Chứa các thành phần middleware của Axum, ví dụ: xử lý xác thực JWT (đảm bảo quyền truy cập, trích xuất `current_user_id`), kiểm tra vai trò người dùng (Admin, User).
-    -   **`interface/routes/`**: Chứa các định nghĩa route của Axum, ánh xạ các URL path tới các controller handler tương ứng. Module này giúp tổ chức các route một cách rõ ràng và cho phép áp dụng middleware theo nhóm route.
--   **Phụ thuộc:** Phụ thuộc vào lớp `application` và `domain`.
+-   **Mô tả:** Đóng vai trò là lớp "gateway" mỏng, chịu trách nhiệm chính cho việc định tuyến và các vấn đề xuyên suốt (cross-cutting concerns).
+-   **Thành phần chính:**
+    -   **`api/routes/`**: Định nghĩa và kết nối tất cả các router từ các `controller` trong lớp `features` vào ứng dụng Axum chính.
+    -   **`api/middleware/`**: Chứa các middleware dùng chung như xác thực token (JWT), logging, CORS...
 
-#### d. Lớp `infrastructure` (Chi tiết kỹ thuật)
+#### d. Lớp `infrastructure` (Chi tiết Kỹ thuật)
 
--   **Mô tả:** Chứa các chi tiết kỹ thuật, triển khai cụ thể các `trait` được định nghĩa trong lớp `domain/repositories`. Lớp này cũng quản lý kết nối với các hệ thống bên ngoài.
--   **Module con:**
-    -   **`infrastructure/database/`**: Triển khai cụ thể các `trait repository` sử dụng thư viện **`sqlx`** để tương tác với PostgreSQL. Đây cũng là nơi quản lý `DbPool` (connection pool) tới database.
-    -   **`infrastructure/security/`**: Chứa các dịch vụ liên quan đến bảo mật như băm mật khẩu (`password_hasher`), tạo và xác thực JWT token (`jwt_handler`).
-    -   **`infrastructure/external/`**: Chứa client để giao tiếp với các dịch vụ bên ngoài, ví dụ: Google OAuth client để xác thực tài khoản Google.
--   **Phụ thuộc:** Phụ thuộc vào lớp `domain`.
+-   **Mô tả:** Chứa các chi tiết kỹ thuật và triển khai cụ thể cho các "hợp đồng" đã được định nghĩa trong lớp `domain`.
+-   **Thành phần chính:**
+    -   **`infrastructure/repositories/`**: Chứa các file triển khai repository cụ thể (ví dụ: `PostgresQuizRepository`). Đây là nơi chứa logic **SQL** thực tế để giao tiếp với database PostgreSQL.
+    -   **`infrastructure/security/`**: Chứa các dịch vụ liên quan đến bảo mật như băm mật khẩu.
+    -   **`infrastructure/external/`**: Chứa client để giao tiếp với các dịch vụ bên ngoài (ví dụ: Google OAuth).
 
 ### 2.3. Sơ đồ tương tác
 
+Sơ đồ này minh họa luồng xử lý một request trong kiến trúc hybrid.
+
 ```
-+------------------+     +-----------------------+     +--------------------+     +-------------------+
-|     Client       |<---->|  Interface Layer      |<--->| Application Layer  |<--->|   Domain Layer    |
-| (Frontend, Mobile)|     |(Controllers, DTOs,   |     |(Services, Use Cases)|     |(Models, Repositories)|
-+------------------+     |(Middleware - Axum) |     +--------------------+     +-------------------+
-                                   ^                               | (uses traits)                 ^
-                                   |                               v                               |
-                                   +--------------------------+-----------------------------------+
-                                                              |
-                                                    +----------------------------+
-                                                    |  Infrastructure Layer      |
-                                                    | (DB, Security, External APIs)|
-                                                    +----------------------------+
+           +-----------------------------------------------------------------+
+           |                           features/quiz                         |
+           |                                                                 |
+(Request)  |  +----------------+   (Call)   +---------------+                |
+---------> |  | controller.rs  |----------->|  service.rs   |                |
+           |  | (API Endpoint) |            | (Application  |                |
+           |  +----------------+            |    Logic)     |                |
+           |         ^                      +---------------+                |
+           |         | (Returns DTO)               | (Uses Trait)           |
+           +---------------------------------------|-------------------------+
+                                                   |
+                 +---------------------------------|-----------------------------------+
+                 |                                 v                                   |
+           +----------------+            +--------------------+            +--------------------+
+           |  domain/quiz/  |  (Defines) | domain/quiz/       | (Implements) | infrastructure/    |
+           |  model.rs      |<-----------| repository.rs      |<-------------| repositories/      |
+           |  (Entity)      |            | (Repository Trait) |            | quiz.rs            |
+           +----------------+            +--------------------+            | (SQL Logic)        |
+                                                                           +--------------------+
 ```
 
 ## 3. Công nghệ sử dụng
@@ -82,65 +91,37 @@ Nguyên tắc cốt lõi là các lớp bên ngoài chỉ được phép phụ t
 -   **Ngôn ngữ lập trình:** Rust
 -   **Web Framework:** [Axum](https://docs.rs/axum/latest/axum/)
 -   **Database:** PostgreSQL
--   **ORM/Database Toolkit:** [SQLx](https://github.com/launchbadge/sqlx) (hoặc Diesel) để giao tiếp bất đồng bộ với PostgreSQL.
--   **JSON Serialization/Deserialization:** [Serde](https://serde.rs/)
+-   **Database Toolkit:** [SQLx](https://github.com/launchbadge/sqlx)
+-   **JSON:** [Serde](https://serde.rs/)
 -   **Asynchronous Runtime:** [Tokio](https://tokio.rs/)
--   **Băm mật khẩu:** [Bcrypt](https://docs.rs/bcrypt/latest/bcrypt/) (trong `infrastructure/security/password_hasher.rs`)
--   **JSON Web Tokens (JWT):** [jsonwebtoken](https://docs.rs/jsonwebtoken/latest/jsonwebtoken/) (trong `infrastructure/security/jwt_handler.rs`)
 -   **Xử lý lỗi:** [thiserror](https://github.com/dtolnay/thiserror)
 -   **Trait bất đồng bộ:** [async-trait](https://docs.rs/async-trait/latest/async_trait/)
--   **Xử lý thời gian:** [Chrono](https://docs.rs/chrono/latest/chrono/)
+-   **Cấu hình:** [dotenvy](https://github.com/allan2/dotenvy)
 
 ## 4. Chi tiết Kỹ thuật
 
-### 4.1. Cấu trúc `AppState` (Dependency Injection)
+### 4.1. Dependency Injection trong `AppState`
 
--   Một instance của `AppState` được tạo ở `main.rs`, chứa `DbPool` (pool kết nối PostgreSQL) và `Arc<dyn RepositoryTrait>` cho tất cả các repository đã triển khai trong lớp `infrastructure`.
--   Các service sẽ được khởi tạo với các `Arc<dyn RepositoryTrait>` này.
--   `AppState` sau đó được truyền làm `State` đến các controller của Axum, cho phép các handler truy cập vào các service và database.
+-   `AppState` được khởi tạo ở `main.rs`.
+-   Các triển khai repository cụ thể từ lớp `infrastructure` (ví dụ: `PostgresQuizRepository`) được tạo và bọc trong `Arc<dyn QuizRepository>`.
+-   Các `Arc` này được inject vào các service.
+-   Các service lại được bọc trong `Arc` và đưa vào `AppState`, sau đó được Axum quản lý và cung cấp cho các controller.
 
 ### 4.2. Xử lý Lỗi
 
--   **`domain/repositories/error.rs`**: Định nghĩa `RepositoryError` để bao bọc các lỗi từ database (e.g., `sqlx::Error`) và các lỗi chung như `NotFound`. Trả về `RepositoryResult<T>`.
--   **`application/error.rs`**: Định nghĩa `ServiceError` để bao bọc `RepositoryError` và thêm các lỗi nghiệp vụ riêng (e.g., `ValidationError`, `Conflict`, `Unauthorized`, `NotFound`). Trả về `ServiceResult<T>`.
--   **`interface/controllers/`**: Các handler sẽ map `ServiceError` thành các HTTP status code và JSON response phù hợp.
+-   **`RepositoryError`**: Lỗi từ lớp `infrastructure` (ví dụ: `sqlx::Error`) được wrap thành `RepositoryError` trong lớp `domain`.
+-   **`ServiceError`**: Lớp `application` xử lý `RepositoryError` và các lỗi nghiệp vụ khác (validation, conflict...), chuyển đổi chúng thành `ServiceError`.
+-   **`impl IntoResponse for ServiceError`**: Lớp `interface` (trong controller) định nghĩa cách chuyển đổi `ServiceError` thành HTTP status code và JSON response phù hợp, giúp giữ cho logic trong handler gọn gàng.
 
-### 4.3. Quản lý Database
+### 4.3. Phân trang (Pagination)
 
--   Sử dụng `sqlx` để tương tác bất đồng bộ với PostgreSQL.
--   `DbPool` được khởi tạo một lần ở `main.rs` và được chia sẻ qua `AppState`.
--   Các migration được quản lý bằng `sqlx-cli` hoặc tương tự.
+-   Các phương thức repository trả về danh sách sẽ trả về một tuple `(Vec<Item>, u32)` chứa dữ liệu trang hiện tại và tổng số mục.
+-   Service sẽ sử dụng thông tin này để tính toán và tạo `PaginationInfo`.
+-   Controller trả về `PaginatedResponse<T>` chứa cả dữ liệu và thông tin phân trang.
 
-### 4.4. Xác thực và Phân quyền
+### 4.4. Luồng triển khai một tính năng (Ví dụ: Sắp xếp)
 
--   **Authentication (JWT):** JTW token được tạo sau khi đăng nhập thành công. Token này được gửi trong header `Authorization` cho các request tiếp theo. `jwt_handler` (trong `infrastructure/security`) chịu trách nhiệm tạo và xác thực token.
--   **Authorization (Roles):** Middleware (trong `interface/middleware/auth_middleware.rs`) sẽ giải mã JWT, xác định `user_id` và `role` của người dùng. Controller hoặc service có thể sử dụng thông tin này để kiểm tra quyền hạn (ví dụ: chỉ Admin mới có thể tạo quiz).
-
-### 4.5. Phân trang (Pagination)
-
--   Các endpoint trả về danh sách (ví dụ: `/quizzes`, `/users`, `/comments`, `/submissions`, `/questions`) sẽ hỗ trợ phân trang thông qua `Query Parameter DTO` (`page`, `limit`).
--   Response sẽ bao gồm metadada phân trang (`currentPage`, `totalPages`, `totalItems`, `limit`) trong struct `PaginatedResponse` (trong `shared_dto.rs`).
-
-## 5. Cấu trúc Dự án chi tiết (Nhắc lại)
-
-```
-csquizz-backend/
-├── src/
-│   ├── application/
-│   │   ├── services/         # Logic nghiệp vụ điều phối (AuthService, QuizService, ...)
-│   │   ├── error.rs          # Định nghĩa ServiceError
-│   │   └── app_state.rs      # AppState struct cho Dependency Injection
-│   ├── domain/
-│   │   ├── models/           # Định nghĩa các thực thể (User, Quiz, Question, ...)
-│   │   └── repositories/     # Định nghĩa các trait (UserRepository, QuizRepository, ...)
-│   ├── infrastructure/
-│   │   ├── database/         # Triển khai repository dùng SQLx và PostgreSQL
-│   │   ├── external/         # Client cho các dịch vụ ngoài (Google OAuth)
-│   │   └── security/         # Hashing mật khẩu, JWT token
-│   └── interface/
-│       ├── controllers/      # Axum route handlers (auth_controller, quiz_controller, ...)
-│       ├── dto/              # Data Transfer Objects (RegisterUserDto, QuizDto, ...)
-│       ├── middleware/       # Axum middleware (AuthMiddleware)
-│       └── routes/           # Định nghĩa các route của Axum
-└── main.rs                   # Khởi tạo ứng dụng, cấu hình server Axum, DB pool
-```
+-   **Interface (`dto`):** Tham số `sort_by: Option<String>` được thêm vào `ListQuizzesQuery` DTO.
+-   **Application (`services`):** Service nhận chuỗi `sort_by` thô. Nó chịu trách nhiệm **xác thực (validate)** chuỗi này và chuyển nó thành một `enum` an toàn về kiểu (type-safe) của lớp Domain (ví dụ: `QuizSortField::LikeCount`). Nếu chuỗi không hợp lệ, service sẽ trả về lỗi `BadRequest`.
+-   **Domain (`repositories`):** Struct `ListQuizzesParams` được cập nhật để nhận `enum` `QuizSortField` từ service.
+-   **Infrastructure (`database`):** Triển khai repository sử dụng `QueryBuilder` của `sqlx`. Nó `match` giá trị enum `QuizSortField` để **xây dựng động (dynamically construct)** mệnh đề `ORDER BY` một cách an toàn, tránh nguy cơ SQL Injection.
