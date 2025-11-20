@@ -3,22 +3,22 @@ use std::sync::Arc;
 use async_trait::async_trait;
 
 use crate::{
-    domain::{error::RepositoryResult, like::repository::ILikeRepository},
+    domain::{error::RepositoryResult, like::repository::LikeRepository},
     infrastructure::database::postgres_context::DatabasePool,
 };
 
-pub struct LikeRepository {
+pub struct SqlxLikeRepository {
     pool: Arc<DatabasePool>,
 }
 
-impl LikeRepository {
+impl SqlxLikeRepository {
     pub fn init(pool: Arc<DatabasePool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl ILikeRepository for LikeRepository {
+impl LikeRepository for SqlxLikeRepository {
     async fn create_quiz_like(&self, user_id: i32, quiz_id: i32) -> RepositoryResult<()> {
         // sqlx::query!(
         //     // "ON CONFLICT DO NOTHING" handles cases where the like already exists,

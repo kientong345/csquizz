@@ -8,41 +8,41 @@ use crate::{
         page::Page,
         question::{
             model::{CreateQuestionParams, Question, UpdateQuestionParams},
-            repository::IQuestionRepository,
+            repository::QuestionRepository,
         },
     },
     infrastructure::database::postgres_context::DatabasePool,
 };
 
-pub struct QuestionRepository {
+pub struct SqlxQuestionRepository {
     pool: Arc<DatabasePool>,
 }
 
-impl QuestionRepository {
+impl SqlxQuestionRepository {
     pub fn init(pool: Arc<DatabasePool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl IQuestionRepository for QuestionRepository {
-    async fn create_from(&self, params: &CreateQuestionParams) -> RepositoryResult<Question> {
+impl QuestionRepository for SqlxQuestionRepository {
+    async fn create(&self, params: &CreateQuestionParams) -> RepositoryResult<Question> {
         todo!()
     }
 
-    async fn get_by(&self, question_id: i32) -> RepositoryResult<Question> {
+    async fn find_by_id(&self, question_id: i32) -> RepositoryResult<Question> {
         todo!()
     }
 
-    async fn get_page_by(&self, quiz_id: i32) -> RepositoryResult<Page<Question>> {
+    async fn find_all(&self, quiz_id: i32) -> RepositoryResult<Page<Question>> {
         todo!()
     }
 
-    async fn update_by(&self, params: &UpdateQuestionParams) -> RepositoryResult<Question> {
+    async fn update(&self, params: &UpdateQuestionParams) -> RepositoryResult<Question> {
         todo!()
     }
 
-    async fn delete_by(&self, question_id: i32) -> RepositoryResult<()> {
+    async fn delete(&self, question_id: i32) -> RepositoryResult<()> {
         todo!()
     }
 }

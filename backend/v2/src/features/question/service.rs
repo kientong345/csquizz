@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use crate::domain::question::repository::IQuestionRepository;
+use crate::domain::question::repository::QuestionRepository;
 
 #[derive(Clone)]
 pub struct QuestionService {
-    repository: Arc<dyn IQuestionRepository>,
+    repository: Arc<dyn QuestionRepository>,
 }
 
 impl QuestionService {
-    pub fn build_from(repository: Arc<dyn IQuestionRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn QuestionRepository>) -> Self {
         Self { repository }
     }
 

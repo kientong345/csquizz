@@ -8,18 +8,18 @@ use crate::domain::{
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait ICommentRepository: Send + Sync {
+pub trait CommentRepository: Send + Sync {
     /// Creates a new comment.
-    async fn create_from(&self, params: &CreateCommentParams) -> RepositoryResult<Comment>;
+    async fn create(&self, params: &CreateCommentParams) -> RepositoryResult<Comment>;
 
     /// Finds a single comment by its ID.
-    async fn get_by(&self, comment_id: i32) -> RepositoryResult<CommentDetail>;
+    async fn find_by_id(&self, comment_id: i32) -> RepositoryResult<CommentDetail>;
 
     /// Lists comments for a quiz with details like author and like count.
-    async fn get_page_by(&self, query: &CommentQuery) -> RepositoryResult<Page<CommentDetail>>;
+    async fn find_all(&self, query: &CommentQuery) -> RepositoryResult<Page<CommentDetail>>;
 
-    async fn update_by(&self, params: &UpdateCommentParams) -> RepositoryResult<Comment>;
+    async fn update(&self, params: &UpdateCommentParams) -> RepositoryResult<Comment>;
     /// Deletes a comment by its ID.
     /// Note: Should add permission check in the service layer.
-    async fn delete_by(&self, comment_id: i32) -> RepositoryResult<()>;
+    async fn delete(&self, comment_id: i32) -> RepositoryResult<()>;
 }

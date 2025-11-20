@@ -8,41 +8,41 @@ use crate::{
         page::Page,
         user::{
             model::{CreateUserParams, UpdateUserParams, User, UserDetail, UserMinimal, UserQuery},
-            repository::IUserRepository,
+            repository::UserRepository,
         },
     },
     infrastructure::database::postgres_context::DatabasePool,
 };
 
-pub struct UserRepository {
+pub struct SqlxUserRepository {
     pool: Arc<DatabasePool>,
 }
 
-impl UserRepository {
+impl SqlxUserRepository {
     pub fn init(pool: Arc<DatabasePool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl IUserRepository for UserRepository {
-    async fn create_from(&self, params: &CreateUserParams) -> RepositoryResult<User> {
+impl UserRepository for SqlxUserRepository {
+    async fn create(&self, params: &CreateUserParams) -> RepositoryResult<User> {
         todo!()
     }
 
-    async fn get_by(&self, user_id: i32) -> RepositoryResult<UserDetail> {
+    async fn find_by_id(&self, user_id: i32) -> RepositoryResult<UserDetail> {
         todo!()
     }
 
-    async fn update_by(&self, params: &UpdateUserParams) -> RepositoryResult<()> {
+    async fn update(&self, params: &UpdateUserParams) -> RepositoryResult<()> {
         todo!()
     }
 
-    async fn get_page_by(&self, query: &UserQuery) -> RepositoryResult<Page<UserMinimal>> {
+    async fn find_all(&self, query: &UserQuery) -> RepositoryResult<Page<UserMinimal>> {
         todo!()
     }
 
-    async fn delete_by(&self, user_id: i32) -> RepositoryResult<()> {
+    async fn delete(&self, user_id: i32) -> RepositoryResult<()> {
         todo!()
     }
 }

@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use crate::{domain::like::repository::ILikeRepository, features::like::error::LikeResult};
+use crate::{domain::like::repository::LikeRepository, features::like::error::LikeResult};
 
 pub struct LikeService {
-    repository: Arc<dyn ILikeRepository>,
+    repository: Arc<dyn LikeRepository>,
 }
 
 impl LikeService {
-    pub fn build_from(repository: Arc<dyn ILikeRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn LikeRepository>) -> Self {
         Self { repository }
     }
 

@@ -7,3 +7,4 @@ pub mod question;
 pub mod quiz;
 pub mod submission_result;
 pub mod user;
+pub mod transaction;

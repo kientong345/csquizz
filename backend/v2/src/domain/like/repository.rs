@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use crate::domain::error::RepositoryResult;
 
 #[async_trait]
-pub trait ILikeRepository: Send + Sync {
+pub trait LikeRepository: Send + Sync {
     async fn create_quiz_like(&self, user_id: i32, quiz_id: i32) -> RepositoryResult<()>;
 
     async fn delete_quiz_like(&self, quiz_like_id: i32) -> RepositoryResult<()>;

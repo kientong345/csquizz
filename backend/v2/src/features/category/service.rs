@@ -3,17 +3,17 @@ use std::sync::Arc;
 use crate::{
     domain::category::{
         model::{CreateCategoryParams, UpdateCategoryParams},
-        repository::ICategoryRepository,
+        repository::CategoryRepository,
     },
     features::category::{dto::CategoryDto, error::CategoryResult},
 };
 
 pub struct CategoryService {
-    repository: Arc<dyn ICategoryRepository>,
+    repository: Arc<dyn CategoryRepository>,
 }
 
 impl CategoryService {
-    pub fn build_from(repository: Arc<dyn ICategoryRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn CategoryRepository>) -> Self {
         Self { repository }
     }
 

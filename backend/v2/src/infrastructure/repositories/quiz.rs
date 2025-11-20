@@ -8,25 +8,25 @@ use crate::{
         page::Page,
         quiz::{
             model::{CreateQuizParams, Quiz, QuizDetail, QuizMinimal, QuizQuery, UpdateQuizParams},
-            repository::IQuizRepository,
+            repository::QuizRepository,
         },
     },
     infrastructure::database::postgres_context::DatabasePool,
 };
 
-pub struct QuizRepository {
+pub struct SqlxQuizRepository {
     pool: Arc<DatabasePool>,
 }
 
-impl QuizRepository {
+impl SqlxQuizRepository {
     pub fn init(pool: Arc<DatabasePool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl IQuizRepository for QuizRepository {
-    async fn create_from(&self, params: &CreateQuizParams) -> RepositoryResult<Quiz> {
+impl QuizRepository for SqlxQuizRepository {
+    async fn create(&self, params: &CreateQuizParams) -> RepositoryResult<Quiz> {
         // let quiz = sqlx::query_as!(
         //     Quiz,
         //     r#"
@@ -55,7 +55,7 @@ impl IQuizRepository for QuizRepository {
         todo!()
     }
 
-    async fn get_by(&self, quiz_id: i32) -> RepositoryResult<QuizDetail> {
+    async fn find_by_id(&self, quiz_id: i32) -> RepositoryResult<QuizDetail> {
         // let quiz = sqlx::query_as!(
         //     Quiz,
         //     r#"
@@ -79,7 +79,7 @@ impl IQuizRepository for QuizRepository {
         todo!()
     }
 
-    async fn get_page_by(&self, params: &QuizQuery) -> RepositoryResult<Page<QuizMinimal>> {
+    async fn find_all(&self, params: &QuizQuery) -> RepositoryResult<Page<QuizMinimal>> {
         // let mut query_builder: QueryBuilder<sqlx::Postgres> = QueryBuilder::new(
         //     r#"
         //     SELECT
@@ -163,7 +163,7 @@ impl IQuizRepository for QuizRepository {
         todo!()
     }
 
-    async fn update_by(&self, quiz_id: i32, params: &UpdateQuizParams) -> RepositoryResult<Quiz> {
+    async fn update(&self, quiz_id: i32, params: &UpdateQuizParams) -> RepositoryResult<Quiz> {
         // let quiz = sqlx::query_as!(
         //     Quiz,
         //     r#"
@@ -198,7 +198,7 @@ impl IQuizRepository for QuizRepository {
         todo!()
     }
 
-    async fn delete_by(&self, quiz_id: i32) -> RepositoryResult<()> {
+    async fn delete(&self, quiz_id: i32) -> RepositoryResult<()> {
         // sqlx::query!("DELETE FROM quizzes WHERE qz_id = $1", quiz_id)
         //     .execute(&self.pool)
         //     .await?;

@@ -2,18 +2,18 @@ use std::sync::Arc;
 
 use crate::{
     domain::{
-        comment::{model::Comment, repository::ICommentRepository},
+        comment::{model::Comment, repository::CommentRepository},
         page::Page,
     },
     features::comment::{dto::CommentDetailDto, error::CommentResult},
 };
 
 pub struct CommentService {
-    repository: Arc<dyn ICommentRepository>,
+    repository: Arc<dyn CommentRepository>,
 }
 
 impl CommentService {
-    pub fn build_from(repository: Arc<dyn ICommentRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn CommentRepository>) -> Self {
         Self { repository }
     }
 

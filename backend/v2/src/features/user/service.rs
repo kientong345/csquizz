@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use crate::domain::user::repository::IUserRepository;
+use crate::domain::user::repository::UserRepository;
 
 #[derive(Clone)]
 pub struct UserService {
-    repository: Arc<dyn IUserRepository>,
+    repository: Arc<dyn UserRepository>,
 }
 
 impl UserService {
-    pub fn build_from(repository: Arc<dyn IUserRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn UserRepository>) -> Self {
         Self { repository }
     }
 

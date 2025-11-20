@@ -6,7 +6,7 @@ use crate::{
     domain::{
         category::{
             model::{Category, CategoryQuery, CreateCategoryParams, UpdateCategoryParams},
-            repository::ICategoryRepository,
+            repository::CategoryRepository,
         },
         error::RepositoryResult,
         page::Page,
@@ -14,19 +14,19 @@ use crate::{
     infrastructure::database::postgres_context::DatabasePool,
 };
 
-pub struct CategoryRepository {
+pub struct SqlxCategoryRepository {
     pool: Arc<DatabasePool>,
 }
 
-impl CategoryRepository {
+impl SqlxCategoryRepository {
     pub fn init(pool: Arc<DatabasePool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl ICategoryRepository for CategoryRepository {
-    async fn create_from(&self, params: &CreateCategoryParams) -> RepositoryResult<Category> {
+impl CategoryRepository for SqlxCategoryRepository {
+    async fn create(&self, params: &CreateCategoryParams) -> RepositoryResult<Category> {
         // let category = sqlx::query_as!(
         //     Category,
         //     r#"
@@ -45,24 +45,24 @@ impl ICategoryRepository for CategoryRepository {
         todo!()
     }
 
-    async fn get_by(&self, category_id: i32) -> RepositoryResult<Category> {
-        // let category = sqlx::query_as!(
-        //     Category,
-        //     r#"
-        //     SELECT cat_id as id, cat_name as name, cat_image_url as image_url, cat_description as description
-        //     FROM categories
-        //     WHERE cat_id = $1
-        //     "#,
-        //     category_id
-        // )
-        // .fetch_optional(&self.pool)
-        // .await?;
+    async fn find_by_id(&self, category_id: i32) -> RepositoryResult<Category> {
+        let mut connection = self.pool.get_connection().await?;
+        let category = sqlx::query_as!(
+            Category,
+            r#"
+            SELECT cat_id as id, cat_name as name, cat_image_url as image_url, cat_description as description
+            FROM categories
+            WHERE cat_id = $1
+            "#,
+            category_id
+        )
+        .fetch_one(&mut *connection)
+        .await?;
 
-        // Ok(category)
-        todo!()
+        Ok(category)
     }
 
-    async fn get_page_by(&self, query: &CategoryQuery) -> RepositoryResult<Page<Category>> {
+    async fn find_all(&self, query: &CategoryQuery) -> RepositoryResult<Page<Category>> {
         // let categories = sqlx::query_as!(
         //     Category,
         //     r#"
@@ -78,7 +78,7 @@ impl ICategoryRepository for CategoryRepository {
         todo!()
     }
 
-    async fn update_by(
+    async fn update(
         &self,
         category_id: i32,
         params: &UpdateCategoryParams,
@@ -106,7 +106,7 @@ impl ICategoryRepository for CategoryRepository {
         todo!()
     }
 
-    async fn delete_by(&self, category_id: i32) -> RepositoryResult<()> {
+    async fn delete(&self, category_id: i32) -> RepositoryResult<()> {
         // sqlx::query!("DELETE FROM categories WHERE cat_id = $1", category_id)
         //     .execute(&self.pool)
         //     .await?;

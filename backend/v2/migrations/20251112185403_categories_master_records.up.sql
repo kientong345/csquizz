@@ -1,5 +1,5 @@
 -- Add up migration script here
-INSERT INTO categories (name, image_url, description)
+INSERT INTO categories (cat_name, cat_image_url, cat_description)
 VALUES
     ('Data Structures', 'https://images.shiksha.com/mediadata/ugcDocuments/images/wordpressImages/2020_05_2167870_21e8.jpg', 'Test your knowledge on arrays, linked lists, trees, and more.'),
     ('Algorithms', 'https://www.snexplores.org/wp-content/uploads/2020/11/1030_algorithm_explainer-1028x579.jpg', 'Challenge yourself with sorting, searching, and graph algorithms.'),

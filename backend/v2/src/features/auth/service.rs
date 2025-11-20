@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     config::auth::AuthConfig,
-    domain::user::repository::IUserRepository,
+    domain::user::repository::UserRepository,
     features::auth::{
         dto::{GoogleLoginDto, LoginDto, RegisterUserDto},
         error::AuthResult,
@@ -10,12 +10,12 @@ use crate::{
 };
 
 pub struct AuthService {
-    repository: Arc<dyn IUserRepository>,
+    repository: Arc<dyn UserRepository>,
     config: AuthConfig,
 }
 
 impl AuthService {
-    pub fn build_from(repository: Arc<dyn IUserRepository>, config: AuthConfig) -> Self {
+    pub fn build_from(repository: Arc<dyn UserRepository>, config: AuthConfig) -> Self {
         Self { config, repository }
     }
 

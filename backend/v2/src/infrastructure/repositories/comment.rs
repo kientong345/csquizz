@@ -8,7 +8,7 @@ use crate::{
             model::{
                 Comment, CommentDetail, CommentQuery, CreateCommentParams, UpdateCommentParams,
             },
-            repository::ICommentRepository,
+            repository::CommentRepository,
         },
         error::RepositoryResult,
         page::Page,
@@ -16,19 +16,19 @@ use crate::{
     infrastructure::database::postgres_context::DatabasePool,
 };
 
-pub struct CommentRepository {
+pub struct SqlxCommentRepository {
     pool: Arc<DatabasePool>,
 }
 
-impl CommentRepository {
+impl SqlxCommentRepository {
     pub fn init(pool: Arc<DatabasePool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl ICommentRepository for CommentRepository {
-    async fn create_from(&self, params: &CreateCommentParams) -> RepositoryResult<Comment> {
+impl CommentRepository for SqlxCommentRepository {
+    async fn create(&self, params: &CreateCommentParams) -> RepositoryResult<Comment> {
         // let comment = sqlx::query_as!(
         //     Comment,
         //     r#"
@@ -46,7 +46,7 @@ impl ICommentRepository for CommentRepository {
         todo!()
     }
 
-    async fn get_by(&self, comment_id: i32) -> RepositoryResult<CommentDetail> {
+    async fn find_by_id(&self, comment_id: i32) -> RepositoryResult<CommentDetail> {
         // let comment = sqlx::query_as!(
         //     Comment,
         //     r#"
@@ -62,7 +62,7 @@ impl ICommentRepository for CommentRepository {
         todo!()
     }
 
-    async fn get_page_by(&self, query: &CommentQuery) -> RepositoryResult<Page<CommentDetail>> {
+    async fn find_all(&self, query: &CommentQuery) -> RepositoryResult<Page<CommentDetail>> {
         // // First, count total records for the given quiz
         // let count_result = sqlx::query!(
         //     "SELECT COUNT(*) as total FROM comments WHERE cmt_quiz_id = $1",
@@ -132,7 +132,7 @@ impl ICommentRepository for CommentRepository {
         todo!()
     }
 
-    async fn update_by(&self, params: &UpdateCommentParams) -> RepositoryResult<Comment> {
+    async fn update(&self, params: &UpdateCommentParams) -> RepositoryResult<Comment> {
         // let comment = sqlx::query_as!(
         //     Comment,
         //     r#"
@@ -152,7 +152,7 @@ impl ICommentRepository for CommentRepository {
         todo!()
     }
 
-    async fn delete_by(&self, comment_id: i32) -> RepositoryResult<()> {
+    async fn delete(&self, comment_id: i32) -> RepositoryResult<()> {
         // sqlx::query!("DELETE FROM comments WHERE cmt_id = $1", comment_id)
         //     .execute(&self.pool)
         //     .await?;

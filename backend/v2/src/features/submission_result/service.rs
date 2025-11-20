@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use crate::domain::submission_result::repository::ISubmissionRepository;
+use crate::domain::submission_result::repository::SubmissionRepository;
 
 #[derive(Clone)]
 pub struct SubmissionService {
-    repository: Arc<dyn ISubmissionRepository>,
+    repository: Arc<dyn SubmissionRepository>,
 }
 
 impl SubmissionService {
-    pub fn build_from(repository: Arc<dyn ISubmissionRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn SubmissionRepository>) -> Self {
         Self { repository }
     }
 

@@ -10,8 +10,8 @@ use csquizz::{
     infrastructure::{
         database::postgres_context::DatabasePool,
         repositories::{
-            category::CategoryRepository, comment::CommentRepository, like::LikeRepository,
-            question::QuestionRepository, quiz::QuizRepository, user::UserRepository,
+            category::SqlxCategoryRepository, comment::SqlxCommentRepository, like::SqlxLikeRepository,
+            question::SqlxQuestionRepository, quiz::SqlxQuizRepository, user::SqlxUserRepository,
         },
     },
 };
@@ -52,12 +52,12 @@ async fn main() {
 async fn build_app_state(config: Configuration) -> AppState {
     let db_pool = Arc::new(DatabasePool::init(&config.db_config).await);
 
-    let category_repository = Arc::new(CategoryRepository::init(db_pool.clone()));
-    let user_repository = Arc::new(UserRepository::init(db_pool.clone()));
-    let quiz_repository = Arc::new(QuizRepository::init(db_pool.clone()));
-    let question_repository = Arc::new(QuestionRepository::init(db_pool.clone()));
-    let comment_repository = Arc::new(CommentRepository::init(db_pool.clone()));
-    let like_repository = Arc::new(LikeRepository::init(db_pool.clone()));
+    let category_repository = Arc::new(SqlxCategoryRepository::init(db_pool.clone()));
+    let user_repository = Arc::new(SqlxUserRepository::init(db_pool.clone()));
+    let quiz_repository = Arc::new(SqlxQuizRepository::init(db_pool.clone()));
+    let question_repository = Arc::new(SqlxQuestionRepository::init(db_pool.clone()));
+    let comment_repository = Arc::new(SqlxCommentRepository::init(db_pool.clone()));
+    let like_repository = Arc::new(SqlxLikeRepository::init(db_pool.clone()));
 
     AppState {
         auth_service: AuthService::build_from(user_repository.clone(), config.auth_config),

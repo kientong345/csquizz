@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use crate::domain::quiz::repository::IQuizRepository;
+use crate::domain::quiz::repository::QuizRepository;
 
 pub struct QuizService {
-    repository: Arc<dyn IQuizRepository>,
+    repository: Arc<dyn QuizRepository>,
 }
 
 impl QuizService {
-    pub fn build_from(repository: Arc<dyn IQuizRepository>) -> Self {
+    pub fn build_from(repository: Arc<dyn QuizRepository>) -> Self {
         Self { repository }
     }
 
