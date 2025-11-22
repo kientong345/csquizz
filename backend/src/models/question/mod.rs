@@ -241,7 +241,7 @@ pub struct QuestionPaginateParams {
 }
 
 impl KeyType {
-    fn validate(self) -> Result<Self, ModelError> {
+    pub fn validate(self) -> Result<Self, ModelError> {
         match &self {
             KeyType::MultipleChoiceKey(_) => Ok(self),
             KeyType::SingleChoiceKey(keys) => {

@@ -140,6 +140,14 @@ pub struct UserUpdateParams {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
+pub struct AuthUserUpdateParams {
+    pub display_name: Option<String>,
+    pub password_hash: Option<String>,
+    pub avatar_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct UserPaginateParams {
     pub name_pattern: String,
     pub page: i32,

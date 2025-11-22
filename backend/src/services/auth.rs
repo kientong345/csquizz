@@ -8,7 +8,7 @@ use crate::{
         user::{DatabaseUser, UserCreateParams},
     },
     services::error::ServiceError,
-    utils::{bcrypt_hash, decode_jwt, generate_jwt, validate_email_name},
+    utils::{bcrypt_hash, decode_jwt, generate_jwt},
 };
 
 pub struct JwtMachine {
@@ -111,31 +111,5 @@ impl AuthenticatedUser {
         };
 
         Ok(AuthenticatedUser(user))
-    }
-}
-
-impl RegisterSchema {
-    pub fn validate(&self) -> Result<&Self, ServiceError> {
-        if let Err(e) = validate_email_name(&self.email) {
-            return Err(ServiceError::InvalidAuthRequest(format!(
-                "Invalid email name: {}",
-                &e
-            )));
-        }
-
-        Ok(self)
-    }
-}
-
-impl LoginSchema {
-    pub fn validate(&self) -> Result<&Self, ServiceError> {
-        if let Err(e) = validate_email_name(&self.email) {
-            return Err(ServiceError::InvalidAuthRequest(format!(
-                "Invalid email name: {}",
-                &e
-            )));
-        }
-
-        Ok(self)
     }
 }

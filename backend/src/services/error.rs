@@ -10,9 +10,6 @@ pub enum ServiceError {
     #[error("token exchange error: {0}")]
     TokenExchange(#[from] reqwest::Error),
 
-    #[error("invalid auth request: {0}")]
-    InvalidAuthRequest(String),
-
     #[error("bcrypt error: {0}")]
     Bcrypt(#[from] bcrypt::BcryptError),
 
@@ -34,7 +31,6 @@ impl ServiceError {
         match self {
             ServiceError::Model(_) => 50013,
             ServiceError::TokenExchange(_) => 50014,
-            ServiceError::InvalidAuthRequest(_) => 40004,
             ServiceError::Bcrypt(_) => 50003,
             ServiceError::Jwt(_) => 50002,
             ServiceError::EmailTaken { .. } => 40001,

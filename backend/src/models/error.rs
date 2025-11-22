@@ -13,6 +13,9 @@ pub enum ModelError {
 
     #[error("bad post: {0}")]
     BadPost(String),
+
+    #[error("invalid auth schema: {0}")]
+    InvalidAuthSchema(String),
 }
 
 impl ModelError {
@@ -22,6 +25,7 @@ impl ModelError {
             ModelError::SerdeJson(_) => 50005,
             ModelError::WrongPasswordForEmail { .. } => 40003,
             ModelError::BadPost(_) => 40005,
+            ModelError::InvalidAuthSchema(_) => 40006,
         }
     }
 }

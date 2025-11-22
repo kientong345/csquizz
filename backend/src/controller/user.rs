@@ -1,13 +1,20 @@
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
 };
+use reqwest::StatusCode;
 use serde_json::{Value, json};
 
 use crate::{
     app::AppState,
     controller::error::ControllerError,
-    models::user::{UserFullDetail, UserPublicDetail},
+    models::{
+        pagination::Paginate,
+        user::{
+            AuthUserUpdateParams, DatabaseUser, UserFullDetail, UserPaginateParams,
+            UserPublicDetail, UserUpdateParams,
+        },
+    },
 };
 
 pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
@@ -36,7 +43,20 @@ pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, Contro
     Ok(Json(json!(user)))
 }
 
-pub async fn get(
+pub async fn update_me(
+    State(state): State<AppState>,
+    Json(payload): Json<AuthUserUpdateParams>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.get_connection().await?;
+
+    let user_id = -1;
+
+    DatabaseUser::auth_update_by(user_id, &payload, &mut *connection).await?;
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn find_by_id(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -47,4 +67,38 @@ pub async fn get(
         .await?
         .into();
     Ok(Json(json!(user)))
+}
+
+pub async fn get_page(
+    State(state): State<AppState>,
+    Query(query): Query<UserPaginateParams>,
+) -> Result<Json<Value>, ControllerError> {
+    let mut connection = state.primary_db.get_connection().await?;
+
+    let users = UserPublicDetail::page(&query, &mut *connection).await?;
+
+    Ok(Json(json!(users)))
+}
+
+pub async fn update(
+    State(state): State<AppState>,
+    Json(payload): Json<UserUpdateParams>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.get_connection().await?;
+
+    DatabaseUser::update_by(&payload, &mut *connection).await?;
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn delete(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.get_connection().await?;
+
+    let id: i32 = id.parse().unwrap_or(-1);
+    DatabaseUser::delete_by_id(id, &mut *connection).await?;
+
+    Ok(StatusCode::OK)
 }

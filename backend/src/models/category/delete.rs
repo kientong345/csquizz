@@ -1,7 +1,7 @@
 use crate::models::category::Category;
 
 impl Category {
-    pub async fn delete_by_id(
+    pub async fn delete_by(
         category_id: i32,
         connection: &mut sqlx::PgConnection,
     ) -> Result<(), crate::models::error::ModelError> {

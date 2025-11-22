@@ -69,7 +69,7 @@ pub async fn handle_login(
     ))
 }
 
-pub async fn handle_login_by_google(
+pub async fn handle_google_login(
     State(state): State<AppState>,
 ) -> Result<Redirect, ControllerError> {
     // let client = &state.read().await.client;

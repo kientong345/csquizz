@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::{models::error::ModelError, utils::validate_email_name};
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct RegisterSchema {
@@ -8,11 +10,37 @@ pub struct RegisterSchema {
     pub password: String,
 }
 
+impl RegisterSchema {
+    pub fn validate(&self) -> Result<&Self, ModelError> {
+        if let Err(e) = validate_email_name(&self.email) {
+            return Err(ModelError::InvalidAuthSchema(format!(
+                "Invalid email name: {}",
+                &e
+            )));
+        }
+
+        Ok(self)
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct LoginSchema {
     pub email: String,
     pub password: String,
+}
+
+impl LoginSchema {
+    pub fn validate(&self) -> Result<&Self, ModelError> {
+        if let Err(e) = validate_email_name(&self.email) {
+            return Err(ModelError::InvalidAuthSchema(format!(
+                "Invalid email name: {}",
+                &e
+            )));
+        }
+
+        Ok(self)
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]

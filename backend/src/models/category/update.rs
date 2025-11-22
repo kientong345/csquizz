@@ -1,8 +1,8 @@
-use crate::models::category::Category;
+use crate::models::category::{Category, CategoryUpdateParams};
 
 impl Category {
-    pub async fn update_from(
-        params: crate::models::category::CategoryUpdateParams,
+    pub async fn update_by(
+        params: &CategoryUpdateParams,
         connection: &mut sqlx::PgConnection,
     ) -> Result<Category, crate::models::error::ModelError> {
         Ok(sqlx::query_as!(

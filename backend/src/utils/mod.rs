@@ -9,7 +9,13 @@ pub fn vec_stringify<T: ToString>(vec: Vec<T>) -> Vec<String> {
 }
 
 pub fn validate_email_name(email: &str) -> Result<(), String> {
-    Ok(())
+    let email_regex =
+        regex::Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
+    if email_regex.is_match(email) {
+        Ok(())
+    } else {
+        Err(String::from("Invalid email format"))
+    }
 }
 
 pub fn decode_jwt<C: Clone + DeserializeOwned>(

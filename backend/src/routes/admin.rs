@@ -1,21 +1,9 @@
-use axum::Router;
+use axum::{Router, routing::put};
 
-use crate::app::AppState;
+use crate::{app::AppState, controller::admin};
 
-pub fn create_protected_route(state: AppState) -> Router {
+pub fn create_admin_route(state: AppState) -> Router {
     Router::new()
-        // .route("/api/admin/quizzes", post(quiz))
-        // .route(
-        //     "/api/admin/quizzes/{:id}",
-        //     patch(update_quiz_info).delete(delete_quiz),
-        // )
-        // .route(
-        //     "/api/admin/quizzes/{:quiz_id}/questions/",
-        //     post(add_question),
-        // )
-        // .route(
-        //     "/api/admin/quizzes/{:quiz_id}/questions/{:question_id}",
-        //     put(update_question).delete(delete_question),
-        // )
+        .route("/api/admin/grant", put(admin::grant_admin_permission))
         .with_state(state)
 }

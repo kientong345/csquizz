@@ -7,7 +7,7 @@ use crate::models::{
 
 impl Category {
     pub async fn create_from(
-        params: CategoryCreateParams,
+        params: &CategoryCreateParams,
         connection: &mut PgConnection,
     ) -> Result<Category, ModelError> {
         Ok(sqlx::query_as!(
