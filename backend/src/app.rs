@@ -3,13 +3,13 @@ use std::sync::Arc;
 use axum::Router;
 
 use crate::config::Configuration;
-use crate::database::pool::QuizBankPool;
+use crate::database::persistent::PrimaryDatabase;
 
 use crate::routes;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub pool: QuizBankPool,
+    pub primary_db: PrimaryDatabase,
     pub config: Arc<Configuration>,
 }
 

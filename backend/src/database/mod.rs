@@ -4,7 +4,8 @@
 
 use sqlx::{Executor, PgConnection};
 
-pub mod pool;
+pub mod non_persistent;
+pub mod persistent;
 
 const LOAD_SAMPLE_SQL: &str = include_str!("../../sample/sample.up.sql");
 const UNLOAD_SAMPLE_SQL: &str = include_str!("../../sample/sample.down.sql");

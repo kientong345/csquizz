@@ -17,7 +17,7 @@ pub async fn paginate(
     State(state): State<AppState>,
     Query(query): Query<CategoryPaginateParams>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.pool.get_connection().await?;
+    let mut connection = state.primary_db.get_connection().await?;
 
     let page = Category::page(&query, &mut *connection).await?;
 

@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.pool.get_connection().await?;
+    let mut connection = state.primary_db.get_connection().await?;
 
     // let auth_header = headers
     //     .get("Authorization")
@@ -40,7 +40,7 @@ pub async fn get(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.pool.get_connection().await?;
+    let mut connection = state.primary_db.get_connection().await?;
 
     let id: i32 = id.parse().unwrap_or(-1);
     let user: UserPublicDetail = UserFullDetail::get_by_id(id, &mut *connection)

@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::Arc};
 use csquizz::{
     app::{self, AppState},
     config::Configuration,
-    database::pool::QuizBankPool,
+    database::persistent::PrimaryDatabase,
 };
 use tokio::net::TcpListener;
 
@@ -26,8 +26,8 @@ async fn main() {
         .expect("cannot bind address");
 
     // Initialize application state
-    let pool = QuizBankPool::init(&config.db_config).await;
-    let app_state = AppState { pool, config };
+    let primary_db = PrimaryDatabase::init(&config.db_config).await;
+    let app_state = AppState { primary_db, config };
 
     // Create app
     let app = app::create_app(app_state).await;

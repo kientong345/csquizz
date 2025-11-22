@@ -27,7 +27,7 @@ pub async fn handle_register(
     State(state): State<AppState>,
     Json(registration): Json<RegisterSchema>,
 ) -> Result<StatusCode, ControllerError> {
-    let mut connection = state.pool.start_transaction().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
     registration.validate()?;
 
@@ -43,7 +43,7 @@ pub async fn handle_login(
     jar: CookieJar,
     Json(login_form): Json<LoginSchema>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
-    let mut connection = state.pool.get_connection().await?;
+    let mut connection = state.primary_db.get_connection().await?;
 
     login_form.validate()?;
 
@@ -98,7 +98,7 @@ pub async fn handle_oauth_callback(
         .get_google_user(&token_response.access_token, &token_response.id_token)
         .await?;
 
-    let mut connection = state.pool.start_transaction().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
     let user: DatabaseUser =
         AuthenticatedUser::login_by_google(google_user.into(), &mut *connection)
             .await?
