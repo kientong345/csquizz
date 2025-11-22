@@ -5,14 +5,14 @@ use csquizz::{
     config::Configuration,
     database::pool::QuizBankPool,
 };
-use tokio::{net::TcpListener, sync::RwLock};
+use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
 
     // Load configuration
-    let config = Configuration::get();
+    let config = Arc::new(Configuration::get());
 
     // Start server
     #[cfg(feature = "local")]
@@ -27,7 +27,7 @@ async fn main() {
 
     // Initialize application state
     let pool = QuizBankPool::init(&config.db_config).await;
-    let app_state = Arc::new(RwLock::new(AppState { pool, config }));
+    let app_state = AppState { pool, config };
 
     // Create app
     let app = app::create_app(app_state).await;

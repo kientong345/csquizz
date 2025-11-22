@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM comments\n            WHERE cmt_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "52d0c68f0a40794cc5b5b337cc41550eeb1e23e37a09c563fb1f03338fb89cdf"
+}

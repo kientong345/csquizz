@@ -1,12 +1,12 @@
-use serde::Serialize;
-use sqlx::PgConnection;
+use serde::{Deserialize, Serialize};
 
-use crate::models::error::ModelError;
-
+pub mod create;
+pub mod delete;
+pub mod get;
 pub mod paginate;
-pub mod post;
+pub mod update;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Category {
     pub id: i32,
@@ -15,23 +15,27 @@ pub struct Category {
     pub description: Option<String>,
 }
 
-impl Category {
-    pub async fn count(connection: &mut PgConnection) -> Result<i64, ModelError> {
-        Ok(sqlx::query_scalar("SELECT COUNT(*) FROM categories")
-            .fetch_one(&mut *connection)
-            .await?)
-    }
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CategoryCreateParams {
+    pub name: String,
+    pub image_url: Option<String>,
+    pub description: Option<String>,
+}
 
-    #[allow(unused)]
-    pub async fn count_by_name(
-        name: &str,
-        connection: &mut PgConnection,
-    ) -> Result<i64, ModelError> {
-        Ok(
-            sqlx::query_scalar("SELECT COUNT(*) FROM categories WHERE name = $1")
-                .bind(name)
-                .fetch_one(&mut *connection)
-                .await?,
-        )
-    }
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CategoryUpdateParams {
+    pub id: i32,
+    pub name: Option<String>,
+    pub image_url: Option<String>,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct CategoryPaginateParams {
+    pub name_pattern: Option<String>,
+    pub page: i32,
+    pub page_size: i32,
 }

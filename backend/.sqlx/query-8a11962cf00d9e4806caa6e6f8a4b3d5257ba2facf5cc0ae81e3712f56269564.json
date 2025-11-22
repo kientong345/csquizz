@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO questions (qs_quiz_id, qs_type, qs_content, qs_image_url, qs_key)\n            VALUES ($1, $2, $3, $4, $5)\n            RETURNING\n                qs_id AS id, qs_type AS \"type: _\", qs_content AS content, qs_image_url AS image_url,\n                qs_key AS \"key: _\", qs_quiz_id AS \"quiz_id!\", qs_created_at AS created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "type: _",
+        "type_info": {
+          "Custom": {
+            "name": "question_type",
+            "kind": {
+              "Enum": [
+                "single_choice",
+                "multiple_choice",
+                "text_entry"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "key: _",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        {
+          "Custom": {
+            "name": "question_type",
+            "kind": {
+              "Enum": [
+                "single_choice",
+                "multiple_choice",
+                "text_entry"
+              ]
+            }
+          }
+        },
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "8a11962cf00d9e4806caa6e6f8a4b3d5257ba2facf5cc0ae81e3712f56269564"
+}

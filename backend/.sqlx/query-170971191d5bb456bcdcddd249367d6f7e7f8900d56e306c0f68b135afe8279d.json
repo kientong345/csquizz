@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE comments\n            SET cmt_content = $1\n            WHERE cmt_id = $2\n            RETURNING\n                cmt_id AS id, cmt_content AS content, cmt_user_id AS \"user_id!\",\n                cmt_quiz_id AS \"quiz_id!\", cmt_created_at AS \"created_at!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "170971191d5bb456bcdcddd249367d6f7e7f8900d56e306c0f68b135afe8279d"
+}

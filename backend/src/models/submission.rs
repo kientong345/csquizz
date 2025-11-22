@@ -3,9 +3,9 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::{KeyType, Question, QuestionWithKey, post::PostQuestion},
-    quiz::post::PostQuizMetadata,
-    result::{QuizResult, TmpQuizResult, UserAnswer, UserChoice, UserEntry},
+    question::{KeyType, Question, QuestionWithKey, create::PostQuestion},
+    quiz::create::PostQuizMetadata,
+    submission_result::{QuizResult, TmpQuizResult, UserAnswer, UserChoice, UserEntry},
 };
 
 #[derive(Debug, Deserialize)]

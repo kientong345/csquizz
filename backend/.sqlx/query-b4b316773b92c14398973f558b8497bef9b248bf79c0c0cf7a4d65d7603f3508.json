@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*)\n            FROM answers AS a\n            INNER JOIN questions AS q\n            ON a.ans_question_id = q.qs_id\n            WHERE a.ans_result_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b4b316773b92c14398973f558b8497bef9b248bf79c0c0cf7a4d65d7603f3508"
+}

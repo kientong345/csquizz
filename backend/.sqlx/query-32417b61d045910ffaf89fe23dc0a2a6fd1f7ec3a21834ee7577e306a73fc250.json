@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*)\n            FROM submission_results AS rs\n            INNER JOIN quizzes AS q\n            ON rs.sub_quiz_id = q.qz_id\n            WHERE\n                rs.sub_user_id = $1 AND\n                q.qz_title ILIKE $2 AND\n                (rs.sub_is_passed = TRUE OR 1 = $3) AND\n                q.qz_difficulty = $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int4",
+        {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "32417b61d045910ffaf89fe23dc0a2a6fd1f7ec3a21834ee7577e306a73fc250"
+}

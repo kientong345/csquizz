@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO comments (cmt_user_id, cmt_quiz_id, cmt_content)\n            VALUES ($1, $2, $3)\n            RETURNING\n                cmt_id AS id, cmt_content AS content, cmt_user_id AS \"user_id!\",\n                cmt_quiz_id AS \"quiz_id!\", cmt_created_at AS \"created_at!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "926c1c75803ccf27688db37144c32c8cbbc37fcbadf5c21960af456ac77472c1"
+}

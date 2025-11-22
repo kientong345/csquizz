@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO user_followers (ufl_follower_id, ufl_followed_id) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "56af1ff783e0642bfbf5f1a13730ec691d3af64e700f63f6b8810155cccb2345"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM quizzes WHERE qz_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5a6128dd262781537fae60af5ccd0f78f1983e7f42d3698f92bda7194250ae05"
+}

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS \"count!\"\n            FROM answers\n            WHERE ans_result_id = $1 AND ans_is_correct IS TRUE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1ad6a88281cde5afa884e7f9751f84f0266f60c5776ee50bafc1af04c9f7b6d3"
+}

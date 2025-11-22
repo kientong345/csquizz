@@ -1,23 +1,17 @@
-use std::sync::Arc;
-
 use axum::{
     Json,
     extract::{Path, State},
 };
 use serde_json::{Value, json};
-use tokio::sync::RwLock;
 
 use crate::{
     app::AppState,
     controller::error::ControllerError,
-    models::user::{UserFullDetail, UserPubInfo},
+    models::user::{UserFullDetail, UserPublicDetail},
 };
 
-pub async fn get_me(
-    State(state): State<Arc<RwLock<AppState>>>,
-) -> Result<Json<Value>, ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.get_connection().await?;
+pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
+    let mut connection = state.pool.get_connection().await?;
 
     // let auth_header = headers
     //     .get("Authorization")
@@ -43,13 +37,14 @@ pub async fn get_me(
 }
 
 pub async fn get(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.get_connection().await?;
+    let mut connection = state.pool.get_connection().await?;
 
     let id: i32 = id.parse().unwrap_or(-1);
-    let user = UserPubInfo::get_by_id(id, &mut *connection).await?;
+    let user: UserPublicDetail = UserFullDetail::get_by_id(id, &mut *connection)
+        .await?
+        .into();
     Ok(Json(json!(user)))
 }

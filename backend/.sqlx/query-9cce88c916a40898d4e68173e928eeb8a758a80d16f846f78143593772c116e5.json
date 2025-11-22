@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                q.qz_id AS id, q.qz_title AS title, q.qz_difficulty AS \"difficulty: _\",\n                COALESCE(qs_cnt.question_count, 0) AS \"question_count!\",\n                COALESCE(lk_cnt.like_count, 0) AS \"like_count!\",\n                c.cat_name AS category_name\n            FROM quizzes AS q\n            INNER JOIN (\n                SELECT qs_quiz_id, COUNT(*) AS question_count\n                FROM questions\n                GROUP BY qs_quiz_id\n            ) AS qs_cnt\n            ON q.qz_id = qs_cnt.qs_quiz_id\n            INNER JOIN (\n                SELECT qzlk_quiz_id, COUNT(*) AS like_count\n                FROM quiz_likes\n                GROUP BY qzlk_quiz_id\n            ) AS lk_cnt\n            ON q.qz_id = lk_cnt.qzlk_quiz_id\n            INNER JOIN categories AS c\n            ON q.qz_category_id = c.cat_id\n            WHERE q.qz_title ILIKE $1 AND q.qz_difficulty = $2\n            ORDER BY $3 DESC\n            OFFSET $4 LIMIT $5",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "difficulty: _",
+        "type_info": {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "question_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "like_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "category_name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        },
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "9cce88c916a40898d4e68173e928eeb8a758a80d16f846f78143593772c116e5"
+}

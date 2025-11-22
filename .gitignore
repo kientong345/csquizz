@@ -2,6 +2,7 @@
 */target
 .env
 target
+*backup*
 
 # General
 .DS_Store

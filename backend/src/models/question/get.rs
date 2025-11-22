@@ -2,88 +2,56 @@ use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
-    question::{
-        KeyType, NoKeyType, OptionContent, OptionKey, QuestionForm, QuestionNoKey, QuestionWithKey,
-        TextKey,
-    },
+    question::{DatabaseQuestion, QuestionPrivateData},
 };
 
-impl QuestionNoKey {
+impl DatabaseQuestion {
     pub async fn get_by_id(
-        question_id: i32,
+        id: i32,
         connection: &mut PgConnection,
-    ) -> Result<QuestionNoKey, ModelError> {
-        let row = sqlx::query!(
-            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key
-            FROM questions WHERE id = $1"#,
-            question_id,
-        ).fetch_one(connection).await?;
+    ) -> Result<DatabaseQuestion, ModelError> {
+        Ok(sqlx::query_as!(
+            DatabaseQuestion,
+            r#"SELECT
+                qs_id AS id, qs_type AS "type: _", qs_content AS content, qs_image_url AS image_url,
+                qs_key AS "key: serde_json::Value", qs_quiz_id AS "quiz_id!", qs_created_at AS created_at
+            FROM questions
+            WHERE qs_id = $1"#,
+            id,
+        )
+        .fetch_one(connection)
+        .await?)
+    }
 
-        let answer_no_key = match row.form {
-            QuestionForm::MultipleChoice => {
-                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                let mut option_contents = Vec::new();
-                for key in option_keys {
-                    option_contents.push(OptionContent(key.content));
-                }
-                NoKeyType::MultipleChoiceKey(option_contents)
-            }
-            QuestionForm::SingleChoice => {
-                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                let mut option_contents = Vec::new();
-                for key in option_keys {
-                    option_contents.push(OptionContent(key.content));
-                }
-                NoKeyType::SingleChoiceKey(option_contents)
-            }
-            QuestionForm::TextEntry => {
-                let _text_key: TextKey = serde_json::from_value(row.answer_key)?;
-                NoKeyType::TextEntryKey
-            }
-        };
-
-        Ok(QuestionNoKey {
-            id: row.id,
-            form: row.form,
-            text: row.text,
-            image_url: row.image_url,
-            answer_no_key,
-        })
+    pub async fn count_by_quiz_id(
+        quiz_id: i32,
+        connection: &mut PgConnection,
+    ) -> Result<i64, ModelError> {
+        Ok(sqlx::query_scalar!(
+            r#"SELECT COUNT(*) FROM questions WHERE qs_quiz_id = $1"#,
+            quiz_id
+        )
+        .fetch_one(connection)
+        .await?
+        .unwrap_or(0))
     }
 }
 
-impl QuestionWithKey {
+impl QuestionPrivateData {
     pub async fn get_by_id(
-        question_id: i32,
+        id: i32,
         connection: &mut PgConnection,
-    ) -> Result<QuestionWithKey, ModelError> {
-        let row = sqlx::query!(
-            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key
-            FROM questions WHERE id = $1"#,
-            question_id,
-        ).fetch_one(connection).await?;
+    ) -> Result<QuestionPrivateData, ModelError> {
+        let db_question = DatabaseQuestion::get_by_id(id, connection).await?;
 
-        let answer_key = match row.form {
-            QuestionForm::MultipleChoice => {
-                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                KeyType::MultipleChoiceKey(option_keys)
-            }
-            QuestionForm::SingleChoice => {
-                let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                KeyType::SingleChoiceKey(option_keys)
-            }
-            QuestionForm::TextEntry => {
-                let text_key: TextKey = serde_json::from_value(row.answer_key)?;
-                KeyType::TextEntryKey(text_key)
-            }
-        };
-
-        Ok(QuestionWithKey {
-            id: row.id,
-            form: row.form,
-            text: row.text,
-            image_url: row.image_url,
-            answer_key,
+        Ok(QuestionPrivateData {
+            id,
+            r#type: db_question.r#type.to_string(),
+            content: db_question.content,
+            image_url: db_question.image_url,
+            private_data: db_question.key,
+            quiz_id: db_question.quiz_id,
+            created_at: db_question.created_at.map(|dt| dt.to_rfc3339()),
         })
     }
 }

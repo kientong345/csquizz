@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                u.usr_id AS id, u.usr_display_name AS display_name,\n                u.usr_avatar_url AS avatar_url, u.usr_created_at AS \"created_at: _\",\n                COALESCE(sub_cnt.quiz_completed_count, 0) AS \"quiz_completed_count!\",\n                COALESCE(created_cnt.quiz_created_count, 0) AS \"quiz_created_count!\",\n                COALESCE(fl_cnt.follower_count, 0) AS \"follower_count!\"\n            FROM users AS u\n            INNER JOIN (\n                SELECT sub_user_id, COUNT(*) AS quiz_completed_count\n                FROM submission_results\n                WHERE sub_is_passed = TRUE\n                GROUP BY sub_user_id\n            ) AS sub_cnt\n            ON u.usr_id = sub_cnt.sub_user_id\n            INNER JOIN (\n                SELECT qz_creator_id, COUNT(*) AS quiz_created_count\n                FROM quizzes\n                GROUP BY qz_creator_id\n            ) AS created_cnt\n            ON u.usr_id = created_cnt.qz_creator_id\n            INNER JOIN (\n                SELECT ufl_followed_id, COUNT(*) AS follower_count\n                FROM user_followers AS fl\n                GROUP BY ufl_followed_id\n            ) AS fl_cnt\n            ON u.usr_id = fl_cnt.ufl_followed_id\n            WHERE u.usr_display_name ILIKE $1\n            ORDER BY $2 DESC\n            OFFSET $3 LIMIT $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at: _",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "quiz_completed_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 5,
+        "name": "quiz_created_count!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 6,
+        "name": "follower_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "560bbc79b5e2502f04f8dfd7ec2b15f91bc561e9f969dddce0905c0deef689e4"
+}

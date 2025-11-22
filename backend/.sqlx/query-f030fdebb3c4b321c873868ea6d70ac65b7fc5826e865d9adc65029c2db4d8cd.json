@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users (usr_display_name, usr_email, usr_password_hash, usr_avatar_url, usr_role, usr_google_id)\n            VALUES ($1, $2, $3, $4, $5, $6)\n            RETURNING usr_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "usr_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        },
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f030fdebb3c4b321c873868ea6d70ac65b7fc5826e865d9adc65029c2db4d8cd"
+}

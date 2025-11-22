@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE categories\n            SET\n                cat_name = COALESCE($2, cat_name),\n                cat_image_url = COALESCE($3, cat_image_url),\n                cat_description = COALESCE($4, cat_description)\n            WHERE cat_id = $1\n            RETURNING cat_id AS id, cat_name AS name, cat_image_url AS image_url, cat_description AS description",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "74d408782fbd2d6929451fd4b263f0d9c55a9e2311eb16fee06b4d676f81d83a"
+}

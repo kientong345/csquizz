@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.usr_id AS id, u.usr_display_name AS display_name, u.usr_avatar_url AS avatar_url\n            FROM user_followers AS ufl\n            INNER JOIN users AS u ON ufl.ufl_followed_id = u.usr_id\n            WHERE ufl.ufl_follower_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "4c77cd77ef7091ab3f4b37807e60b07577201b90b9aa994211c2baf9293e325e"
+}

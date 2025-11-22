@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM comment_likes\n            WHERE cmlk_user_id = $1 AND cmlk_comment_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2a830e475507e13a557766fd20a1fbf840cffe200ad1e61d346e893839bc51ed"
+}

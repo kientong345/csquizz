@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
 use axum::Router;
-use tokio::sync::RwLock;
 
 use crate::app::AppState;
 
-pub fn create_protected_route(state: Arc<RwLock<AppState>>) -> Router {
+pub fn create_protected_route(state: AppState) -> Router {
     Router::new()
         // .route("/api/admin/quizzes", post(quiz))
         // .route(

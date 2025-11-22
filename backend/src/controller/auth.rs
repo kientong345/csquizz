@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{
     Json,
     extract::{Query, State},
@@ -11,24 +9,25 @@ use axum_extra::extract::{
     cookie::{Cookie, SameSite},
 };
 use serde_json::{Value, json};
-use tokio::sync::RwLock;
 
 use crate::{
     app::AppState,
     controller::error::ControllerError,
-    models::user::UserFullDetail,
+    models::{
+        auth::{LoginSchema, RegisterSchema},
+        user::DatabaseUser,
+    },
     services::{
-        auth::{AuthenticatedUser, JwtMachine, LoginSchema, RegisterSchema},
+        auth::{AuthenticatedUser, JwtMachine},
         oauth_client::{AuthorizationCode, OAuthClient},
     },
 };
 
 pub async fn handle_register(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
     Json(registration): Json<RegisterSchema>,
 ) -> Result<StatusCode, ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.start_transaction().await?;
+    let mut connection = state.pool.start_transaction().await?;
 
     registration.validate()?;
 
@@ -40,20 +39,19 @@ pub async fn handle_register(
 }
 
 pub async fn handle_login(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
     jar: CookieJar,
     Json(login_form): Json<LoginSchema>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
-    let state_locked = state.read().await;
-    let mut connection = state_locked.pool.get_connection().await?;
+    let mut connection = state.pool.get_connection().await?;
 
     login_form.validate()?;
 
-    let user: UserFullDetail = AuthenticatedUser::login(login_form, &mut *connection)
+    let user: DatabaseUser = AuthenticatedUser::login(login_form, &mut *connection)
         .await?
         .into();
 
-    let jwt_machine = JwtMachine::init(&state_locked.config.auth_config);
+    let jwt_machine = JwtMachine::init(&state.config.auth_config);
     let (access_token, refresh_token) = jwt_machine.generate_token_pair(&user);
 
     let cookie: Cookie = Cookie::build(refresh_token)
@@ -72,7 +70,7 @@ pub async fn handle_login(
 }
 
 pub async fn handle_login_by_google(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
 ) -> Result<Redirect, ControllerError> {
     // let client = &state.read().await.client;
 
@@ -89,11 +87,10 @@ pub async fn handle_login_by_google(
 }
 
 pub async fn handle_oauth_callback(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
     Query(auth_code): Query<AuthorizationCode>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
-    let state_locked = state.read().await;
-    let oauth_client = OAuthClient::init(&state_locked.config.oauth_config);
+    let oauth_client = OAuthClient::init(&state.config.oauth_config);
 
     let token_response = oauth_client.request_token(&auth_code.code).await?;
 
@@ -101,13 +98,13 @@ pub async fn handle_oauth_callback(
         .get_google_user(&token_response.access_token, &token_response.id_token)
         .await?;
 
-    let mut connection = state_locked.pool.start_transaction().await?;
-    let user: UserFullDetail =
+    let mut connection = state.pool.start_transaction().await?;
+    let user: DatabaseUser =
         AuthenticatedUser::login_by_google(google_user.into(), &mut *connection)
             .await?
             .into();
 
-    let jwt_machine = JwtMachine::init(&state_locked.config.auth_config);
+    let jwt_machine = JwtMachine::init(&state.config.auth_config);
     let (access_token, refresh_token) = jwt_machine.generate_token_pair(&user);
 
     let cookie: Cookie = Cookie::build(refresh_token)
@@ -128,13 +125,13 @@ pub async fn handle_oauth_callback(
 }
 
 pub async fn handle_refresh(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
     todo!()
 }
 
 pub async fn handle_logout(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
     todo!()
 }

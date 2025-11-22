@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users\n            SET\n                usr_display_name = COALESCE($1, usr_display_name),\n                usr_password_hash = COALESCE($2, usr_password_hash),\n                usr_avatar_url = COALESCE($3, usr_avatar_url)\n            WHERE usr_id = $4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4487a19010e10776466c6a23773cfbd858198e8f4038252b71533b568874b21f"
+}

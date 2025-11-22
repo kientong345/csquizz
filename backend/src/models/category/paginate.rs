@@ -1,48 +1,43 @@
-use serde::Deserialize;
 use sqlx::PgConnection;
 
 use crate::models::{
-    category::Category,
+    category::{Category, CategoryPaginateParams},
     error::ModelError,
     pagination::{Page, Paginate},
 };
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct CategoryQuery {
-    pub name_pattern: Option<String>,
-    pub page: i64,
-    pub size: i64,
-}
-
-impl Paginate<CategoryQuery> for Category {
+impl Paginate<CategoryPaginateParams> for Category {
     async fn page(
-        query: &CategoryQuery,
+        params: &CategoryPaginateParams,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, ModelError> {
-        let name_pattern = format!("%{}%", query.name_pattern.clone().unwrap_or("".to_string()));
-        let offset = (query.page.saturating_sub(1)) * query.size;
+        let name_pattern = format!(
+            "%{}%",
+            params.name_pattern.clone().unwrap_or("".to_string())
+        );
+        let offset = (params.page.saturating_sub(1)) * params.page_size;
 
         let items = sqlx::query_as!(
             Category,
-            r#"SELECT id, name, image_url, description FROM categories
-            WHERE name LIKE $1 LIMIT $2 OFFSET $3"#,
+            r#"SELECT cat_id AS id, cat_name AS name, cat_image_url AS image_url, cat_description AS description
+            FROM categories
+            WHERE cat_name LIKE $1 LIMIT $2 OFFSET $3"#,
             name_pattern,
-            query.size,
-            offset
+            params.page_size as i64,
+            offset as i64
         )
         .fetch_all(&mut *connection)
         .await?;
 
         let total_items = sqlx::query_scalar!(
-            r#"SELECT COUNT(id) FROM categories WHERE name LIKE $1"#,
+            r#"SELECT COUNT(cat_id) FROM categories WHERE cat_name LIKE $1"#,
             name_pattern,
         )
         .fetch_one(connection)
         .await?
         .unwrap_or(0);
 
-        Ok(Page::build_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, params.page_size))
     }
 }
 

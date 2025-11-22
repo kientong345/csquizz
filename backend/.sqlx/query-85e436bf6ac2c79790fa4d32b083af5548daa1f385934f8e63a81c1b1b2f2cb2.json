@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                qs_id AS id, qs_type AS \"type: _\", qs_content AS content, qs_image_url AS image_url,\n                qs_key AS \"key: serde_json::Value\", qs_quiz_id AS \"quiz_id!\", qs_created_at AS created_at\n            FROM questions\n            WHERE qs_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "type: _",
+        "type_info": {
+          "Custom": {
+            "name": "question_type",
+            "kind": {
+              "Enum": [
+                "single_choice",
+                "multiple_choice",
+                "text_entry"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "image_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "key: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "85e436bf6ac2c79790fa4d32b083af5548daa1f385934f8e63a81c1b1b2f2cb2"
+}

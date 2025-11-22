@@ -1,119 +1,41 @@
-use serde::Deserialize;
 use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
     pagination::{Page, Paginate},
-    question::{
-        KeyType, NoKeyType, OptionContent, OptionKey, Question, QuestionForm, QuestionNoKey,
-        QuestionWithKey, TextKey,
-    },
+    question::{QuestionPaginateParams, QuestionPrivateData},
 };
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct QuestionQuery {
-    pub quiz_id: i32,
-    pub page: i64,
-    pub size: i64,
-}
-
-impl Paginate<QuestionQuery> for QuestionNoKey {
+impl Paginate<QuestionPaginateParams> for QuestionPrivateData {
     async fn page(
-        query: &QuestionQuery,
+        params: &QuestionPaginateParams,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, ModelError> {
-        let offset = (query.page.saturating_sub(1)) * query.size;
-        let rows = sqlx::query!(
-            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key
-            FROM questions WHERE quiz_id = $1 LIMIT $2 OFFSET $3"#,
-            query.quiz_id,
-            query.size,
-            offset,
-        ).fetch_all(&mut *connection).await?;
+        let offset = (params.page.saturating_sub(1)) * params.page_size;
 
-        let mut items = Vec::new();
-        for row in rows {
-            let answer_no_key = match row.form {
-                QuestionForm::MultipleChoice => {
-                    let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                    let mut option_contents = Vec::new();
-                    for key in option_keys {
-                        option_contents.push(OptionContent(key.content));
-                    }
-                    NoKeyType::MultipleChoiceKey(option_contents)
-                }
-                QuestionForm::SingleChoice => {
-                    let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                    let mut option_contents = Vec::new();
-                    for key in option_keys {
-                        option_contents.push(OptionContent(key.content));
-                    }
-                    NoKeyType::SingleChoiceKey(option_contents)
-                }
-                QuestionForm::TextEntry => {
-                    let _text_key: TextKey = serde_json::from_value(row.answer_key)?;
-                    NoKeyType::TextEntryKey
-                }
-            };
+        let items = sqlx::query_as!(
+            QuestionPrivateData,
+            r#"SELECT
+                qs_id AS id, qs_type AS "type: _", qs_content AS content, qs_image_url AS image_url,
+                qs_key AS "private_data: serde_json::Value", qs_quiz_id AS "quiz_id!", qs_created_at AS "created_at: _"
+            FROM questions
+            WHERE qs_quiz_id = $1
+            OFFSET $2 LIMIT $3"#,
+            params.quiz_id,
+            offset as i64,
+            params.page_size as i64,
+        )
+        .fetch_all(&mut *connection)
+        .await?;
 
-            items.push(QuestionNoKey {
-                id: row.id,
-                form: row.form,
-                text: row.text,
-                image_url: row.image_url,
-                answer_no_key,
-            })
-        }
+        let total_items = sqlx::query_scalar!(
+            r#"SELECT COUNT (*) FROM questions WHERE qs_quiz_id = $1"#,
+            params.quiz_id
+        )
+        .fetch_one(connection)
+        .await?
+        .unwrap_or(0);
 
-        let total_items = Question::count_by_quiz_id(query.quiz_id, connection).await?;
-
-        Ok(Page::build_from(items, total_items, query.size))
-    }
-}
-
-impl Paginate<QuestionQuery> for QuestionWithKey {
-    async fn page(
-        query: &QuestionQuery,
-        connection: &mut PgConnection,
-    ) -> Result<Page<Self>, ModelError> {
-        let offset = (query.page.saturating_sub(1)) * query.size;
-        let rows = sqlx::query!(
-            r#"SELECT id, question_type AS "form: QuestionForm", question_text AS text, image_url, answer_key
-            FROM questions WHERE quiz_id = $1 LIMIT $2 OFFSET $3"#,
-            query.quiz_id,
-            query.size,
-            offset,
-        ).fetch_all(&mut *connection).await?;
-
-        let mut items = Vec::new();
-        for row in rows {
-            let answer_key = match row.form {
-                QuestionForm::MultipleChoice => {
-                    let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                    KeyType::MultipleChoiceKey(option_keys)
-                }
-                QuestionForm::SingleChoice => {
-                    let option_keys: Vec<OptionKey> = serde_json::from_value(row.answer_key)?;
-                    KeyType::SingleChoiceKey(option_keys)
-                }
-                QuestionForm::TextEntry => {
-                    let text_key: TextKey = serde_json::from_value(row.answer_key)?;
-                    KeyType::TextEntryKey(text_key)
-                }
-            };
-
-            items.push(QuestionWithKey {
-                id: row.id,
-                form: row.form,
-                text: row.text,
-                image_url: row.image_url,
-                answer_key,
-            })
-        }
-
-        let total_items = Question::count_by_quiz_id(query.quiz_id, connection).await?;
-
-        Ok(Page::build_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, params.page_size))
     }
 }

@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                sub_id AS id, sub_user_id AS \"user_id!\", sub_quiz_id AS \"quiz_id!\", sub_score AS \"score: _\",\n                sub_is_passed AS is_passed, sub_submitted_at AS \"submitted_at: _\"\n            FROM submission_results\n            WHERE sub_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "score: _",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_passed",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "submitted_at: _",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "9c0204dbe6226022aa8da0b5d7223b583b1c889b98223eb29879455dda588c6b"
+}

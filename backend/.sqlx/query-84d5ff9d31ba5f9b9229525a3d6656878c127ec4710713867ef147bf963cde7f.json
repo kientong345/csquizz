@@ -1,0 +1,97 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE quizzes\n            SET\n                qz_title = COALESCE($1, qz_title),\n                qz_description = COALESCE($2, qz_description),\n                qz_difficulty = COALESCE($3, qz_difficulty),\n                qz_category_id = COALESCE($4, qz_category_id),\n                qz_pass_score = COALESCE($5, qz_pass_score),\n                qz_updated_at = NOW()\n            WHERE qz_id = $6\n            RETURNING\n                qz_id AS id, qz_title AS title, qz_description AS description, qz_difficulty as \"difficulty: _\", qz_category_id AS category_id,\n                qz_pass_score AS pass_score, qz_creator_id AS creator_id, qz_created_at AS created_at, qz_updated_at AS updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "difficulty: _",
+        "type_info": {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "category_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "pass_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "creator_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        },
+        "Int4",
+        "Float8",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "84d5ff9d31ba5f9b9229525a3d6656878c127ec4710713867ef147bf963cde7f"
+}

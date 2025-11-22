@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO submission_results (sub_user_id, sub_quiz_id, sub_score, sub_is_passed)\n            VALUES ($1, $2, $3, $4)\n            RETURNING\n                sub_id AS id, sub_user_id AS \"user_id!\", sub_quiz_id AS \"quiz_id!\",\n                sub_score AS \"score: _\", sub_is_passed AS is_passed, sub_submitted_at AS submitted_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "score: _",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_passed",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "submitted_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Float8",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e0d6649da7bf5844abe286485d67e68f5efa4e5e69fa061d68a84651d2d04996"
+}

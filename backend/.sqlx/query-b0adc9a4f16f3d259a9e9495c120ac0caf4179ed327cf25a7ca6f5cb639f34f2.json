@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM quiz_likes\n            WHERE qzlk_user_id = $1 AND qzlk_quiz_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b0adc9a4f16f3d259a9e9495c120ac0caf4179ed327cf25a7ca6f5cb639f34f2"
+}

@@ -1,10 +1,7 @@
 use reqwest::Url;
 use serde::Deserialize;
 
-use crate::{
-    config::oauth::OAuthConfig,
-    services::{auth::OAuthSchema, error::ServiceError},
-};
+use crate::{config::oauth::OAuthConfig, models::auth::OAuthSchema, services::error::ServiceError};
 
 pub struct OAuthClient {
     client: reqwest::Client,

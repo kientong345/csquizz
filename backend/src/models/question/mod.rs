@@ -1,96 +1,269 @@
-use crate::utils::{deserialize_snake_case, serializeCamelCase};
+use std::str::FromStr;
+
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{PgConnection, prelude::Type};
+use serde_json::{Value, json};
+use sqlx::prelude::FromRow;
 
 use crate::models::error::ModelError;
 
+pub mod create;
+pub mod delete;
 pub mod get;
 pub mod paginate;
-pub mod post;
+pub mod update;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, sqlx::Type)]
+#[sqlx(type_name = "question_type", rename_all = "snake_case")]
+pub enum QuestionType {
+    SingleChoice,
+    MultipleChoice,
+    TextEntry,
+}
+
+impl ToString for QuestionType {
+    fn to_string(&self) -> String {
+        match self {
+            QuestionType::MultipleChoice => "multiple_choice".to_string(),
+            QuestionType::SingleChoice => "single_choice".to_string(),
+            QuestionType::TextEntry => "text_entry".to_string(),
+        }
+    }
+}
+
+impl FromStr for QuestionType {
+    type Err = ModelError;
+
+    fn from_str(input: &str) -> Result<QuestionType, Self::Err> {
+        match input {
+            "multiple_choice" => Ok(QuestionType::MultipleChoice),
+            "single_choice" => Ok(QuestionType::SingleChoice),
+            "text_entry" => Ok(QuestionType::TextEntry),
+            _ => Err(ModelError::BadPost(input.to_string())),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptionKey {
+    pub id: i32,
     pub content: String,
-    #[serde(
-        serialize_with = "serializeCamelCase",
-        deserialize_with = "deserialize_snake_case"
-    )]
+    pub image_url: Option<String>,
     pub is_correct: bool,
     pub explanation: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
-pub struct OptionContent(String);
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OptionPubKey {
+    pub id: i32,
+    pub content: String,
+    pub image_url: Option<String>,
+}
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TextKey {
-    #[serde(
-        serialize_with = "serializeCamelCase",
-        deserialize_with = "deserialize_snake_case"
-    )]
     pub correct_entry: String,
     pub explanation: Option<String>,
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub enum KeyType {
     SingleChoiceKey(Vec<OptionKey>),
     MultipleChoiceKey(Vec<OptionKey>),
     TextEntryKey(TextKey),
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
-pub enum NoKeyType {
-    SingleChoiceKey(Vec<OptionContent>),
-    MultipleChoiceKey(Vec<OptionContent>),
-    TextEntryKey,
-}
-
-#[derive(Debug, Type, Serialize, PartialEq, Eq, Clone, Copy)]
-#[sqlx(type_name = "question_form", rename_all = "kebab-case")]
-pub enum QuestionForm {
-    MultipleChoice,
-    SingleChoice,
-    TextEntry,
-}
-
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct QuestionNoKey {
+#[derive(Debug, Clone, FromRow)]
+pub struct DatabaseQuestion {
     pub id: i32,
-    pub form: QuestionForm,
-    pub text: String,
+    pub r#type: QuestionType,
+    pub content: String,
     pub image_url: Option<String>,
-    pub answer_no_key: NoKeyType,
+    #[sqlx(json)]
+    pub key: Value,
+    pub quiz_id: i32,
+    pub created_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct QuestionWithKey {
+impl From<DatabaseQuestionAlter> for DatabaseQuestion {
+    fn from(value: DatabaseQuestionAlter) -> Self {
+        let (r#type, key) = match value.key {
+            KeyType::MultipleChoiceKey(keys) => (QuestionType::MultipleChoice, json!(keys)),
+            KeyType::SingleChoiceKey(keys) => (QuestionType::SingleChoice, json!(keys)),
+            KeyType::TextEntryKey(key) => (QuestionType::TextEntry, json!(key)),
+        };
+        Self {
+            id: value.id,
+            r#type,
+            content: value.content,
+            image_url: value.image_url,
+            key,
+            quiz_id: value.quiz_id,
+            created_at: value.created_at,
+        }
+    }
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct DatabaseQuestionAlter {
     pub id: i32,
-    pub form: QuestionForm,
-    pub text: String,
+    pub content: String,
     pub image_url: Option<String>,
-    pub answer_key: KeyType,
+    #[sqlx(json)]
+    pub key: KeyType,
+    pub quiz_id: i32,
+    pub created_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
-pub enum Question {
-    NoKey(QuestionNoKey),
-    WithKey(QuestionWithKey),
+impl From<DatabaseQuestion> for DatabaseQuestionAlter {
+    fn from(value: DatabaseQuestion) -> Self {
+        let key = match value.r#type {
+            QuestionType::MultipleChoice => {
+                let deserialized_key: Vec<OptionKey> = serde_json::from_value(value.key).unwrap();
+                KeyType::MultipleChoiceKey(deserialized_key)
+            }
+            QuestionType::SingleChoice => {
+                let deserialized_key: Vec<OptionKey> = serde_json::from_value(value.key).unwrap();
+                KeyType::SingleChoiceKey(deserialized_key)
+            }
+            QuestionType::TextEntry => {
+                let deserialized_key: TextKey = serde_json::from_value(value.key).unwrap();
+                KeyType::TextEntryKey(deserialized_key)
+            }
+        };
+        Self {
+            id: value.id,
+            content: value.content,
+            image_url: value.image_url,
+            key,
+            quiz_id: value.quiz_id,
+            created_at: value.created_at,
+        }
+    }
 }
 
-impl Question {
-    pub async fn count_by_quiz_id(
-        quiz_id: i32,
-        connection: &mut PgConnection,
-    ) -> Result<i64, ModelError> {
-        Ok(sqlx::query_scalar!(
-            r#"SELECT COUNT(*) FROM questions WHERE quiz_id = $1"#,
-            quiz_id
-        )
-        .fetch_one(connection)
-        .await?
-        .unwrap_or(0))
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuestionPublicData {
+    pub id: i32,
+    pub r#type: String,
+    pub content: String,
+    pub image_url: Option<String>,
+    pub public_data: Value,
+    pub quiz_id: i32,
+    pub created_at: Option<String>,
+}
+
+impl TryFrom<QuestionPrivateData> for QuestionPublicData {
+    type Error = ModelError;
+    fn try_from(value: QuestionPrivateData) -> Result<Self, Self::Error> {
+        let public_data = match QuestionType::from_str(&value.r#type)? {
+            QuestionType::MultipleChoice => {
+                let deserialized_key: Vec<OptionKey> =
+                    serde_json::from_value(value.private_data.clone()).unwrap();
+                let public_data: Vec<OptionPubKey> = deserialized_key
+                    .into_iter()
+                    .map(|e| OptionPubKey {
+                        id: e.id,
+                        content: e.content,
+                        image_url: e.image_url,
+                    })
+                    .collect();
+                json!(public_data)
+            }
+            QuestionType::SingleChoice => {
+                let deserialized_key: Vec<OptionKey> =
+                    serde_json::from_value(value.private_data.clone()).unwrap();
+                let public_data: Vec<OptionPubKey> = deserialized_key
+                    .into_iter()
+                    .map(|e| OptionPubKey {
+                        id: e.id,
+                        content: e.content,
+                        image_url: e.image_url,
+                    })
+                    .collect();
+                json!(public_data)
+            }
+            QuestionType::TextEntry => {
+                json!("")
+            }
+        };
+        Ok(Self {
+            id: value.id,
+            r#type: value.r#type,
+            content: value.content,
+            image_url: value.image_url,
+            public_data,
+            quiz_id: value.quiz_id,
+            created_at: value.created_at,
+        })
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuestionPrivateData {
+    pub id: i32,
+    pub r#type: String,
+    pub content: String,
+    pub image_url: Option<String>,
+    pub private_data: Value,
+    pub quiz_id: i32,
+    pub created_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct QuestionCreateParams {
+    pub quiz_id: i32,
+    pub r#type: String,
+    pub content: String,
+    pub image_url: Option<String>,
+    pub key: Value,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct QuestionUpdateParams {
+    pub id: i32,
+    pub r#type: Option<String>,
+    pub content: Option<String>,
+    pub image_url: Option<String>,
+    pub key: Option<Value>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct QuestionPaginateParams {
+    pub quiz_id: i32,
+    pub page: i32,
+    pub page_size: i32,
+}
+
+impl KeyType {
+    fn validate(self) -> Result<Self, ModelError> {
+        match &self {
+            KeyType::MultipleChoiceKey(_) => Ok(self),
+            KeyType::SingleChoiceKey(keys) => {
+                let mut correct_option_count: u8 = 0;
+                for key in keys {
+                    if key.is_correct {
+                        correct_option_count += 1;
+                        if correct_option_count > 1 {
+                            return Err(ModelError::BadPost(
+                                "only one correct answer allowed".to_string(),
+                            ));
+                        }
+                    }
+                }
+                if correct_option_count == 0 {
+                    return Err(ModelError::BadPost(
+                        "one correct answer must be provided".to_string(),
+                    ));
+                }
+                Ok(self)
+            }
+            KeyType::TextEntryKey(_) => Ok(self),
+        }
     }
 }

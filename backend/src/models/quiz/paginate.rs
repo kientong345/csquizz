@@ -1,97 +1,78 @@
-use serde::Deserialize;
-use sqlx::{PgConnection, QueryBuilder};
+use std::str::FromStr;
+
+use sqlx::PgConnection;
 
 use crate::models::{
     error::ModelError,
     pagination::{Page, Paginate},
-    quiz::QuizMetadata,
+    quiz::{QuizDifficulty, QuizMinimal, QuizPaginateParams, QuizSortField},
 };
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct QuizQuery {
-    pub category_id: Option<i32>,
-    pub title_pattern: Option<String>,
-    pub difficulty: Option<String>,
-    pub created_by: Option<i32>,
-    pub completed_by: Option<i32>,
-    pub page: i64,
-    pub size: i64,
-}
-
-impl QuizQuery {
-    fn apply_filters_for(&self, builder: &mut QueryBuilder<sqlx::Postgres>) {
-        builder.push(" WHERE 1=1");
-
-        if let Some(category_id) = self.category_id {
-            builder.push(" AND q.category = ").push_bind(category_id);
-        }
-
-        if let Some(title) = &self.title_pattern {
-            builder
-                .push(" AND q.title ILIKE ")
-                .push_bind(format!("%{}%", title));
-        }
-
-        if let Some(difficulty) = &self.difficulty {
-            builder
-                .push(" AND q.difficulty = (")
-                .push_bind(difficulty.clone())
-                .push(")::quiz_difficulty");
-        }
-
-        if let Some(user_id) = self.created_by {
-            builder.push(" AND q.created_by = ").push_bind(user_id);
-        }
-
-        if let Some(user_id) = self.completed_by {
-            let sub_query =
-                " AND EXISTS (SELECT 1 FROM results r WHERE r.quiz_id = q.id AND r.user_id = ";
-            builder.push(sub_query).push_bind(user_id).push(")");
-        }
-    }
-
-    fn apply_pagination_for(&self, builder: &mut QueryBuilder<sqlx::Postgres>) {
-        let page_size = self.size;
-        let offset = (self.page - 1) * page_size;
-        builder.push(" ORDER BY q.id ASC");
-        builder.push(" LIMIT ").push_bind(page_size);
-        builder.push(" OFFSET ").push_bind(offset);
-    }
-}
-
-impl Paginate<QuizQuery> for QuizMetadata {
+impl Paginate<QuizPaginateParams> for QuizMinimal {
     async fn page(
-        query: &QuizQuery,
+        params: &QuizPaginateParams,
         connection: &mut PgConnection,
     ) -> Result<Page<Self>, ModelError> {
-        let mut count_builder: QueryBuilder<sqlx::Postgres> = QueryBuilder::new(
-            "SELECT COUNT(q.id) FROM quizzes AS q JOIN categories AS c ON q.category = c.id",
-        );
-        query.apply_filters_for(&mut count_builder);
+        let offset = (params.page.saturating_sub(1)) * params.page_size;
 
-        let mut query_builder: QueryBuilder<sqlx::Postgres> = QueryBuilder::new(
-            "SELECT
-                q.id, q.title, q.description, c.name AS category,
-                COALESCE(COUNT(qs.quiz_id), 0) AS question_count,
-                q.difficulty, u.display_name AS created_by
+        let title_pattern = format!(
+            "%{}%",
+            params.title_pattern.clone().unwrap_or("".to_string())
+        );
+        let difficulty = if let Some(diff) = &params.difficulty {
+            Some(QuizDifficulty::from_str(&diff)?)
+        } else {
+            None
+        };
+        let order = match QuizSortField::from_str(params.sort_by.as_str())? {
+            QuizSortField::CreatedAt => "quiz_completed_count",
+            QuizSortField::LikeCount => "like_count",
+        };
+
+        let items = sqlx::query_as!(
+            QuizMinimal,
+            r#"SELECT
+                q.qz_id AS id, q.qz_title AS title, q.qz_difficulty AS "difficulty: _",
+                COALESCE(qs_cnt.question_count, 0) AS "question_count!",
+                COALESCE(lk_cnt.like_count, 0) AS "like_count!",
+                c.cat_name AS category_name
             FROM quizzes AS q
-                JOIN categories AS c ON q.category = c.id
-                JOIN users AS u ON q.created_by = u.id
-                LEFT JOIN questions AS qs ON q.id = qs.quiz_id",
-        );
-        query.apply_filters_for(&mut query_builder);
-        query_builder.push(" GROUP BY q.id, c.name, u.display_name");
-        query.apply_pagination_for(&mut query_builder);
+            INNER JOIN (
+                SELECT qs_quiz_id, COUNT(*) AS question_count
+                FROM questions
+                GROUP BY qs_quiz_id
+            ) AS qs_cnt
+            ON q.qz_id = qs_cnt.qs_quiz_id
+            INNER JOIN (
+                SELECT qzlk_quiz_id, COUNT(*) AS like_count
+                FROM quiz_likes
+                GROUP BY qzlk_quiz_id
+            ) AS lk_cnt
+            ON q.qz_id = lk_cnt.qzlk_quiz_id
+            INNER JOIN categories AS c
+            ON q.qz_category_id = c.cat_id
+            WHERE q.qz_title ILIKE $1 AND q.qz_difficulty = $2
+            ORDER BY $3 DESC
+            OFFSET $4 LIMIT $5"#,
+            title_pattern,
+            difficulty.clone() as Option<QuizDifficulty>,
+            order,
+            offset as i64,
+            params.page_size as i64,
+        )
+        .fetch_all(&mut *connection)
+        .await?;
 
-        let total_items: i64 = count_builder
-            .build_query_scalar()
-            .fetch_one(&mut *connection)
-            .await?;
+        let total_items = sqlx::query_scalar!(
+            r#"SELECT COUNT(*) FROM quizzes WHERE qz_title ILIKE $1 AND qz_difficulty = $2"#,
+            title_pattern,
+            difficulty as Option<QuizDifficulty>,
+        )
+        .fetch_one(connection)
+        .await?
+        .unwrap_or(0);
 
-        let items: Vec<QuizMetadata> = query_builder.build_query_as().fetch_all(connection).await?;
-
-        Ok(Page::build_from(items, total_items, query.size))
+        Ok(Page::build_from(items, total_items, params.page_size))
     }
 }
 

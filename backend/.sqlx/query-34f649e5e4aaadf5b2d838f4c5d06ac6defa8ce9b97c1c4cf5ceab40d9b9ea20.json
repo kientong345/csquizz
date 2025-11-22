@@ -1,0 +1,97 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO quizzes (qz_title, qz_description, qz_difficulty, qz_category_id, qz_creator_id, qz_pass_score)\n            VALUES ($1, $2, $3, $4, $5, $6)\n            RETURNING\n                qz_id AS id, qz_title AS title, qz_description AS description, qz_difficulty as \"difficulty: _\", qz_category_id AS category_id,\n                qz_pass_score AS pass_score, qz_creator_id AS creator_id, qz_created_at AS created_at, qz_updated_at AS updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "difficulty: _",
+        "type_info": {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "category_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "pass_score",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "creator_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "quiz_difficulty",
+            "kind": {
+              "Enum": [
+                "easy",
+                "medium",
+                "hard"
+              ]
+            }
+          }
+        },
+        "Int4",
+        "Int4",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "34f649e5e4aaadf5b2d838f4c5d06ac6defa8ce9b97c1c4cf5ceab40d9b9ea20"
+}

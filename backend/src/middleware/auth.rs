@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -7,20 +5,14 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
-use tokio::sync::RwLock;
 
-use crate::{
-    app::AppState,
-    services::auth::{AccessClaims, JwtMachine},
-};
+use crate::{app::AppState, models::auth::AccessClaims, services::auth::JwtMachine};
 
 pub async fn auth_middleware(
-    State(state): State<Arc<RwLock<AppState>>>,
+    State(state): State<AppState>,
     mut req: Request<Body>,
     next: Next,
 ) -> Response {
-    let state_locked = state.read().await;
-
     let auth_header = match req.headers().get("Authorization") {
         Some(value) => value,
         None => return StatusCode::NON_AUTHORITATIVE_INFORMATION.into_response(),
@@ -32,7 +24,7 @@ pub async fn auth_middleware(
         .strip_prefix("Bearer ")
         .unwrap();
 
-    let jwt_machine = JwtMachine::init(&state_locked.config.auth_config);
+    let jwt_machine = JwtMachine::init(&state.config.auth_config);
 
     let access_claims = match jwt_machine.decode::<AccessClaims>(access_token) {
         Ok(access_claims) => access_claims,
