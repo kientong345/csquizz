@@ -5,6 +5,7 @@ pub mod comment;
 pub mod error;
 pub mod input_dto;
 pub mod like;
+pub mod oauth;
 pub mod pagination;
 pub mod question;
 pub mod quiz;

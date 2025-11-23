@@ -4,7 +4,8 @@ use sqlx::PgConnection;
 use crate::{
     config::auth::AuthConfig,
     models::{
-        auth::{AccessClaims, LoginSchema, OAuthSchema, RefreshClaims, RegisterSchema},
+        auth::{AccessClaims, LoginSchema, RefreshClaims, RegisterSchema},
+        oauth::OAuthSchema,
         user::{DatabaseUser, UserCreateParams},
     },
     services::error::ServiceError,

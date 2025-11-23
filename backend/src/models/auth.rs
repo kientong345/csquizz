@@ -43,14 +43,6 @@ impl LoginSchema {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct OAuthSchema {
-    pub google_id: String,
-    pub display_name: String,
-    pub email: String,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccessClaims {
     pub sub: String,

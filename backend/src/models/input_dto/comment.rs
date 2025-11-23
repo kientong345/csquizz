@@ -7,7 +7,7 @@ use crate::models::comment::{CommentCreateParams, CommentPaginateParams};
 pub struct CommentPaginateParamsDto {
     pub page: i32,
     pub page_size: i32,
-    pub sort_by: Option<String>,
+    pub sort_by: String,
 }
 
 impl CommentPaginateParamsDto {

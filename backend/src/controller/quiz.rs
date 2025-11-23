@@ -9,6 +9,7 @@ use crate::{
     app::AppState,
     controller::error::ControllerError,
     models::{
+        answer::Answer,
         auth::AccessClaims,
         comment::{CommentDetail, DatabaseComment},
         input_dto::{
@@ -18,13 +19,16 @@ use crate::{
             },
             quiz::QuizUpdateParamsDto,
             quiz_question::QuizQuestionCreateParamsDto,
+            submission::QuizSubmissionParamsDto,
         },
         like::DatabaseQuizLike,
         pagination::Paginate,
         question::{DatabaseQuestion, QuestionPrivateData, QuestionPublicData},
         quiz::{DatabaseQuiz, QuizDetail, QuizMinimal, QuizPaginateParams},
         quiz_composition::{QuizComment, QuizPublicQuestion},
+        submission_result::DatabaseSubmissionResult,
     },
+    services::evaluator::Evaluator,
 };
 
 pub async fn get_quizzes_page(
@@ -188,6 +192,35 @@ pub async fn delete_question(
     let mut connection = state.primary_db.start_transaction().await?;
 
     DatabaseQuestion::delete_by(question_id, &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn submit_quiz(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Extension(access_claims): Extension<AccessClaims>,
+    Json(payload): Json<QuizSubmissionParamsDto>,
+) -> Result<StatusCode, ControllerError> {
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
+
+    let submission = payload.bind(user_id, id);
+
+    let mut connection = state.primary_db.start_transaction().await?;
+
+    let (submission_result_summary, evaluated_answers) =
+        Evaluator::evaluate(&submission, &mut *connection).await?;
+
+    let result_id =
+        DatabaseSubmissionResult::create_from(&submission_result_summary, &mut *connection)
+            .await?
+            .id;
+
+    for evaluated_answer in evaluated_answers {
+        Answer::create_from(&evaluated_answer.bind(result_id), &mut *connection).await?;
+    }
 
     connection.commit().await?;
 

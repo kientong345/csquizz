@@ -20,3 +20,16 @@ impl DatabaseConfig {
         DatabaseConfig { database_url }
     }
 }
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+pub struct CacheConfig {
+    pub cache_url: String,
+}
+
+impl CacheConfig {
+    pub fn get() -> CacheConfig {
+        let cache_url = std::env::var("CACHE_URL").expect("CACHE_URL is not set");
+
+        CacheConfig { cache_url }
+    }
+}

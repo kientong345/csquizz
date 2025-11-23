@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                cm.cmt_id AS id, cm.cmt_user_id AS \"user_id!\", cm.cmt_quiz_id AS \"quiz_id!\",\n                cm.cmt_content AS content, cm.cmt_created_at AS \"created_at: _\",\n                u.usr_display_name AS user_display_name, u.usr_avatar_url AS user_avatar_url,\n                COALESCE(lk.like_count, 0) AS \"like_count!\"\n            FROM comments AS cm\n            INNER JOIN users AS u\n            ON cm.cmt_user_id = u.usr_id\n            INNER JOIN (\n                SELECT cmlk_comment_id, COUNT(*) AS like_count\n                FROM comment_likes\n                GROUP BY cmlk_comment_id\n            ) AS lk\n            ON cm.cmt_id = lk.cmlk_comment_id\n            WHERE cm.cmt_quiz_id = $1\n            ORDER BY $2\n            OFFSET $3 LIMIT $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "quiz_id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at: _",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "user_display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "user_avatar_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "like_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "da22af8bd2475366e63ac0e3e266134ae50a6e4629eadb496836a8d9ea47a75b"
+}

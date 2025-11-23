@@ -1,12 +1,33 @@
+use std::str::FromStr;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
+
+use crate::models::error::ModelError;
 
 pub mod create;
 pub mod delete;
 pub mod get;
 pub mod paginate;
 pub mod update;
+
+#[derive(Debug, Clone, Copy)]
+pub enum CommentSortField {
+    Latest,
+    MostLike,
+}
+
+impl FromStr for CommentSortField {
+    type Err = ModelError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "latest" => Ok(CommentSortField::Latest),
+            "most-like" => Ok(CommentSortField::MostLike),
+            _ => Err(ModelError::BadPost(s.to_string())),
+        }
+    }
+}
 
 #[derive(Debug, Clone, FromRow)]
 pub struct DatabaseComment {
@@ -51,5 +72,5 @@ pub struct CommentPaginateParams {
     pub quiz_id: i32,
     pub page: i32,
     pub page_size: i32,
-    pub sort_by: Option<String>,
+    pub sort_by: String,
 }

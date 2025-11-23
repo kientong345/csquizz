@@ -15,11 +15,12 @@ use crate::{
     controller::error::ControllerError,
     models::{
         auth::{LoginSchema, RegisterSchema},
+        oauth::AuthorizationCode,
         user::DatabaseUser,
     },
     services::{
         auth::{AuthenticatedUser, JwtMachine},
-        oauth_client::{AuthorizationCode, OAuthClient},
+        oauth_client::OAuthClient,
     },
 };
 

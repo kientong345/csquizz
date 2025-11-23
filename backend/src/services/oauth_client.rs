@@ -1,48 +1,14 @@
 use reqwest::Url;
-use serde::Deserialize;
 
-use crate::{config::oauth::OAuthConfig, models::auth::OAuthSchema, services::error::ServiceError};
+use crate::{
+    config::oauth::OAuthConfig,
+    models::oauth::{GoogleUserResult, OAuthResponse},
+    services::error::ServiceError,
+};
 
 pub struct OAuthClient {
     client: reqwest::Client,
     config: OAuthConfig,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct OAuthResponse {
-    pub access_token: String,
-    pub id_token: String,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct GoogleUserResult {
-    pub id: String,
-    pub email: String,
-    pub verified_email: bool,
-    pub name: String,
-    pub given_name: String,
-    pub family_name: String,
-    pub picture: String,
-    pub locale: String,
-}
-
-impl Into<OAuthSchema> for GoogleUserResult {
-    fn into(self) -> OAuthSchema {
-        OAuthSchema {
-            google_id: self.id,
-            display_name: self.name,
-            email: self.email,
-        }
-    }
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct AuthorizationCode {
-    pub code: String,
-    pub state: String,
 }
 
 impl OAuthClient {

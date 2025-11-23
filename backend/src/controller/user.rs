@@ -10,8 +10,11 @@ use crate::{
     controller::error::ControllerError,
     models::{
         auth::AccessClaims,
-        input_dto::user::UserUpdateParamsDto,
+        input_dto::{
+            submission_result::SubmissionResultPaginateParamsDto, user::UserUpdateParamsDto,
+        },
         pagination::Paginate,
+        submission_result::SubmissionResultMinimal,
         user::{DatabaseUser, UserFullDetail, UserPaginateParams, UserPublicDetail},
     },
 };
@@ -61,7 +64,7 @@ pub async fn update_me(
     Ok(StatusCode::OK)
 }
 
-pub async fn find_by_id(
+pub async fn find_user_by_id(
     State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -73,7 +76,7 @@ pub async fn find_by_id(
     Ok(Json(json!(user)))
 }
 
-pub async fn get_page(
+pub async fn get_users_page(
     State(state): State<AppState>,
     Query(query): Query<UserPaginateParams>,
 ) -> Result<Json<Value>, ControllerError> {
@@ -84,7 +87,7 @@ pub async fn get_page(
     Ok(Json(json!(users)))
 }
 
-pub async fn update(
+pub async fn update_user(
     State(state): State<AppState>,
     Path(id): Path<i32>,
     Json(payload): Json<UserUpdateParamsDto>,
@@ -98,7 +101,7 @@ pub async fn update(
     Ok(StatusCode::OK)
 }
 
-pub async fn delete(
+pub async fn delete_user(
     State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, ControllerError> {
@@ -109,4 +112,19 @@ pub async fn delete(
     connection.commit().await?;
 
     Ok(StatusCode::OK)
+}
+
+pub async fn get_submissions_me(
+    State(state): State<AppState>,
+    Extension(access_claims): Extension<AccessClaims>,
+    Query(params): Query<SubmissionResultPaginateParamsDto>,
+) -> Result<Json<Value>, ControllerError> {
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
+
+    let mut connection = state.primary_db.get_connection().await?;
+
+    let submissions =
+        SubmissionResultMinimal::page(&params.bind(user_id), &mut *connection).await?;
+
+    Ok(Json(json!(submissions)))
 }

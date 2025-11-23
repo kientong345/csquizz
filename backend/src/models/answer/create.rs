@@ -1,7 +1,7 @@
 use crate::models::answer::{Answer, AnswerCreateParams};
 
 impl Answer {
-    pub async fn create(
+    pub async fn create_from(
         params: &AnswerCreateParams,
         connection: &mut sqlx::PgConnection,
     ) -> Result<Answer, crate::models::error::ModelError> {

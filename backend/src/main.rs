@@ -3,7 +3,7 @@ use std::{net::SocketAddr, sync::Arc};
 use csquizz::{
     app::{self, AppState},
     config::Configuration,
-    database::persistent::PrimaryDatabase,
+    database::{non_persistent::SecondaryDatabase, persistent::PrimaryDatabase},
 };
 use tokio::net::TcpListener;
 
@@ -27,7 +27,12 @@ async fn main() {
 
     // Initialize application state
     let primary_db = PrimaryDatabase::init(&config.db_config).await;
-    let app_state = AppState { primary_db, config };
+    let secondary_db = SecondaryDatabase::init(&config.cache_config).ok();
+    let app_state = AppState {
+        primary_db,
+        secondary_db,
+        config,
+    };
 
     // Create app
     let app = app::create_app(app_state).await;

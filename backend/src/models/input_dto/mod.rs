@@ -1,4 +1,3 @@
-pub mod answer;
 pub mod category;
 pub mod comment;
 pub mod like;
@@ -6,4 +5,6 @@ pub mod question;
 pub mod quiz;
 pub mod quiz_answer;
 pub mod quiz_question;
+pub mod submission;
+pub mod submission_result;
 pub mod user;

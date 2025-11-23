@@ -54,10 +54,44 @@ pub struct OptionKey {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OptionKeys {
+    pub keys: Vec<OptionKey>,
+}
+
+impl TryFrom<Value> for OptionKeys {
+    type Error = ModelError;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        let seriallized_key: OptionKeys = serde_json::from_value(value)?;
+        Ok(seriallized_key)
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptionPubKey {
     pub id: i32,
     pub content: String,
     pub image_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OptionPubKeys {
+    pub keys: Vec<OptionPubKey>,
+}
+
+impl From<OptionKeys> for OptionPubKeys {
+    fn from(value: OptionKeys) -> Self {
+        let keys = value
+            .keys
+            .into_iter()
+            .map(|e| OptionPubKey {
+                id: e.id,
+                content: e.content,
+                image_url: e.image_url,
+            })
+            .collect();
+
+        Self { keys }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -66,10 +100,18 @@ pub struct TextKey {
     pub explanation: Option<String>,
 }
 
+impl TryFrom<Value> for TextKey {
+    type Error = ModelError;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        let seriallized_key: TextKey = serde_json::from_value(value)?;
+        Ok(seriallized_key)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum KeyType {
-    SingleChoiceKey(Vec<OptionKey>),
-    MultipleChoiceKey(Vec<OptionKey>),
+    SingleChoiceKey(OptionKeys),
+    MultipleChoiceKey(OptionKeys),
     TextEntryKey(TextKey),
 }
 
@@ -115,30 +157,26 @@ pub struct DatabaseQuestionAlter {
     pub created_at: Option<DateTime<Utc>>,
 }
 
-impl From<DatabaseQuestion> for DatabaseQuestionAlter {
-    fn from(value: DatabaseQuestion) -> Self {
+impl TryFrom<DatabaseQuestion> for DatabaseQuestionAlter {
+    type Error = ModelError;
+    fn try_from(value: DatabaseQuestion) -> Result<Self, Self::Error> {
         let key = match value.r#type {
             QuestionType::MultipleChoice => {
-                let deserialized_key: Vec<OptionKey> = serde_json::from_value(value.key).unwrap();
-                KeyType::MultipleChoiceKey(deserialized_key)
+                KeyType::MultipleChoiceKey(OptionKeys::try_from(value.key)?)
             }
             QuestionType::SingleChoice => {
-                let deserialized_key: Vec<OptionKey> = serde_json::from_value(value.key).unwrap();
-                KeyType::SingleChoiceKey(deserialized_key)
+                KeyType::SingleChoiceKey(OptionKeys::try_from(value.key)?)
             }
-            QuestionType::TextEntry => {
-                let deserialized_key: TextKey = serde_json::from_value(value.key).unwrap();
-                KeyType::TextEntryKey(deserialized_key)
-            }
+            QuestionType::TextEntry => KeyType::TextEntryKey(TextKey::try_from(value.key)?),
         };
-        Self {
+        Ok(Self {
             id: value.id,
             content: value.content,
             image_url: value.image_url,
             key,
             quiz_id: value.quiz_id,
             created_at: value.created_at,
-        }
+        })
     }
 }
 
@@ -159,29 +197,13 @@ impl TryFrom<QuestionPrivateData> for QuestionPublicData {
     fn try_from(value: QuestionPrivateData) -> Result<Self, Self::Error> {
         let public_data = match QuestionType::from_str(&value.r#type)? {
             QuestionType::MultipleChoice => {
-                let deserialized_key: Vec<OptionKey> =
-                    serde_json::from_value(value.private_data.clone()).unwrap();
-                let public_data: Vec<OptionPubKey> = deserialized_key
-                    .into_iter()
-                    .map(|e| OptionPubKey {
-                        id: e.id,
-                        content: e.content,
-                        image_url: e.image_url,
-                    })
-                    .collect();
+                let public_data =
+                    OptionPubKeys::from(OptionKeys::try_from(value.private_data.clone())?);
                 json!(public_data)
             }
             QuestionType::SingleChoice => {
-                let deserialized_key: Vec<OptionKey> =
-                    serde_json::from_value(value.private_data.clone()).unwrap();
-                let public_data: Vec<OptionPubKey> = deserialized_key
-                    .into_iter()
-                    .map(|e| OptionPubKey {
-                        id: e.id,
-                        content: e.content,
-                        image_url: e.image_url,
-                    })
-                    .collect();
+                let public_data =
+                    OptionPubKeys::from(OptionKeys::try_from(value.private_data.clone())?);
                 json!(public_data)
             }
             QuestionType::TextEntry => {
@@ -244,9 +266,9 @@ impl KeyType {
     pub fn validate(self) -> Result<Self, ModelError> {
         match &self {
             KeyType::MultipleChoiceKey(_) => Ok(self),
-            KeyType::SingleChoiceKey(keys) => {
+            KeyType::SingleChoiceKey(k) => {
                 let mut correct_option_count: u8 = 0;
-                for key in keys {
+                for key in &k.keys {
                     if key.is_correct {
                         correct_option_count += 1;
                         if correct_option_count > 1 {
