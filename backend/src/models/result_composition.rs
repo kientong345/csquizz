@@ -3,11 +3,11 @@ use serde_json::Value;
 use sqlx::prelude::FromRow;
 
 use crate::models::{
-    answer::{Answer, AnswerCreateParams},
+    answer::Answer,
     error::ModelError,
     pagination::{Page, Paginate},
     question::QuestionPrivateData,
-    submission_result::{SubmissionResultCreateParams, SubmissionResultDetail},
+    submission_result::SubmissionResultDetail,
 };
 
 #[derive(Debug, Clone, Serialize)]

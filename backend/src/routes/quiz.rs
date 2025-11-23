@@ -7,7 +7,7 @@ use crate::{
     app::AppState,
     controller::quiz::{
         add_question, comment_quiz, create_quiz_with_questions, delete_question, delete_quiz,
-        get_quiz_with_comments, get_quiz_with_questions, get_quizzes_page, like_quiz,
+        get_quiz_with_comments, get_quiz_with_questions, get_quizzes_page, like_quiz, submit_quiz,
         update_question, update_quiz_metadata,
     },
 };
@@ -25,6 +25,7 @@ pub fn create_auth_route(state: AppState) -> Router {
         .route("/api/quizzes", post(create_quiz_with_questions))
         .route("/api/quizzes/{:id}/like", post(like_quiz))
         .route("/api/quizzes/{:id}/comment", post(comment_quiz))
+        .route("/api/quizzes/{:id}/submit", post(submit_quiz))
         .with_state(state)
 }
 
