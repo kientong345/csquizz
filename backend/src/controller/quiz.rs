@@ -1,87 +1,195 @@
 use axum::{
-    Json,
+    Extension, Json,
     extract::{Path, Query, State},
 };
+use reqwest::StatusCode;
 use serde_json::{Value, json};
 
 use crate::{
     app::AppState,
     controller::error::ControllerError,
     models::{
+        auth::AccessClaims,
+        comment::{CommentDetail, DatabaseComment},
+        input_dto::{
+            comment::{CommentCreateParamsDto, CommentPaginateParamsDto},
+            question::{
+                QuestionCreateParamsDto, QuestionPaginateParamsDto, QuestionUpdateParamsDto,
+            },
+            quiz::QuizUpdateParamsDto,
+            quiz_question::QuizQuestionCreateParamsDto,
+        },
+        like::DatabaseQuizLike,
         pagination::Paginate,
-        quiz::{DatabaseQuiz, QuizCreateParams, QuizDetail, QuizMinimal, QuizPaginateParams},
+        question::{DatabaseQuestion, QuestionPrivateData, QuestionPublicData},
+        quiz::{DatabaseQuiz, QuizDetail, QuizMinimal, QuizPaginateParams},
+        quiz_composition::{QuizComment, QuizPublicQuestion},
     },
 };
 
-pub async fn paginate(
+pub async fn get_quizzes_page(
     State(state): State<AppState>,
-    Query(query): Query<QuizPaginateParams>,
+    Query(params): Query<QuizPaginateParams>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    let page = QuizMinimal::page(&query, &mut *connection).await?;
+    let page = QuizMinimal::page(&params, &mut *connection).await?;
+
+    connection.commit().await?;
 
     Ok(Json(json!(page)))
 }
 
-pub async fn get(
+pub async fn get_quiz_with_comments(
     State(state): State<AppState>,
-    Path(id): Path<String>,
+    Path(id): Path<i32>,
+    Query(params): Query<CommentPaginateParamsDto>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    let id: i32 = id.parse().unwrap_or(-1);
-    let quiz = QuizDetail::get_by_id(id, &mut *connection).await?;
-    Ok(Json(json!(quiz)))
+    let metadata = QuizDetail::get_by_id(id, &mut *connection).await?;
+    let data = CommentDetail::page(&params.bind(id), &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(Json(json!(QuizComment { metadata, data })))
 }
 
-pub async fn post(
+pub async fn get_quiz_with_questions(
     State(state): State<AppState>,
-    Json(data): Json<QuizCreateParams>,
-) -> Result<(), ControllerError> {
-    // let mut connection = state.pool.start_transaction().await?;
+    Path(id): Path<i32>,
+    Query(params): Query<QuestionPaginateParamsDto>,
+) -> Result<Json<Value>, ControllerError> {
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    // DatabaseQuiz::create_from(data.metadata, &mut connection).await?;
+    let metadata = QuizDetail::get_by_id(id, &mut *connection).await?;
+    let data = QuestionPrivateData::page(&params.bind(id), &mut *connection)
+        .await?
+        .try_map_into::<QuestionPublicData>()?;
 
-    // for question in data.questions {
-    //     Question::create_from(question, &mut connection).await?;
-    // }
+    connection.commit().await?;
 
-    // connection.commit().await?;
-
-    Ok(())
+    Ok(Json(json!(QuizPublicQuestion { metadata, data })))
 }
 
-pub async fn update(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+pub async fn create_quiz_with_questions(
+    State(state): State<AppState>,
+    Extension(access_claims): Extension<AccessClaims>,
+    Json(payload): Json<QuizQuestionCreateParamsDto>,
+) -> Result<StatusCode, ControllerError> {
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
 
-    todo!()
+    let mut connection = state.primary_db.start_transaction().await?;
+
+    let quiz_id = DatabaseQuiz::create_from(&payload.quiz_params.bind(user_id), &mut *connection)
+        .await?
+        .id;
+
+    for params in payload.questions_params {
+        DatabaseQuestion::create_from(&params.bind(quiz_id), &mut *connection).await?;
+    }
+
+    connection.commit().await?;
+
+    Ok(StatusCode::CREATED)
 }
 
-pub async fn delete(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+pub async fn update_quiz_metadata(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Json(payload): Json<QuizUpdateParamsDto>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    todo!()
+    DatabaseQuiz::update_by(&payload.bind(id), &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(StatusCode::OK)
 }
 
-pub async fn add_question(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
+pub async fn delete_quiz(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.start_transaction().await?;
+
+    DatabaseQuiz::delete_by(id, &mut *connection).await?;
+    connection.commit().await?;
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn like_quiz(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Extension(access_claims): Extension<AccessClaims>,
+) -> Result<StatusCode, ControllerError> {
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
+
     let mut connection = state.primary_db.get_connection().await?;
 
-    todo!()
+    DatabaseQuizLike::create_from(user_id, id, &mut *connection).await?;
+
+    Ok(StatusCode::CREATED)
+}
+
+pub async fn comment_quiz(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Extension(access_claims): Extension<AccessClaims>,
+    Json(payload): Json<CommentCreateParamsDto>,
+) -> Result<StatusCode, ControllerError> {
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
+
+    let mut connection = state.primary_db.start_transaction().await?;
+
+    DatabaseComment::create_from(&payload.bind(user_id, id), &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(StatusCode::CREATED)
+}
+
+pub async fn add_question(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Json(payload): Json<QuestionCreateParamsDto>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.start_transaction().await?;
+
+    DatabaseQuestion::create_from(&payload.bind(id), &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(StatusCode::CREATED)
 }
 
 pub async fn update_question(
     State(state): State<AppState>,
-) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    Path(_id): Path<i32>,
+    Path(question_id): Path<i32>,
+    Json(payload): Json<QuestionUpdateParamsDto>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    todo!()
+    DatabaseQuestion::update_by(&payload.bind(question_id), &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(StatusCode::OK)
 }
 
 pub async fn delete_question(
     State(state): State<AppState>,
-) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    Path(_id): Path<i32>,
+    Path(question_id): Path<i32>,
+) -> Result<StatusCode, ControllerError> {
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    todo!()
+    DatabaseQuestion::delete_by(question_id, &mut *connection).await?;
+
+    connection.commit().await?;
+
+    Ok(StatusCode::OK)
 }

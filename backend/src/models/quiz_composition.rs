@@ -1,22 +1,23 @@
 use serde::Serialize;
 
 use crate::models::{
+    comment::CommentDetail,
     error::ModelError,
-    pagination::{Page, Paginate},
-    question::{QuestionPaginateParams, QuestionPrivateData, QuestionPublicData},
+    pagination::Page,
+    question::{QuestionPrivateData, QuestionPublicData},
     quiz::QuizDetail,
 };
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct QuizPublicComposition {
-    metadata: QuizDetail,
-    data: Page<QuestionPublicData>,
+pub struct QuizPublicQuestion {
+    pub metadata: QuizDetail,
+    pub data: Page<QuestionPublicData>,
 }
 
-impl TryFrom<QuizPrivateComposition> for QuizPublicComposition {
+impl TryFrom<QuizPrivateQuestion> for QuizPublicQuestion {
     type Error = ModelError;
-    fn try_from(value: QuizPrivateComposition) -> Result<Self, Self::Error> {
+    fn try_from(value: QuizPrivateQuestion) -> Result<Self, Self::Error> {
         Ok(Self {
             metadata: value.metadata,
             data: value.data.try_map_into()?,
@@ -26,21 +27,14 @@ impl TryFrom<QuizPrivateComposition> for QuizPublicComposition {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct QuizPrivateComposition {
-    metadata: QuizDetail,
-    data: Page<QuestionPrivateData>,
+pub struct QuizPrivateQuestion {
+    pub metadata: QuizDetail,
+    pub data: Page<QuestionPrivateData>,
 }
 
-pub type QuizCompositionPaginateParams = QuestionPaginateParams;
-
-impl QuizPrivateComposition {
-    pub async fn get_by(
-        params: &QuizCompositionPaginateParams,
-        connection: &mut sqlx::PgConnection,
-    ) -> Result<QuizPrivateComposition, ModelError> {
-        let metadata = QuizDetail::get_by_id(params.quiz_id, connection).await?;
-        let data = QuestionPrivateData::page(&params, connection).await?;
-
-        Ok(QuizPrivateComposition { metadata, data })
-    }
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuizComment {
+    pub metadata: QuizDetail,
+    pub data: Page<CommentDetail>,
 }

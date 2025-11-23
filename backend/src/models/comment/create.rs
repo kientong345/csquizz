@@ -1,13 +1,13 @@
 use sqlx::PgConnection;
 
 use crate::models::{
-    comment::{CreateCommentParams, DatabaseComment},
+    comment::{CommentCreateParams, DatabaseComment},
     error::ModelError,
 };
 
 impl DatabaseComment {
     pub async fn create_from(
-        params: &CreateCommentParams,
+        params: &CommentCreateParams,
         connection: &mut PgConnection,
     ) -> Result<DatabaseComment, ModelError> {
         Ok(sqlx::query_as!(

@@ -1,7 +1,7 @@
 use crate::models::user::DatabaseUser;
 
 impl DatabaseUser {
-    pub async fn delete_by_id(
+    pub async fn delete_by(
         id: i32,
         connection: &mut sqlx::PgConnection,
     ) -> Result<(), crate::models::error::ModelError> {

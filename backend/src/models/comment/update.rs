@@ -1,8 +1,9 @@
-use crate::models::comment::{DatabaseComment, UpdateCommentParams};
+use crate::models::comment::{CommentUpdateParams, DatabaseComment};
 
 impl DatabaseComment {
     pub async fn update_by(
-        params: &UpdateCommentParams,
+        id: i32,
+        params: &CommentUpdateParams,
         connection: &mut sqlx::PgConnection,
     ) -> Result<DatabaseComment, crate::models::error::ModelError> {
         Ok(sqlx::query_as!(
@@ -14,7 +15,7 @@ impl DatabaseComment {
                 cmt_id AS id, cmt_content AS content, cmt_user_id AS "user_id!",
                 cmt_quiz_id AS "quiz_id!", cmt_created_at AS "created_at!""#,
             params.content,
-            params.id
+            id
         )
         .fetch_one(connection)
         .await?)

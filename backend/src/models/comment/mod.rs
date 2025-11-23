@@ -17,7 +17,7 @@ pub struct DatabaseComment {
     pub created_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommentDetail {
     pub id: i32,
@@ -30,26 +30,26 @@ pub struct CommentDetail {
     pub like_count: i64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct CreateCommentParams {
+pub struct CommentCreateParams {
     pub user_id: i32,
     pub quiz_id: i32,
     pub content: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct UpdateCommentParams {
+pub struct CommentUpdateParams {
     pub id: i32,
     pub content: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct PaginateCommentParams {
+pub struct CommentPaginateParams {
     pub quiz_id: i32,
     pub page: i32,
-    pub limit: i32,
+    pub page_size: i32,
     pub sort_by: Option<String>,
 }

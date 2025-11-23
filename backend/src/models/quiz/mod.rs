@@ -122,7 +122,7 @@ pub struct QuizUpdateParams {
     pub description: Option<String>,
     pub difficulty: Option<String>,
     pub category_id: Option<i32>,
-    pub pass_score: f64,
+    pub pass_score: Option<f64>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

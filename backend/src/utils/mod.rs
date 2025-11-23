@@ -1,5 +1,6 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::DeserializeOwned};
 
+/// Converts a vector of any type that implements ToString into a vector of strings
 pub fn vec_stringify<T: ToString>(vec: Vec<T>) -> Vec<String> {
     let mut ret = Vec::new();
     for element in vec {
@@ -8,6 +9,7 @@ pub fn vec_stringify<T: ToString>(vec: Vec<T>) -> Vec<String> {
     ret
 }
 
+/// Validates if the provided email string matches a standard email format
 pub fn validate_email_name(email: &str) -> Result<(), String> {
     let email_regex =
         regex::Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
@@ -18,6 +20,7 @@ pub fn validate_email_name(email: &str) -> Result<(), String> {
     }
 }
 
+/// Decodes a JWT token into the specified claims type using the provided secret
 pub fn decode_jwt<C: Clone + DeserializeOwned>(
     jwt: &str,
     secret: &[u8],
@@ -30,6 +33,7 @@ pub fn decode_jwt<C: Clone + DeserializeOwned>(
     .claims)
 }
 
+/// Generates a JWT token from the specified claims type using the provided secret
 pub fn generate_jwt<C: Serialize>(claims: &C, secret: &[u8]) -> String {
     jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
@@ -39,17 +43,18 @@ pub fn generate_jwt<C: Serialize>(claims: &C, secret: &[u8]) -> String {
     .unwrap_or(String::from(""))
 }
 
+/// Hashes a given string using bcrypt and returns the hashed value
 pub fn bcrypt_hash(value: &str) -> Result<String, bcrypt::BcryptError> {
     Ok(bcrypt::hash(value, bcrypt::DEFAULT_COST)?)
 }
 
+/// Verifies a given string against a bcrypt hashed value
 #[allow(non_snake_case)]
 pub fn serializeCamelCase<S, T>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
 where
     T: Serialize,
     S: Serializer,
 {
-    // Sử dụng một intermediate struct với camelCase
     #[derive(Serialize)]
     #[serde(rename_all = "camelCase")]
     struct Camel<'a, T: Serialize>(&'a T);
@@ -57,7 +62,7 @@ where
     Camel(value).serialize(serializer)
 }
 
-// Helper để deserialize snake_case
+/// Deserializes a value from snake_case format
 pub fn deserialize_snake_case<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     T: Deserialize<'de>,
@@ -68,4 +73,20 @@ where
     struct Snake<T>(T);
 
     Snake::deserialize(deserializer).map(|s| s.0)
+}
+
+/// Retrieves a query parameter from a map, with an optional default value
+#[macro_export]
+macro_rules! get_query_param {
+    // With default value
+    ($map:expr, $key:expr, $default:expr) => {
+        $map.get($key)
+            .and_then(|s| s.parse().ok())
+            .unwrap_or($default)
+    };
+
+    // Without default value
+    ($map:expr, $key:expr) => {
+        $map.get($key).and_then(|s| s.parse().ok())
+    };
 }

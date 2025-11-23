@@ -9,7 +9,8 @@ use crate::{
     app::AppState,
     controller::error::ControllerError,
     models::{
-        category::{Category, CategoryCreateParams, CategoryPaginateParams, CategoryUpdateParams},
+        category::{Category, CategoryCreateParams, CategoryPaginateParams},
+        input_dto::category::CategoryUpdateParamsDto,
         pagination::Paginate,
     },
 };
@@ -57,7 +58,7 @@ pub async fn create(
 
 pub async fn delete(
     State(state): State<AppState>,
-    Query(id): Query<i32>,
+    Path(id): Path<i32>,
 ) -> Result<StatusCode, ControllerError> {
     let mut connection = state.primary_db.get_connection().await?;
 
@@ -68,11 +69,14 @@ pub async fn delete(
 
 pub async fn update(
     State(state): State<AppState>,
-    Json(payload): Json<CategoryUpdateParams>,
+    Path(id): Path<i32>,
+    Json(payload): Json<CategoryUpdateParamsDto>,
 ) -> Result<StatusCode, ControllerError> {
     let mut connection = state.primary_db.get_connection().await?;
 
-    Category::update_by(&payload, &mut *connection).await?;
+    let params = payload.bind(id);
+
+    Category::update_by(&params, &mut *connection).await?;
 
     Ok(StatusCode::OK)
 }

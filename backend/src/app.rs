@@ -26,8 +26,12 @@ pub async fn create_app(state: AppState) -> Router {
         // category routes
         .merge(routes::category::create_route(state.clone()))
         .merge(routes::category::create_admin_route(state.clone()))
-        .merge(routes::result::create_protected_route(state.clone()))
+        // quiz routes
         .merge(routes::quiz::create_route(state.clone()))
+        .merge(routes::quiz::create_auth_route(state.clone()))
+        .merge(routes::quiz::create_owner_route(state.clone()))
+        //
+        .merge(routes::result::create_protected_route(state.clone()))
         .merge(routes::result::create_route(state.clone()))
         // default routes
         .merge(routes::create_default_route())

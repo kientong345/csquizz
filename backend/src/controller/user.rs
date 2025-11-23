@@ -1,5 +1,5 @@
 use axum::{
-    Json,
+    Extension, Json,
     extract::{Path, Query, State},
 };
 use reqwest::StatusCode;
@@ -9,15 +9,19 @@ use crate::{
     app::AppState,
     controller::error::ControllerError,
     models::{
+        auth::AccessClaims,
+        input_dto::user::UserUpdateParamsDto,
         pagination::Paginate,
-        user::{
-            AuthUserUpdateParams, DatabaseUser, UserFullDetail, UserPaginateParams,
-            UserPublicDetail, UserUpdateParams,
-        },
+        user::{DatabaseUser, UserFullDetail, UserPaginateParams, UserPublicDetail},
     },
 };
 
-pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, ControllerError> {
+pub async fn get_me(
+    State(state): State<AppState>,
+    Extension(access_claims): Extension<AccessClaims>,
+) -> Result<Json<Value>, ControllerError> {
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
+
     let mut connection = state.primary_db.get_connection().await?;
 
     // let auth_header = headers
@@ -36,8 +40,6 @@ pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, Contro
     //     Err(_) => return Err(StatusCode::UNAUTHORIZED),
     // };
 
-    let user_id = -1;
-
     let user = UserFullDetail::get_by_id(user_id, &mut *connection).await?;
 
     Ok(Json(json!(user)))
@@ -45,24 +47,26 @@ pub async fn get_me(State(state): State<AppState>) -> Result<Json<Value>, Contro
 
 pub async fn update_me(
     State(state): State<AppState>,
-    Json(payload): Json<AuthUserUpdateParams>,
+    Extension(access_claims): Extension<AccessClaims>,
+    Json(payload): Json<UserUpdateParamsDto>,
 ) -> Result<StatusCode, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let user_id = access_claims.sub.parse().unwrap_or(-1);
 
-    let user_id = -1;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    DatabaseUser::auth_update_by(user_id, &payload, &mut *connection).await?;
+    DatabaseUser::update_by(&payload.bind(user_id), &mut *connection).await?;
+
+    connection.commit().await?;
 
     Ok(StatusCode::OK)
 }
 
 pub async fn find_by_id(
     State(state): State<AppState>,
-    Path(id): Path<String>,
+    Path(id): Path<i32>,
 ) -> Result<Json<Value>, ControllerError> {
     let mut connection = state.primary_db.get_connection().await?;
 
-    let id: i32 = id.parse().unwrap_or(-1);
     let user: UserPublicDetail = UserFullDetail::get_by_id(id, &mut *connection)
         .await?
         .into();
@@ -82,23 +86,27 @@ pub async fn get_page(
 
 pub async fn update(
     State(state): State<AppState>,
-    Json(payload): Json<UserUpdateParams>,
+    Path(id): Path<i32>,
+    Json(payload): Json<UserUpdateParamsDto>,
 ) -> Result<StatusCode, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    DatabaseUser::update_by(&payload, &mut *connection).await?;
+    DatabaseUser::update_by(&payload.bind(id), &mut *connection).await?;
+
+    connection.commit().await?;
 
     Ok(StatusCode::OK)
 }
 
 pub async fn delete(
     State(state): State<AppState>,
-    Path(id): Path<String>,
+    Path(id): Path<i32>,
 ) -> Result<StatusCode, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    let id: i32 = id.parse().unwrap_or(-1);
-    DatabaseUser::delete_by_id(id, &mut *connection).await?;
+    DatabaseUser::delete_by(id, &mut *connection).await?;
+
+    connection.commit().await?;
 
     Ok(StatusCode::OK)
 }

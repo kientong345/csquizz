@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    routing::{get, post},
+    routing::{delete, get, post},
 };
 
 use crate::{app::AppState, controller::category};
@@ -15,11 +15,10 @@ pub fn create_route(state: AppState) -> Router {
 
 pub fn create_admin_route(state: AppState) -> Router {
     Router::new()
+        .route("/api/admin/categories", post(category::create))
         .route(
-            "/api/admin/categories",
-            post(category::create)
-                .delete(category::delete)
-                .patch(category::update),
+            "/api/admin/categories/{:id}",
+            delete(category::delete).patch(category::update),
         )
         .with_state(state)
 }

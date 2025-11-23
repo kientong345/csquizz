@@ -1,6 +1,6 @@
 use axum::{
     Router, middleware,
-    routing::{delete, get, patch},
+    routing::{delete, get},
 };
 
 use crate::{app::AppState, controller::user, middleware::auth::auth_middleware};
@@ -24,7 +24,9 @@ pub fn create_auth_route(state: AppState) -> Router {
 
 pub fn create_admin_route(state: AppState) -> Router {
     Router::new()
-        .route("/api/admin/users/{:id}", delete(user::delete))
-        .route("/api/admin/users", patch(user::update))
+        .route(
+            "/api/admin/users/{:id}",
+            delete(user::delete).patch(user::update),
+        )
         .with_state(state)
 }
