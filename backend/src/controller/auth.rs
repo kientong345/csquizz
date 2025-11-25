@@ -2,7 +2,6 @@ use axum::{
     Json,
     extract::{Query, State},
     http::StatusCode,
-    response::Redirect,
 };
 use axum_extra::extract::{
     CookieJar,
@@ -16,12 +15,8 @@ use crate::{
     models::{
         auth::{LoginSchema, RegisterSchema},
         oauth::AuthorizationCode,
-        user::DatabaseUser,
     },
-    services::{
-        auth::{AuthenticatedUser, JwtMachine},
-        oauth_client::OAuthClient,
-    },
+    services::oauth_client::OAuthClient,
 };
 
 pub async fn handle_register(
@@ -32,7 +27,10 @@ pub async fn handle_register(
 
     registration.validate()?;
 
-    AuthenticatedUser::register(registration, &mut connection).await?;
+    state
+        .auth_service
+        .register(&mut *connection, registration)
+        .await?;
 
     connection.commit().await?;
 
@@ -48,12 +46,10 @@ pub async fn handle_login(
 
     login_form.validate()?;
 
-    let user: DatabaseUser = AuthenticatedUser::login(login_form, &mut *connection)
-        .await?
-        .into();
-
-    let jwt_machine = JwtMachine::init(&state.config.auth_config);
-    let (access_token, refresh_token) = jwt_machine.generate_token_pair(&user);
+    let (_, access_token, refresh_token) = state
+        .auth_service
+        .login(&mut *connection, login_form)
+        .await?;
 
     let cookie: Cookie = Cookie::build(refresh_token)
         .http_only(true)
@@ -70,43 +66,45 @@ pub async fn handle_login(
     ))
 }
 
+// pub async fn handle_google_login(
+//     State(state): State<AppState>,
+//     jar: CookieJar,
+//     Query(auth_code) : Query<AuthorizationCode>,
+// ) -> Result<(CookieJar, Json<Value>), ControllerError> {
+//     // let client = &state.read().await.client;
+
+//     // let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+//     // let (auth_url, csrf_state) = client
+//     //     .authorize_url(CsrfToken::new_random)
+//     //     .add_scope(Scope::new("".to_string()))
+//     //     .set_pkce_challenge(pkce_challenge)
+//     //     .url();
+
+//     // Ok(Redirect::to(auth_url.as_str()))
+
+//     todo!()
+// }
+
 pub async fn handle_google_login(
-    State(state): State<AppState>,
-) -> Result<Redirect, ControllerError> {
-    // let client = &state.read().await.client;
-
-    // let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
-    // let (auth_url, csrf_state) = client
-    //     .authorize_url(CsrfToken::new_random)
-    //     .add_scope(Scope::new("".to_string()))
-    //     .set_pkce_challenge(pkce_challenge)
-    //     .url();
-
-    // Ok(Redirect::to(auth_url.as_str()))
-
-    todo!()
-}
-
-pub async fn handle_oauth_callback(
     State(state): State<AppState>,
     Query(auth_code): Query<AuthorizationCode>,
 ) -> Result<(CookieJar, Json<Value>), ControllerError> {
     let oauth_client = OAuthClient::init(&state.config.oauth_config);
 
-    let token_response = oauth_client.request_token(&auth_code.code).await?;
+    let token_response = oauth_client.exchange_for_token(&auth_code.code).await?;
 
     let google_user = oauth_client
         .get_google_user(&token_response.access_token, &token_response.id_token)
         .await?;
 
     let mut connection = state.primary_db.start_transaction().await?;
-    let user: DatabaseUser =
-        AuthenticatedUser::login_by_google(google_user.into(), &mut *connection)
-            .await?
-            .into();
 
-    let jwt_machine = JwtMachine::init(&state.config.auth_config);
-    let (access_token, refresh_token) = jwt_machine.generate_token_pair(&user);
+    let (_, access_token, refresh_token) = state
+        .auth_service
+        .google_login(&mut *connection, google_user.into())
+        .await?;
+
+    connection.commit().await?;
 
     let cookie: Cookie = Cookie::build(refresh_token)
         .http_only(true)

@@ -12,18 +12,17 @@ use crate::{
     utils::{bcrypt_hash, decode_jwt, generate_jwt},
 };
 
-pub struct JwtMachine {
+#[derive(Clone)]
+pub struct AuthService {
     config: AuthConfig,
 }
 
-impl JwtMachine {
-    pub fn init(config: &AuthConfig) -> JwtMachine {
-        JwtMachine {
-            config: config.clone(),
-        }
+impl AuthService {
+    pub fn new(config: AuthConfig) -> Self {
+        Self { config }
     }
 
-    pub fn decode<C: Clone + DeserializeOwned>(&self, jwt: &str) -> Result<C, ServiceError> {
+    pub fn decode_jwt<C: Clone + DeserializeOwned>(&self, jwt: &str) -> Result<C, ServiceError> {
         let secret = self.config.jwt_secret.as_bytes().to_vec();
         Ok(decode_jwt::<C>(jwt, &secret)?)
     }
@@ -50,22 +49,13 @@ impl JwtMachine {
 
         (access_token, refresh_token)
     }
-}
 
-pub struct AuthenticatedUser(DatabaseUser);
-
-impl Into<DatabaseUser> for AuthenticatedUser {
-    fn into(self) -> DatabaseUser {
-        self.0
-    }
-}
-
-impl AuthenticatedUser {
     pub async fn register(
+        &self,
+        conn: &mut PgConnection,
         registration: RegisterSchema,
-        connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, ServiceError> {
-        if DatabaseUser::is_email_exist(&registration.email, connection).await? {
+    ) -> Result<DatabaseUser, ServiceError> {
+        if DatabaseUser::is_email_exist(&registration.email, conn).await? {
             return Err(ServiceError::EmailTaken {
                 email: registration.email,
             });
@@ -79,25 +69,29 @@ impl AuthenticatedUser {
             avatar_url: None,
             role: None, // default is "user"
         };
-        let user = DatabaseUser::create_from(post_user, connection).await?;
-        Ok(AuthenticatedUser(user))
+        let user = DatabaseUser::create_from(post_user, conn).await?;
+        Ok(user)
     }
 
     pub async fn login(
+        &self,
+        conn: &mut PgConnection,
         login_form: LoginSchema,
-        connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, ServiceError> {
+    ) -> Result<(DatabaseUser, String, String), ServiceError> {
         let user =
-            DatabaseUser::validate_login(&login_form.email, &login_form.password, connection)
-                .await?;
-        Ok(AuthenticatedUser(user))
+            DatabaseUser::validate_login(&login_form.email, &login_form.password, conn).await?;
+
+        let (access_token, refresh_token) = self.generate_token_pair(&user);
+
+        Ok((user, access_token, refresh_token))
     }
 
-    pub async fn login_by_google(
+    pub async fn google_login(
+        &self,
+        conn: &mut PgConnection,
         oauth: OAuthSchema,
-        connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser, ServiceError> {
-        let user = if !DatabaseUser::is_email_exist(&oauth.email, connection).await? {
+    ) -> Result<(DatabaseUser, String, String), ServiceError> {
+        let user = if !DatabaseUser::is_email_exist(&oauth.email, conn).await? {
             let post_user = UserCreateParams {
                 google_id: Some(oauth.google_id),
                 display_name: oauth.display_name,
@@ -106,11 +100,13 @@ impl AuthenticatedUser {
                 avatar_url: None,
                 role: None, // default is "user"
             };
-            DatabaseUser::create_from(post_user, connection).await?
+            DatabaseUser::create_from(post_user, conn).await?
         } else {
-            DatabaseUser::get_by_email(&oauth.email, connection).await?
+            DatabaseUser::get_by_email(&oauth.email, conn).await?
         };
 
-        Ok(AuthenticatedUser(user))
+        let (access_token, refresh_token) = self.generate_token_pair(&user);
+
+        Ok((user, access_token, refresh_token))
     }
 }

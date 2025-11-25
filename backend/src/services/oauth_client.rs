@@ -19,10 +19,17 @@ impl OAuthClient {
         }
     }
 
-    pub async fn request_token(
+    pub async fn exchange_for_token(
         &self,
         authorization_code: &str,
     ) -> Result<OAuthResponse, ServiceError> {
+        /*
+        Gemini 3 Pro:
+        "Tôi là ứng dụng A (client_id),
+        tôi có mật khẩu B (client_secret).
+        Người dùng đã đồng ý và đưa cho tôi mã C (code) thông qua địa chỉ D (redirect_uri).
+        Vì tôi dùng quy trình chuẩn E (grant_type), hãy đưa cho tôi chìa khóa (access_token) để vào nhà."
+        */
         let params = [
             ("grant_type", "authorization_code"),
             ("redirect_uri", self.config.redirect_url.as_str()),

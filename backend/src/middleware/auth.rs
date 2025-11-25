@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use crate::{app::AppState, models::auth::AccessClaims, services::auth::JwtMachine};
+use crate::{app::AppState, models::auth::AccessClaims};
 
 pub async fn auth_middleware(
     State(state): State<AppState>,
@@ -24,9 +24,7 @@ pub async fn auth_middleware(
         .strip_prefix("Bearer ")
         .unwrap();
 
-    let jwt_machine = JwtMachine::init(&state.config.auth_config);
-
-    let access_claims = match jwt_machine.decode::<AccessClaims>(access_token) {
+    let access_claims = match state.auth_service.decode_jwt::<AccessClaims>(access_token) {
         Ok(access_claims) => access_claims,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
     };

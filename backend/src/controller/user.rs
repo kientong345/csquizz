@@ -3,7 +3,7 @@ use axum::{
     extract::{Path, Query, State},
 };
 use reqwest::StatusCode;
-use serde_json::{Value, json};
+use serde_json::Value;
 
 use crate::{
     app::AppState,
@@ -13,9 +13,7 @@ use crate::{
         input_dto::{
             submission_result::SubmissionResultPaginateParamsDto, user::UserUpdateParamsDto,
         },
-        pagination::Paginate,
-        submission_result::SubmissionResultMinimal,
-        user::{DatabaseUser, UserFullDetail, UserPaginateParams, UserPublicDetail},
+        user::UserPaginateParams,
     },
 };
 
@@ -25,27 +23,13 @@ pub async fn get_me(
 ) -> Result<Json<Value>, ControllerError> {
     let user_id = access_claims.sub.parse().unwrap_or(-1);
 
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    // let auth_header = headers
-    //     .get("Authorization")
-    //     .and_then(|v| v.to_str().ok())
-    //     .unwrap_or("");
+    let user = state.user_service.get_me(&mut *connection, user_id).await?;
 
-    // if !auth_header.starts_with("Bearer ") {
-    //     return Err(StatusCode::UNAUTHORIZED);
-    // }
+    connection.commit().await?;
 
-    // let access_token = auth_header.trim_start_matches("Bearer ").trim();
-
-    // let user_id = match validate_access_token(access_token, &config::secret_key()) {
-    //     Ok(user_id) => user_id,
-    //     Err(_) => return Err(StatusCode::UNAUTHORIZED),
-    // };
-
-    let user = UserFullDetail::get_by_id(user_id, &mut *connection).await?;
-
-    Ok(Json(json!(user)))
+    Ok(Json(user))
 }
 
 pub async fn update_me(
@@ -57,7 +41,10 @@ pub async fn update_me(
 
     let mut connection = state.primary_db.start_transaction().await?;
 
-    DatabaseUser::update_by(&payload.bind(user_id), &mut *connection).await?;
+    state
+        .user_service
+        .update_me(&mut *connection, user_id, &payload)
+        .await?;
 
     connection.commit().await?;
 
@@ -68,23 +55,32 @@ pub async fn find_user_by_id(
     State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    let user: UserPublicDetail = UserFullDetail::get_by_id(id, &mut *connection)
-        .await?
-        .into();
-    Ok(Json(json!(user)))
+    let user = state
+        .user_service
+        .find_user_by_id(&mut *connection, id)
+        .await?;
+
+    connection.commit().await?;
+
+    Ok(Json(user))
 }
 
 pub async fn get_users_page(
     State(state): State<AppState>,
     Query(query): Query<UserPaginateParams>,
 ) -> Result<Json<Value>, ControllerError> {
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    let users = UserPublicDetail::page(&query, &mut *connection).await?;
+    let users = state
+        .user_service
+        .get_users_page(&mut *connection, &query)
+        .await?;
 
-    Ok(Json(json!(users)))
+    connection.commit().await?;
+
+    Ok(Json(users))
 }
 
 pub async fn update_user(
@@ -94,7 +90,10 @@ pub async fn update_user(
 ) -> Result<StatusCode, ControllerError> {
     let mut connection = state.primary_db.start_transaction().await?;
 
-    DatabaseUser::update_by(&payload.bind(id), &mut *connection).await?;
+    state
+        .user_service
+        .update_user(&mut *connection, id, &payload)
+        .await?;
 
     connection.commit().await?;
 
@@ -107,7 +106,7 @@ pub async fn delete_user(
 ) -> Result<StatusCode, ControllerError> {
     let mut connection = state.primary_db.start_transaction().await?;
 
-    DatabaseUser::delete_by(id, &mut *connection).await?;
+    state.user_service.delete_user(&mut *connection, id).await?;
 
     connection.commit().await?;
 
@@ -121,10 +120,14 @@ pub async fn get_submissions_me(
 ) -> Result<Json<Value>, ControllerError> {
     let user_id = access_claims.sub.parse().unwrap_or(-1);
 
-    let mut connection = state.primary_db.get_connection().await?;
+    let mut connection = state.primary_db.start_transaction().await?;
 
-    let submissions =
-        SubmissionResultMinimal::page(&params.bind(user_id), &mut *connection).await?;
+    let submissions = state
+        .user_service
+        .get_submissions_me(&mut *connection, user_id, &params)
+        .await?;
 
-    Ok(Json(json!(submissions)))
+    connection.commit().await?;
+
+    Ok(Json(submissions))
 }
