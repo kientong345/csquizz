@@ -3,7 +3,7 @@ use serde::Deserialize;
 use crate::models::comment::{CommentCreateParams, CommentPaginateParams};
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CommentPaginateParamsDto {
     pub page: i32,
     pub page_size: i32,
@@ -22,7 +22,7 @@ impl CommentPaginateParamsDto {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CommentCreateParamsDto {
     pub content: String,
 }

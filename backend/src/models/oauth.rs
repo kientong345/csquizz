@@ -39,7 +39,7 @@ impl Into<OAuthSchema> for GoogleUserResult {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct AuthorizationCode {
     pub code: String,
     pub state: String,

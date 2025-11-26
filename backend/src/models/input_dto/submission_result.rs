@@ -3,7 +3,7 @@ use serde::Deserialize;
 use crate::models::submission_result::SubmissionResultPaginateParams;
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct SubmissionResultPaginateParamsDto {
     pub quiz_title_pattern: String,
     pub passed_only: bool,

@@ -119,7 +119,7 @@ pub struct UserFullDetail {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UserCreateParams {
     pub google_id: Option<String>,
     pub display_name: String,
@@ -130,7 +130,7 @@ pub struct UserCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UserUpdateParams {
     pub id: i32,
     pub display_name: Option<String>,
@@ -139,7 +139,7 @@ pub struct UserUpdateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UserPaginateParams {
     pub name_pattern: String,
     pub page: i32,

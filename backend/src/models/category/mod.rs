@@ -16,7 +16,7 @@ pub struct Category {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CategoryCreateParams {
     pub name: String,
     pub image_url: Option<String>,
@@ -24,7 +24,7 @@ pub struct CategoryCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CategoryUpdateParams {
     pub id: i32,
     pub name: Option<String>,
@@ -33,7 +33,7 @@ pub struct CategoryUpdateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CategoryPaginateParams {
     pub name_pattern: Option<String>,
     pub page: i32,

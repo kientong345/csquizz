@@ -97,6 +97,7 @@ impl From<OptionKeys> for OptionPubKeys {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TextKey {
     pub correct_entry: String,
+    pub is_case_sensitive: bool,
     pub explanation: Option<String>,
 }
 
@@ -235,7 +236,7 @@ pub struct QuestionPrivateData {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionCreateParams {
     pub quiz_id: i32,
     pub r#type: String,
@@ -245,7 +246,7 @@ pub struct QuestionCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionUpdateParams {
     pub id: i32,
     pub r#type: Option<String>,
@@ -255,7 +256,7 @@ pub struct QuestionUpdateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionPaginateParams {
     pub quiz_id: i32,
     pub page: i32,

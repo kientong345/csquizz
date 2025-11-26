@@ -4,7 +4,7 @@ use serde_json::Value;
 use crate::models::question::{QuestionCreateParams, QuestionPaginateParams, QuestionUpdateParams};
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionPaginateParamsDto {
     pub page: i32,
     pub page_size: i32,
@@ -21,7 +21,7 @@ impl QuestionPaginateParamsDto {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionCreateParamsDto {
     pub r#type: String,
     pub content: String,
@@ -42,7 +42,7 @@ impl QuestionCreateParamsDto {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuestionUpdateParamsDto {
     pub r#type: Option<String>,
     pub content: Option<String>,

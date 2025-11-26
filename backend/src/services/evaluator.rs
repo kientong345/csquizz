@@ -95,13 +95,19 @@ fn is_matched(answer: &Value, key: &KeyType) -> Result<bool, ServiceError> {
             }
         }
         KeyType::TextEntryKey(text_entry) => {
-            let entry = UserEntry::try_from(answer.clone())?;
-            if entry
+            let entry_trimmed = UserEntry::try_from(answer.clone())?
                 .entry
                 .trim()
-                .eq_ignore_ascii_case(&text_entry.correct_entry.trim())
-            {
-                return Ok(true);
+                .to_string();
+
+            if text_entry.is_case_sensitive {
+                if entry_trimmed.eq(text_entry.correct_entry.trim()) {
+                    return Ok(true);
+                }
+            } else {
+                if entry_trimmed.eq_ignore_ascii_case(text_entry.correct_entry.trim()) {
+                    return Ok(true);
+                }
             }
         }
     }

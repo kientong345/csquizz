@@ -52,7 +52,7 @@ pub struct CommentDetail {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CommentCreateParams {
     pub user_id: i32,
     pub quiz_id: i32,
@@ -60,14 +60,14 @@ pub struct CommentCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CommentUpdateParams {
     pub id: i32,
     pub content: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CommentPaginateParams {
     pub quiz_id: i32,
     pub page: i32,

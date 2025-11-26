@@ -3,7 +3,7 @@ use serde::Deserialize;
 use crate::models::quiz::{QuizCreateParams, QuizUpdateParams};
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuizCreateParamsDto {
     pub title: String,
     pub description: Option<String>,
@@ -26,7 +26,7 @@ impl QuizCreateParamsDto {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuizUpdateParamsDto {
     pub title: Option<String>,
     pub description: Option<String>,

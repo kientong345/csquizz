@@ -133,6 +133,7 @@ OptionKeys {
 // text-entry key:
 TextKey {
   correct_entry: string,
+  is_case_sensitive: boolean,
   explanation?: string
 }
 

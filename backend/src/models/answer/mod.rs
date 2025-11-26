@@ -58,7 +58,7 @@ pub struct Answer {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct AnswerCreateParams {
     pub result_id: i32,
     pub question_id: i32,
@@ -67,7 +67,7 @@ pub struct AnswerCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UnevaluatedAnswer {
     pub question_id: i32,
     pub data: Value,
@@ -84,7 +84,7 @@ impl UnevaluatedAnswer {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct EvaluatedAnswer {
     pub question_id: i32,
     pub data: Value,

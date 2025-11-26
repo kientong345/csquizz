@@ -104,7 +104,7 @@ pub struct QuizDetail {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuizCreateParams {
     pub title: String,
     pub description: Option<String>,
@@ -115,7 +115,7 @@ pub struct QuizCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuizUpdateParams {
     pub id: i32,
     pub title: Option<String>,
@@ -126,7 +126,7 @@ pub struct QuizUpdateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct QuizPaginateParams {
     pub title_pattern: Option<String>,
     pub category_id: Option<i32>,

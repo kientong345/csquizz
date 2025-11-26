@@ -3,7 +3,7 @@ use serde::Deserialize;
 use crate::models::category::CategoryUpdateParams;
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct CategoryUpdateParamsDto {
     pub name: Option<String>,
     pub image_url: Option<String>,

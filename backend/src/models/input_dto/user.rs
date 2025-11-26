@@ -3,7 +3,7 @@ use serde::Deserialize;
 use crate::models::user::UserUpdateParams;
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UserUpdateParamsDto {
     pub display_name: Option<String>,
     pub password_hash: Option<String>,

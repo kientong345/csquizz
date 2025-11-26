@@ -2,212 +2,498 @@
 
 **Base URL:** `/api`
 
+> [!NOTE]
+> **Case Convention:**
+> - **Requests** (Input): Use `camelCase` for JSON property names (DTOs).
+> - **Responses** (Output): Use `camelCase` for JSON property names.
+> - **Exceptions**: Nested JSON objects like `key` (in questions) and `data` (in answers) use `snake_case` as they map directly to database JSON structures.
+
 ---
 
 ## 1. Authentication (`/auth`)
 
-Luồng xác thực sử dụng cặp Access Token (thời gian sống ngắn) và Refresh Token (thời gian sống dài).
+### 1.1. Register
+- **Endpoint:** `POST /api/auth/register`
+- **Description:** Register a new user.
+- **Request Body:** `application/json`
+  ```json
+  {
+    "displayName": "string",
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Success Response:** `201 Created`
 
--   **Access Token:** Dùng để xác thực khi gọi các API cần bảo vệ. Được gửi qua header `Authorization: Bearer <access_token>`.
--   **Refresh Token:** Dùng để lấy Access Token mới. Được lưu trong một cookie `HttpOnly`, `Secure`.
+### 1.2. Login
+- **Endpoint:** `POST /api/auth/login`
+- **Description:** Authenticate user and receive access token. Refresh token is set in HttpOnly cookie.
+- **Request Body:** `application/json`
+  ```json
+  {
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "accessToken": "string"
+  }
+  ```
+  **Cookies:** `refresh_token=...; HttpOnly; Path=/`
 
-### 1.1. Đăng ký người dùng mới
+### 1.3. Google Login
+- **Endpoint:** `POST /api/auth/google-login`
+- **Description:** Exchange Google Authorization Code for access token.
+- **Query Parameters:**
+  - `code`: `string` (The authorization code from Google)
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "accessToken": "string"
+  }
+  ```
+  **Cookies:** `refresh_token=...; HttpOnly; Path=/`
 
--   **Endpoint:** `POST /api/auth/register`
--   **Mô tả:** Tạo một tài khoản người dùng mới.
--   **Request Body:** `application/json`
-    ```json
-    {
-        "display_name": "string", // Bắt buộc
-        "email": "string",    // Bắt buộc, duy nhất, định dạng email
-        "password": "string"  // Bắt buộc, tối thiểu 8 ký tự
-    }
-    ```
--   **Success Response:** `201 Created`
--   **Error Responses:**
-    -   `400 Bad Request`: Dữ liệu đầu vào không hợp lệ.
-    -   `409 Conflict`: `username` hoặc `email` đã tồn tại.
+### 1.4. Logout
+- **Endpoint:** `POST /api/auth/logout`
+- **Description:** Log out the user (invalidate refresh token).
+- **Success Response:** `200 OK` (Implementation pending)
 
-### 1.2. Đăng nhập
-
--   **Endpoint:** `POST /api/auth/login`
--   **Mô tả:** Xác thực người dùng, trả về `access_token` trong body và `refresh_token` trong cookie.
--   **Request Body:** `application/json`
-    ```json
-    {
-        "email": "string",
-        "password": "string"
-    }
-    ```
--   **Success Response:** `200 OK`
-    ```
-    Set-Cookie: refresh_token=...; HttpOnly; Secure; Path=/api/auth
-    ```
-    ```json
-    {
-        "access_token": "string", // JWT Access Token (ngắn hạn)
-    }
-    ```
-
--   **Error Responses:**
-    -   `401 Unauthorized`: Sai `email` hoặc `password`.
-
-### 1.3. Làm mới Access Token
-
--   **Endpoint:** `POST /api/auth/refresh`
--   **Mô tả:** Lấy một `access_token` mới khi cái cũ hết hạn.
--   **Authentication:** Trình duyệt tự động gửi `refresh_token` qua cookie.
--   **Request Body:** (empty)
--   **Success Response:** `200 OK`
-    ```json
-    {
-        "access_token": "string" // Access Token mới
-    }
-    ```
--   **Error Responses:**
-    -   `401 Unauthorized`: `refresh_token` không hợp lệ hoặc đã hết hạn.
-
-### 1.4. Đăng xuất
-
--   **Endpoint:** `POST /api/auth/logout`
--   **Mô tả:** Vô hiệu hóa `refresh_token` và xóa cookie khỏi trình duyệt.
--   **Authentication:** Trình duyệt tự động gửi `refresh_token` qua cookie.
--   **Success Response:** `204 No Content`
-    -   **Headers:**
-        -   `Set-Cookie`: `refresh_token=; HttpOnly; Secure; Path=/api/auth; Max-Age=0` (xóa cookie)
--   **Error Responses:**
-    -   `401 Unauthorized`: `refresh_token` không hợp lệ.
+### 1.5. Refresh Token
+- **Endpoint:** `POST /api/auth/refresh`
+- **Description:** Get a new access token using the refresh token cookie.
+- **Success Response:** `200 OK` (Implementation pending)
 
 ---
 
 ## 2. Quizzes (`/quizzes`)
 
-### 2.1. Lấy danh sách các quiz
+### 2.1. Get Quizzes Page
+- **Endpoint:** `GET /api/quizzes`
+- **Description:** Get a paginated list of quizzes.
+- **Query Parameters:**
+  - `page`: `number` (optional)
+  - `page_size`: `number` (optional)
+  - `title_pattern`: `string` (optional)
+  - `category_id`: `number` (optional)
+  - `difficulty`: `string` (optional)
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "items": [
+      {
+        "id": 1,
+        "title": "Quiz Title",
+        "description": "Description",
+        "difficulty": "easy",
+        "categoryId": 1,
+        "creatorId": 1,
+        "passScore": 50.0,
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp",
+        "questionCount": 10,
+        "likeCount": 5,
+        "categoryName": "Category Name"
+      }
+    ],
+    "totalItems": 100,
+    "totalPages": 10
+  }
+  ```
 
--   **Endpoint:** `GET /api/quizzes`
--   **Mô tả:** Lấy danh sách các bài quiz có sẵn, hỗ trợ tìm kiếm và lọc.
--   **Query Parameters:**
-    -   `title_pattern?`: `string`
-    -   `category?`: `string`
-    -   `difficulty?`: `string`
-    -   `page`: `number`
-    -   `size`: `number`
--   **Success Response:** `200 OK` (Nội dung không đổi)
-    ```json
-    {
-        "items": [
-            {
-                "id": "number",
-                "title": "string",
-                "description?": "string",
-                "category": "string",
-                "question_count": "number",
-                "difficulty?": "difficulty" {"easy" | "medium" | "hard"},
-                "created_by?": "string"
-            }
-        ],
-        "total_items": "number",
-        "total_pages": "number",
+### 2.2. Get Quiz with Questions
+- **Endpoint:** `GET /api/quizzes/{id}/questions`
+- **Description:** Get a quiz details along with its questions.
+- **Query Parameters:**
+  - `page`: `number`
+  - `page_size`: `number`
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "quiz": {
+      "id": 1,
+      "title": "Quiz Title",
+      "description": "Description",
+      "difficulty": "easy",
+      "categoryId": 1,
+      "creatorId": 1,
+      "passScore": 50.0,
+      "createdAt": "timestamp",
+      "updatedAt": "timestamp",
+      "questionCount": 10,
+      "likeCount": 5,
+      "commentCount": 2,
+      "categoryName": "Category Name"
+    },
+    "questions": {
+      "items": [
+        {
+          "id": 1,
+          "type": "multiple_choice", // or "single_choice", "text_entry"
+          "content": "Question text",
+          "imageUrl": "url",
+          "publicData": { ... }, // Options for choice questions (see Data Structures)
+          "quizId": 1,
+          "createdAt": "timestamp"
+        }
+      ],
+      "totalItems": 10,
+      "totalPages": 1
     }
-    ```
+  }
+  ```
 
-### 2.2. Lấy thông tin 1 quiz
+### 2.3. Get Quiz Comments
+- **Endpoint:** `GET /api/quizzes/{id}/comments`
+- **Description:** Get comments for a quiz.
+- **Query Parameters:**
+  - `page`: `number`
+  - `page_size`: `number`
+  - `sort_by`: `string`
+- **Success Response:** `200 OK`
 
--   **Endpoint:** `GET /api/quizzes/{id}`
--   **Success Response:** `200 OK` (Nội dung không đổi)
-    ```json
-    {
-        "id": "number",
-        "title": "string",
-        "description?": "string",
-        "category": "string",
-        "difficulty?": "difficulty" {"easy" | "medium" | "hard"},
-        "created_by?": "string"
-    }
-    ```
+### 2.4. Create Quiz (with Questions)
+- **Endpoint:** `POST /api/quizzes`
+- **Authentication:** Required
+- **Request Body:** `application/json`
+  ```json
+  {
+    "quizParams": {
+      "title": "string",
+      "description": "string", // optional
+      "difficulty": "string", // optional
+      "categoryId": 1,
+      "passScore": 50.0
+    },
+    "questionsParams": [
+      {
+        "type": "multiple_choice", // "single_choice", "text_entry"
+        "content": "string",
+        "imageUrl": "string", // optional
+        "key": { ... } // See Question Key Structure below (snake_case)
+      }
+    ]
+  }
+  ```
+- **Success Response:** `201 Created`
 
-### 2.3. Lấy các question trong 1 quiz (để làm bài)
+### 2.5. Like Quiz
+- **Endpoint:** `POST /api/quizzes/{id}/like`
+- **Authentication:** Required
+- **Success Response:** `201 Created`
 
--   **Endpoint:** `GET /api/questions`
--   **Success Response:** `200 OK` (Nội dung không đổi)
-    ```json
-    {
-        "items": [
-            {
-                "id": "number",
-                "form": "question_form" {"multiple_choice" | "single_choice" | "text_input"},
-                "text": "string",
-                "image_url?": "string",
-                "explanation?": "string", // to be deleted in later versions
-                "options": [
-                    {
-                        "id": "number",
-                        "text": "string"
-                    }
-                ]
-            }
-        ],
-        "total_items": "number",
-        "total_pages": "number",
-    }
-    ```
+### 2.6. Comment on Quiz
+- **Endpoint:** `POST /api/quizzes/{id}/comment`
+- **Authentication:** Required
+- **Request Body:**
+  ```json
+  {
+    "content": "string"
+  }
+  ```
+- **Success Response:** `201 Created`
 
-### 2.4. Nộp bài và chấm điểm
+### 2.7. Submit Quiz
+- **Endpoint:** `POST /api/quizzes/{id}/submit`
+- **Authentication:** Required
+- **Request Body:**
+  ```json
+  {
+    "answersParams": [
+      {
+        "questionId": 1,
+        "data": { ... } // See Answer Data Structure below (snake_case)
+      }
+    ]
+  }
+  ```
+- **Success Response:** `200 OK`
 
--   **Endpoint:** `POST /api/quizzes/{id}/submit`
--   **Authentication:** Tùy chọn. Nếu có `Bearer <access_token>`, kết quả sẽ được lưu vào lịch sử của người dùng.
--   **Success Response:** `200 OK` (Nội dung không đổi)
+### 2.8. Add Question to Quiz
+- **Endpoint:** `POST /api/quizzes/{id}/questions`
+- **Authentication:** Required (Owner)
+- **Request Body:** `QuestionCreateParamsDto` (same as in Create Quiz)
+- **Success Response:** `201 Created`
+
+### 2.9. Update Question
+- **Endpoint:** `PATCH /api/quizzes/{id}/questions/{question_id}`
+- **Authentication:** Required (Owner)
+- **Request Body:**
+  ```json
+  {
+    "type": "string", // optional
+    "content": "string", // optional
+    "imageUrl": "string", // optional
+    "key": { ... } // optional
+  }
+  ```
+- **Success Response:** `200 OK`
+
+### 2.10. Delete Question
+- **Endpoint:** `DELETE /api/quizzes/{id}/questions/{question_id}`
+- **Authentication:** Required (Owner)
+- **Success Response:** `200 OK`
+
+### 2.11. Update Quiz Metadata
+- **Endpoint:** `PATCH /api/quizzes/{id}`
+- **Authentication:** Required (Owner)
+- **Request Body:**
+  ```json
+  {
+    "title": "string", // optional
+    "description": "string", // optional
+    "difficulty": "string", // optional
+    "categoryId": 1, // optional
+    "passScore": 50.0 // optional
+  }
+  ```
+- **Success Response:** `200 OK`
+
+### 2.12. Delete Quiz
+- **Endpoint:** `DELETE /api/quizzes/{id}`
+- **Authentication:** Required (Owner)
+- **Success Response:** `200 OK`
 
 ---
 
 ## 3. Categories (`/categories`)
 
-### 3.1. Lấy danh sách category
+### 3.1. Get Categories Page
+- **Endpoint:** `GET /api/categories`
+- **Query Parameters:**
+  - `page`: `number`
+  - `page_size`: `number`
+  - `sort_by`: `string`
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "items": [
+      {
+        "id": 1,
+        "name": "string",
+        "imageUrl": "string",
+        "description": "string"
+      }
+    ],
+    "totalItems": 10,
+    "totalPages": 1
+  }
+  ```
 
--   **Endpoint:** `GET /api/categories`
--   **Mô tả:** Lấy danh sách các thể loại quiz.
--   **Query Parameters:**
-    -   `page`: `number` - Số trang để phân trang.
-    -   `size`: `number` - Kích thước trang.
--   **Success Response:** `200 OK`
-    ```json
-    {
-        "items": [
-            {
-                "id": "number",
-                "name": "string",
-                "image_url?": "string",
-                "description?": "string"
-            }
-        ],
-        "total_items": "number",
-        "total_pages": "number",
-    }
-    ```
+### 3.2. Get All Categories
+- **Endpoint:** `GET /api/categories/all`
+- **Description:** Get all categories without pagination.
+- **Success Response:** `200 OK`
+
+### 3.3. Get Category by ID
+- **Endpoint:** `GET /api/categories/{id}`
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "id": 1,
+    "name": "string",
+    "imageUrl": "string",
+    "description": "string"
+  }
+  ```
+
+### 3.4. Create Category
+- **Endpoint:** `POST /api/admin/categories`
+- **Authentication:** Admin
+- **Request Body:**
+  ```json
+  {
+    "name": "string",
+    "imageUrl": "string", // optional
+    "description": "string" // optional
+  }
+  ```
+- **Success Response:** `201 Created`
+
+### 3.5. Update Category
+- **Endpoint:** `PATCH /api/admin/categories/{id}`
+- **Authentication:** Admin
+- **Request Body:**
+  ```json
+  {
+    "name": "string", // optional
+    "imageUrl": "string", // optional
+    "description": "string" // optional
+  }
+  ```
+- **Success Response:** `200 OK`
+
+### 3.6. Delete Category
+- **Endpoint:** `DELETE /api/admin/categories/{id}`
+- **Authentication:** Admin
+- **Success Response:** `200 OK`
 
 ---
 
-## 4. User (`/user`)
+## 4. Users (`/users`)
 
-### 4.1. Lấy lịch sử làm bài
+### 4.1. Get Users Page
+- **Endpoint:** `GET /api/users`
+- **Query Parameters:**
+  - `page`: `number`
+  - `page_size`: `number`
+  - `sort_by`: `string`
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "items": [
+      {
+        "id": 1,
+        "displayName": "string",
+        "avatarUrl": "string"
+      }
+    ],
+    "totalItems": 10,
+    "totalPages": 1
+  }
+  ```
 
--   **Endpoint:** `GET /api/user/results`
--   **Mô tả:** Lấy danh sách các kết quả quiz của người dùng đang đăng nhập.
--   **Authentication:** Yêu cầu `Bearer <access_token>`.
--   **Success Response:** `200 OK` (Nội dung không đổi)
--   **Error Responses:**
-    -   `401 Unauthorized`: `access_token` không hợp lệ.
+### 4.2. Get User by ID
+- **Endpoint:** `GET /api/users/{id}`
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "id": 1,
+    "displayName": "string",
+    "avatarUrl": "string",
+    "createdAt": "timestamp",
+    "quizCompletedCount": 10,
+    "quizCreatedCount": 5,
+    "followerCount": 2
+  }
+  ```
+
+### 4.3. Get Current User (Me)
+- **Endpoint:** `GET /api/users/me`
+- **Authentication:** Required
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "id": 1,
+    "displayName": "string",
+    "email": "string",
+    "avatarUrl": "string",
+    "role": "user",
+    "createdAt": "timestamp",
+    "quizCompletedCount": 10,
+    "quizCreatedCount": 5,
+    "followerCount": 2
+  }
+  ```
+
+### 4.4. Update Current User
+- **Endpoint:** `PATCH /api/users/me`
+- **Authentication:** Required
+- **Request Body:**
+  ```json
+  {
+    "displayName": "string", // optional
+    "passwordHash": "string", // optional
+    "avatarUrl": "string" // optional
+  }
+  ```
+- **Success Response:** `200 OK`
+
+### 4.5. Get My Submissions
+- **Endpoint:** `GET /api/users/me/submissions`
+- **Authentication:** Required
+- **Query Parameters:**
+  - `quiz_title_pattern`: `string`
+  - `passed_only`: `boolean`
+  - `quiz_difficulty`: `string` (optional)
+  - `page`: `number`
+  - `page_size`: `number`
+  - `sort_by`: `string`
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "items": [
+      {
+        "id": 1,
+        "score": 80.0,
+        "isPassed": true,
+        "submittedAt": "timestamp",
+        "quizTitle": "Quiz Title"
+      }
+    ],
+    "totalItems": 10,
+    "totalPages": 1
+  }
+  ```
+
+### 4.6. Update User (Admin)
+- **Endpoint:** `PATCH /api/admin/users/{id}`
+- **Authentication:** Admin
+- **Request Body:** Same as Update Current User
+- **Success Response:** `200 OK`
+
+### 4.7. Delete User (Admin)
+- **Endpoint:** `DELETE /api/admin/users/{id}`
+- **Authentication:** Admin
+- **Success Response:** `200 OK`
 
 ---
 
 ## 5. Admin (`/admin`)
 
-Tất cả các endpoint trong mục này đều yêu cầu quyền `admin`.
+### 5.1. Grant Admin Permission
+- **Endpoint:** `PUT /api/admin/grant`
+- **Authentication:** Admin (Likely)
+- **Description:** Placeholder endpoint.
+- **Success Response:** `200 OK`
 
--   **Authentication:** Yêu cầu `Bearer <access_token>` với `role` là `admin`.
--   `POST /api/admin/quizzes`: Tạo một quiz mới.
--   `PUT /api/admin/quizzes/{id}`: Cập nhật thông tin một quiz.
--   `DELETE /api/admin/quizzes/{id}`: Xóa một quiz.
--   `POST /api/admin/quizzes/{quizId}/questions`: Thêm một câu hỏi mới vào quiz.
--   `PUT /api/admin/questions/{questionId}`: Cập nhật một câu hỏi.
--   `DELETE /api/admin/questions/{questionId}`: Xóa một câu hỏi.
+---
+
+## Data Structures
+
+### Question Key Structure (`key`)
+
+**Multiple Choice / Single Choice:**
+```json
+{
+  "keys": [
+    {
+      "id": 1,
+      "content": "Option text",
+      "image_url": "url", // snake_case (nested object)
+      "is_correct": true,
+      "explanation": "Why this is correct"
+    }
+  ]
+}
+```
+
+**Text Entry:**
+```json
+{
+  "correct_entry": "exact answer",
+  "explanation": "Explanation"
+}
+```
+
+### Answer Data Structure (`data`)
+
+**Multiple Choice / Single Choice:**
+```json
+{
+  "choices": [
+    {
+      "option_id": 1 // snake_case (nested object)
+    }
+  ]
+}
+```
+
+**Text Entry:**
+```json
+{
+  "entry": "user answer"
+}
+```

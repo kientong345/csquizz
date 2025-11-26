@@ -64,7 +64,7 @@ pub struct SubmissionResultDetail {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct SubmissionResultCreateParams {
     pub user_id: i32,
     pub quiz_id: i32,
@@ -73,7 +73,7 @@ pub struct SubmissionResultCreateParams {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct SubmissionResultPaginateParams {
     pub user_id: i32,
     pub quiz_title_pattern: String,

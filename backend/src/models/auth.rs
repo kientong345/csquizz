@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{models::error::ModelError, utils::validate_email_name};
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct RegisterSchema {
     pub display_name: String,
     pub email: String,
@@ -24,7 +24,7 @@ impl RegisterSchema {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct LoginSchema {
     pub email: String,
     pub password: String,
