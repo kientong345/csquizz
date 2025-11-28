@@ -201,6 +201,7 @@ export default async function QuizListPage({
       categoryId: categoryId,
       page: page,
       pageSize: QUIZ_INFO_PER_PAGE,
+      sortBy: 'created_at',
     });
   } else {
     currentQuizPage = getPage(mockQuizzes, page, QUIZ_INFO_PER_PAGE);
@@ -228,7 +229,7 @@ export default async function QuizListPage({
               key={quiz.id}
               id={quiz.id}
               title={quiz.title}
-              difficulty={stringifyDifficulty(quiz.difficulty)}
+              difficulty={quiz.difficulty}
               questionCount={quiz.questionCount}
             />
           ))}

@@ -35,7 +35,9 @@ export async function getCategories(
   query: CategoryQuery
 ): Promise<PaginatedResponse<Category>> {
   try {
-    const response = await apiClient.get('/categories', { params: query });
+    const url = `/categories?namePattern=${query.namePattern}&page=${query.page}&pageSize=${query.pageSize}`;
+    console.log(`url: ${url}`);
+    const response = await apiClient.get(url);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -56,7 +58,9 @@ export async function getQuizzes(
   query: QuizQuery
 ): Promise<PaginatedResponse<Quiz>> {
   try {
-    const response = await apiClient.get('/quizzes', { params: query });
+    const url = `/quizzes?category_id=${query.categoryId}&page=${query.page}&pageSize=${query.pageSize}&sortBy=${query.sortBy}`;
+    console.log(`url: ${url}`);
+    const response = await apiClient.get(url);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

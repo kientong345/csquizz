@@ -18,7 +18,8 @@ export interface UpdateCategoryRequest {
 }
 
 export interface CategoryQuery {
-  page?: number;
-  size?: number;
+  namePattern?: string;
+  page: number;
+  pageSize: number;
 }
 

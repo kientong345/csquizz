@@ -56,4 +56,5 @@ export interface QuizQuery {
   titlePattern?: string;
   categoryId?: number;
   difficulty?: string;
+  sortBy?: string;
 }

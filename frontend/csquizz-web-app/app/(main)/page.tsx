@@ -121,7 +121,7 @@ export default async function HomePage({
 
   let currentCategoryPage;
   if (process.env.NEXT_RUNTIME_ENV === 'production') {
-    currentCategoryPage = await getCategories({ page: page, size: CATEGORY_PER_PAGE });
+    currentCategoryPage = await getCategories({ page: page, pageSize: CATEGORY_PER_PAGE });
   } else {
     currentCategoryPage = getPage(
       mockCategoryPage,
