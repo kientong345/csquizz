@@ -5,13 +5,14 @@ export interface Category {
   description?: string;
 }
 
-export interface CategoryQuery {
-	page: number;
-	size: number;
+export interface CreateCategoryRequest {
+  name: string;
+  imageUrl?: string;
+  description?: string;
 }
 
-export interface PostCategory {
-	name: string;
-	imageUrl?: string;
-	description?: string;
+export interface UpdateCategoryRequest {
+  name?: string;
+  imageUrl?: string;
+  description?: string;
 }

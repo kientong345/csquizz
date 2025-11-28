@@ -2,11 +2,11 @@ import { Input } from '@/components/ui/input';
 import CategoryCard from '@/components/features/CategoryCard';
 import { getCategories } from '@/lib/api';
 import { CATEGORY_PER_PAGE } from '@/constants';
-import { Page } from '@/types/page';
+import { PaginatedResponse } from '@/types/common';
 import { Category } from '@/types/category';
 import CSQuizzPagination from '@/components/features/CSQuizzPagination';
 
-const mockCategoryPage: Page<Category> = {
+const mockCategoryPage: PaginatedResponse<Category> = {
   items: [
     {
       id: 1,
@@ -88,19 +88,23 @@ const mockCategoryPage: Page<Category> = {
   ],
   totalItems: 10,
   totalPages: 2,
+  currentPage: 1,
+  pageSize: 10,
 };
 
 function getPage(
-  instance: Page<Category>,
+  instance: PaginatedResponse<Category>,
   page: number,
   size: number
-): Page<Category> {
+): PaginatedResponse<Category> {
   const start = (page - 1) * size;
   const end = start + size;
   return {
     items: instance.items.slice(start, end),
     totalItems: instance.totalItems,
     totalPages: Math.ceil(instance.totalItems / size),
+    currentPage: page,
+    pageSize: size,
   };
 }
 
@@ -150,7 +154,7 @@ export default async function HomePage({
 
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {currentCategoryPage.items.map((category) => (
+          {currentCategoryPage.items.map((category: Category) => (
             <CategoryCard
               key={category.id}
               id={category.id}

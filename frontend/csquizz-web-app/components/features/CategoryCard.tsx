@@ -24,7 +24,7 @@ export default function CategoryCard({
   description,
 }: CategoryCardProps) {
   const quizzesHref = {
-    pathname: `/${slugify(name)}/quizzes`,
+    pathname: `/categories/${slugify(name)}`,
     query: { categoryId: id },
   };
 

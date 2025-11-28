@@ -75,6 +75,11 @@ impl Paginate<SubmissionResultPaginateParams> for SubmissionResultMinimal {
         .await?
         .unwrap_or(0);
 
-        Ok(Page::build_from(items, total_items, params.page_size))
+        Ok(Page::build_from(
+            items,
+            total_items,
+            params.page as i64,
+            params.page_size,
+        ))
     }
 }

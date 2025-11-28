@@ -1,33 +1,59 @@
-export enum QuizDifficulty {
-  Easy,
-  Medium,
-  Hard,
-}
+import { PaginatedResponse } from './common';
+import { Question, QuestionCreateParams, AnswerParam } from './question';
 
-export interface QuizMetadata {
+export interface Quiz {
   id: number;
   title: string;
   description?: string;
-  category: string;
+  difficulty: string;
+  categoryId: number;
+  creatorId: number;
+  passScore: number;
+  createdAt: string;
+  updatedAt: string;
   questionCount: number;
-  difficulty?: QuizDifficulty;
-  createdBy?: string;
+  likeCount: number;
+  categoryName: string;
+}
+
+export interface QuizDetail extends Quiz {
+  commentCount: number;
+}
+
+export interface QuizWithQuestions {
+  quiz: QuizDetail;
+  questions: PaginatedResponse<Question>;
+}
+
+export interface QuizParams {
+  title: string;
+  description?: string;
+  difficulty?: string;
+  categoryId: number;
+  passScore: number;
+}
+
+export interface CreateQuizRequest {
+  quizParams: QuizParams;
+  questionsParams: QuestionCreateParams[];
+}
+
+export interface UpdateQuizRequest {
+  title?: string;
+  description?: string;
+  difficulty?: string;
+  categoryId?: number;
+  passScore?: number;
+}
+
+export interface SubmitQuizRequest {
+  answersParams: AnswerParam[];
 }
 
 export interface QuizQuery {
-  categoryId?: number;
+  page?: number;
+  pageSize?: number;
   titlePattern?: string;
+  categoryId?: number;
   difficulty?: string;
-  createdBy?: number;
-  completedBy?: number;
-  page: number;
-  size: number;
-}
-
-export interface PostQuizMetadata{
-  title: string;
-  description?: string;
-  categoryId: number;
-  difficulty?: QuizDifficulty;
-  creatorId?: number;
 }

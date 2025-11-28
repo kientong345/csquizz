@@ -1,26 +1,31 @@
-export enum UserRole {
-  User,
-  Admin,
-}
-
-export interface UserPubInfo {
+export interface User {
   id: number;
   displayName: string;
   avatarUrl?: string;
-  role: UserRole;
-  quizCreatedCount: number;
+}
+
+export interface UserDetail extends User {
+  createdAt: string;
   quizCompletedCount: number;
+  quizCreatedCount: number;
+  followerCount: number;
 }
 
-export interface UserPubInfoPage {
-  items: UserPubInfo[];
-  totalItems: number;
-  totalPages: number;
-}
-
-export interface UserFullDetail {
-  pubInfo: UserPubInfo;
+export interface CurrentUser extends UserDetail {
   email: string;
+  role: 'user' | 'admin';
+}
+
+export interface UpdateUserRequest {
+  displayName?: string;
   passwordHash?: string;
-  googleId?: string;
+  avatarUrl?: string;
+}
+
+export interface UserSubmission {
+  id: number;
+  score: number;
+  isPassed: boolean;
+  submittedAt: string;
+  quizTitle: string;
 }

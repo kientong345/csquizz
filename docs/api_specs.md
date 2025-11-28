@@ -99,7 +99,9 @@
       }
     ],
     "totalItems": 100,
-    "totalPages": 10
+    "totalPages": 10,
+    "currentPage": 1,
+    "pageSize": 10
   }
   ```
 
@@ -140,7 +142,9 @@
         }
       ],
       "totalItems": 10,
-      "totalPages": 1
+      "totalPages": 1,
+      "currentPage": 1,
+      "pageSize": 10
     }
   }
   ```
@@ -278,7 +282,9 @@
       }
     ],
     "totalItems": 10,
-    "totalPages": 1
+    "totalPages": 1,
+    "currentPage": 1,
+    "pageSize": 10
   }
   ```
 
@@ -351,7 +357,9 @@
       }
     ],
     "totalItems": 10,
-    "totalPages": 1
+    "totalPages": 1,
+    "currentPage": 1,
+    "pageSize": 10
   }
   ```
 
@@ -424,7 +432,9 @@
       }
     ],
     "totalItems": 10,
-    "totalPages": 1
+    "totalPages": 1,
+    "currentPage": 1,
+    "pageSize": 10
   }
   ```
 

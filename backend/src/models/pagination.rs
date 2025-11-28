@@ -9,10 +9,12 @@ pub struct Page<T> {
     pub items: Vec<T>,
     pub total_items: i64,
     pub total_pages: i64,
+    pub current_page: i64,
+    pub page_size: i64,
 }
 
 impl<T> Page<T> {
-    pub fn build_from(items: Vec<T>, total_items: i64, page_size: i32) -> Self {
+    pub fn build_from(items: Vec<T>, total_items: i64, current_page: i64, page_size: i32) -> Self {
         let total_pages = if page_size > 0 {
             (total_items as f64 / page_size as f64).ceil() as i64
         } else {
@@ -23,6 +25,8 @@ impl<T> Page<T> {
             items,
             total_items,
             total_pages,
+            current_page,
+            page_size: page_size as i64,
         }
     }
 
@@ -31,6 +35,8 @@ impl<T> Page<T> {
             items: self.items.into_iter().map(|e| U::from(e)).collect(),
             total_items: self.total_items,
             total_pages: self.total_pages,
+            current_page: self.current_page,
+            page_size: self.page_size,
         }
     }
 
@@ -45,6 +51,8 @@ impl<T> Page<T> {
             items,
             total_items: self.total_items,
             total_pages: self.total_pages,
+            current_page: self.current_page,
+            page_size: self.page_size,
         })
     }
 }

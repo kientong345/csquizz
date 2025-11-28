@@ -1,110 +1,174 @@
 import { Input } from '@/components/ui/input';
 import QuizInfoCard from '@/components/features/QuizInfoCard';
 import { unslugify } from '@/lib/utils';
-import { Page } from '@/types/page';
-import { QuizDifficulty, QuizMetadata } from '@/types/quiz';
+import { PaginatedResponse } from '@/types/common';
+import { Quiz } from '@/types/quiz';
 import CSQuizzPagination from '@/components/features/CSQuizzPagination';
 import { getQuizzes } from '@/lib/api';
 import { QUIZ_INFO_PER_PAGE } from '@/constants';
 
-const mockQuizzes: Page<QuizMetadata> = {
+const mockQuizzes: PaginatedResponse<Quiz> = {
   items: [
     {
       id: 101,
       title: 'Basic Data Structures',
-      category: 'Data Structure',
-      difficulty: QuizDifficulty.Easy,
+      categoryId: 1,
+      difficulty: 'easy',
       questionCount: 10,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
     },
     {
       id: 102,
       title: 'Trees and Graphs',
-      category: 'Data Structure',
-      difficulty: QuizDifficulty.Medium,
+      categoryId: 2,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'medium',
       questionCount: 15,
     },
     {
       id: 103,
       title: 'Advanced Hashing',
-      category: 'Algorithm',
-      difficulty: QuizDifficulty.Hard,
+      categoryId: 3,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'hard',
       questionCount: 20,
     },
     {
       id: 104,
       title: 'Linked List Manipulations',
-      category: 'Algorithm',
-      difficulty: QuizDifficulty.Medium,
+      categoryId: 4,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'medium',
       questionCount: 12,
     },
     {
       id: 105,
       title: 'Array Fundamentals',
-      category: 'Data Structure',
-      difficulty: QuizDifficulty.Easy,
+      categoryId: 5,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'easy',
       questionCount: 10,
     },
     {
       id: 106,
       title: 'Sorting Algorithms',
-      category: 'Algorithm',
-      difficulty: QuizDifficulty.Medium,
+      categoryId: 6,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'medium',
       questionCount: 15,
     },
     {
       id: 107,
       title: 'Dynamic Programming Basics',
-      category: 'Algorithm',
-      difficulty: QuizDifficulty.Hard,
+      categoryId: 7,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'hard',
       questionCount: 20,
     },
     {
       id: 108,
       title: 'Bit Manipulation',
-      category: 'Algorithm',
-      difficulty: QuizDifficulty.Hard,
+      categoryId: 8,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'hard',
       questionCount: 18,
     },
     {
       id: 109,
       title: 'Recursion Techniques',
-      category: 'Algorithm',
-      difficulty: QuizDifficulty.Medium,
+      categoryId: 9,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'medium',
       questionCount: 12,
     },
     {
       id: 110,
       title: 'Object-Oriented Design Patterns',
-      category: 'OOP',
-      difficulty: QuizDifficulty.Hard,
+      categoryId: 10,
+      creatorId: 1,
+      passScore: 5,
+      createdAt: '2023-01-01T00:00:00.000Z',
+      updatedAt: '2023-01-01T00:00:00.000Z',
+      likeCount: 0,
+      categoryName: 'Data Structure',
+      difficulty: 'hard',
       questionCount: 25,
     },
   ],
   totalItems: 10,
   totalPages: 1,
+  currentPage: 1,
+  pageSize: 10,
 };
 
 function getPage(
-  instance: Page<QuizMetadata>,
+  instance: PaginatedResponse<Quiz>,
   page: number,
   size: number
-): Page<QuizMetadata> {
+): PaginatedResponse<Quiz> {
   const start = (page - 1) * size;
   const end = start + size;
   return {
     items: instance.items.slice(start, end),
     totalItems: instance.totalItems,
     totalPages: Math.ceil(instance.totalItems / size),
+    currentPage: page,
+    pageSize: size,
   };
 }
 
-function stringifyDifficulty(difficulty: QuizDifficulty | undefined): string {
+function stringifyDifficulty(difficulty: string | undefined): string {
   switch (difficulty) {
-    case QuizDifficulty.Easy:
+    case 'easy':
       return 'easy';
-    case QuizDifficulty.Medium:
+    case 'medium':
       return 'medium';
-    case QuizDifficulty.Hard:
+    case 'hard':
       return 'hard';
     default:
       return 'none';
@@ -136,7 +200,7 @@ export default async function QuizListPage({
     currentQuizPage = await getQuizzes({
       categoryId: categoryId,
       page: page,
-      size: QUIZ_INFO_PER_PAGE,
+      pageSize: QUIZ_INFO_PER_PAGE,
     });
   } else {
     currentQuizPage = getPage(mockQuizzes, page, QUIZ_INFO_PER_PAGE);
@@ -159,7 +223,7 @@ export default async function QuizListPage({
 
       <section>
         <div className="flex flex-col gap-4">
-          {currentQuizPage.items.map((quiz) => (
+          {currentQuizPage.items.map((quiz: Quiz) => (
             <QuizInfoCard
               key={quiz.id}
               id={quiz.id}
