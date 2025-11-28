@@ -28,7 +28,13 @@ pub struct CacheConfig {
 
 impl CacheConfig {
     pub fn get() -> CacheConfig {
-        let cache_url = std::env::var("CACHE_URL").expect("CACHE_URL is not set");
+        let cache_url = match std::env::var("CACHE_URL") {
+            Ok(url) => url,
+            Err(_) => {
+                println!("CACHE_URL is not set, using default value");
+                "".to_string()
+            }
+        };
 
         CacheConfig { cache_url }
     }
