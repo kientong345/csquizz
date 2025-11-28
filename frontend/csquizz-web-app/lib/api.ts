@@ -35,7 +35,7 @@ export async function getCategories(
   query: CategoryQuery
 ): Promise<PaginatedResponse<Category>> {
   try {
-    const url = `/categories?namePattern=${query.namePattern}&page=${query.page}&pageSize=${query.pageSize}`;
+    const url = `/categories?namePattern=${query.namePattern?query.namePattern:''}&page=${query.page}&pageSize=${query.pageSize}`;
     console.log(`url: ${url}`);
     const response = await apiClient.get(url);
     return response.data;
