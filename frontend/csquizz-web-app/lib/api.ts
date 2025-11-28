@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Category, CategoryQuery } from '@/types/category';
-import { QuizMetadata, QuizQuery } from '@/types/quiz';
-import { Page } from '@/types/page';
+import { Quiz, QuizQuery } from '@/types/quiz';
+import { PaginatedResponse } from '@/types/common';
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -10,26 +10,30 @@ const apiClient = axios.create({
   },
 });
 
-const defaultCategoryPage: Page<Category> = {
+const defaultCategoryPage: PaginatedResponse<Category> = {
   items: [],
   totalItems: 0,
   totalPages: 0,
+  currentPage: 1,
+  pageSize: 10,
 };
 
-const defaultQuizPage: Page<QuizMetadata> = {
+const defaultQuizPage: PaginatedResponse<Quiz> = {
   items: [],
   totalItems: 0,
   totalPages: 0,
+  currentPage: 1,
+  pageSize: 10,
 };
 
 /**
  * Fetches a paginated list of quiz categories from the backend.
  * @param {CategoryQuery} query - The query object with page and size.
- * @returns {Promise<Page<Category>>} A promise that resolves to a page of categories.
+ * @returns {Promise<PaginatedResponse<Category>>} A promise that resolves to a page of categories.
  */
 export async function getCategories(
   query: CategoryQuery
-): Promise<Page<Category>> {
+): Promise<PaginatedResponse<Category>> {
   try {
     const response = await apiClient.get('/categories', { params: query });
     return response.data;
@@ -46,11 +50,11 @@ export async function getCategories(
 /**
  * Fetches a paginated list of quizzes based on a flexible query object.
  * @param {QuizQuery} query - The query object with parameters like category_id, page, size, etc.
- * @returns {Promise<Page<QuizMetadata>>} A promise that resolves to a page of quiz metadata.
+ * @returns {Promise<PaginatedResponse<QuizMetadata>>} A promise that resolves to a page of quiz metadata.
  */
 export async function getQuizzes(
   query: QuizQuery
-): Promise<Page<QuizMetadata>> {
+): Promise<PaginatedResponse<Quiz>> {
   try {
     const response = await apiClient.get('/quizzes', { params: query });
     return response.data;

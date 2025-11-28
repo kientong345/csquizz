@@ -16,3 +16,9 @@ export interface UpdateCategoryRequest {
   imageUrl?: string;
   description?: string;
 }
+
+export interface CategoryQuery {
+  page?: number;
+  size?: number;
+}
+
