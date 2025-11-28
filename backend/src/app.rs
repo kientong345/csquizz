@@ -3,12 +3,12 @@ use std::sync::Arc;
 use axum::Router;
 
 use crate::config::Configuration;
-use crate::database::non_persistent::SecondaryDatabase;
 use crate::database::persistent::PrimaryDatabase;
 
 use crate::routes;
 
 use crate::services::auth::AuthService;
+use crate::services::cache::CacheService;
 use crate::services::category::CategoryService;
 use crate::services::quiz::QuizService;
 use crate::services::user::UserService;
@@ -16,12 +16,12 @@ use crate::services::user::UserService;
 #[derive(Clone)]
 pub struct AppState {
     pub primary_db: PrimaryDatabase,
-    pub secondary_db: Option<SecondaryDatabase>,
     pub config: Arc<Configuration>,
     pub quiz_service: QuizService,
     pub category_service: CategoryService,
     pub auth_service: AuthService,
     pub user_service: UserService,
+    pub cache_service: Option<CacheService>,
 }
 
 pub async fn create_app(state: AppState) -> Router {

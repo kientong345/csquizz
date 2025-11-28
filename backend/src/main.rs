@@ -4,6 +4,10 @@ use csquizz::{
     app::{self, AppState},
     config::Configuration,
     database::{non_persistent::SecondaryDatabase, persistent::PrimaryDatabase},
+    services::{
+        auth::AuthService, cache::CacheService, category::CategoryService, quiz::QuizService,
+        user::UserService,
+    },
 };
 use tokio::net::TcpListener;
 
@@ -27,20 +31,23 @@ async fn main() {
 
     // Initialize application state
     let primary_db = PrimaryDatabase::init(&config.db_config).await;
-    let secondary_db = SecondaryDatabase::init(&config.cache_config).ok();
-    let quiz_service = csquizz::services::quiz::QuizService::new();
-    let category_service = csquizz::services::category::CategoryService::new();
-    let auth_service = csquizz::services::auth::AuthService::new(config.auth_config.clone());
-    let user_service = csquizz::services::user::UserService::new();
+    let quiz_service = QuizService::new();
+    let category_service = CategoryService::new();
+    let auth_service = AuthService::new(config.auth_config.clone());
+    let user_service = UserService::new();
+    let cache_service = match SecondaryDatabase::init(&config.cache_config).ok() {
+        Some(db) => Some(CacheService::init(db)),
+        None => None,
+    };
 
     let app_state = AppState {
         primary_db,
-        secondary_db,
         config,
         quiz_service,
         category_service,
         auth_service,
         user_service,
+        cache_service,
     };
 
     // Create app

@@ -24,6 +24,12 @@ pub enum ServiceError {
 
     #[error("bad submission: {0}")]
     BadSubmission(String),
+
+    #[error("redis error: {0}")]
+    RedisPool(#[from] deadpool_redis::PoolError),
+
+    #[error("redis error: {0}")]
+    Redis(#[from] redis::RedisError),
 }
 
 impl ServiceError {
@@ -36,6 +42,8 @@ impl ServiceError {
             ServiceError::EmailTaken { .. } => 40001,
             ServiceError::EmailNotExist { .. } => 40002,
             ServiceError::BadSubmission(_) => 40005,
+            ServiceError::RedisPool(_) => 50014,
+            ServiceError::Redis(_) => 50015,
         }
     }
 }
